@@ -2,9 +2,9 @@
   <div>
     <section class="relative overflow-hidden bg-primary-navy py-16 md:py-24">
       <div class="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(46,125,50,0.24),transparent_24%),linear-gradient(135deg,rgba(255,255,255,0.04),transparent_40%)]" />
-      <div class="container-shell relative">
+      <div class="container-shell relative" :class="type === 'service' ? 'text-center' : ''">
         <div class="eyebrow text-white/75">{{ eyebrow }}</div>
-        <h1 class="section-title mt-4 max-w-4xl text-white">{{ detail?.title || detail?.name || 'Đang tải...' }}</h1>
+        <h1 class="section-title mt-4 text-white" :class="type === 'service' ? 'mx-auto max-w-5xl text-4xl md:text-6xl' : 'max-w-4xl'">{{ detail?.title || detail?.name || 'Đang tải...' }}</h1>
 <!--        <p class="section-subtitle mt-4 max-w-3xl text-neutral-300">{{ summaryText }}</p>-->
       </div>
     </section>
@@ -168,7 +168,43 @@
         </article>
 
         <article v-else>
-          <div class="prose prose-slate max-w-none">
+          <section v-if="type === 'service' && serviceDocuments.length" class="mb-12 space-y-5">
+            <h2 class="font-heading text-2xl font-bold uppercase text-primary-navy">* TÀI LIỆU-QUYẾT ĐỊNH</h2>
+
+            <div class="divide-y divide-neutral-200 border-y border-neutral-200">
+              <a
+                v-for="(item, index) in serviceDocuments"
+                :key="`${item.id}-${item.filePath}-${index}`"
+                :href="resolveMediaUrl(item.filePath)"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="group flex items-center justify-between gap-4 py-4 text-left text-primary-navy transition-colors hover:text-accent-green"
+              >
+                <span class="text-base font-semibold leading-7">- {{ item.title }}</span>
+                <span class="shrink-0 text-sm font-semibold transition-transform group-hover:translate-x-1">Xem ngay</span>
+              </a>
+            </div>
+          </section>
+          <section v-if="type === 'service' && serviceGalleryImages.length" class="mb-12 space-y-5">
+            <h2 class="font-heading text-2xl font-bold uppercase text-primary-navy">* MỘT SỐ HÌNH ẢNH CỦA DỰ ÁN</h2>
+
+            <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+              <div
+                v-for="(image, index) in serviceGalleryImages"
+                :key="`${image}-${index}`"
+                class="overflow-hidden rounded-lg border border-neutral-100 bg-white"
+              >
+                <img :src="resolveMediaUrl(image)" :alt="`${detail?.title || 'service'} ${index + 1}`" class="h-64 w-full object-cover" />
+              </div>
+            </div>
+          </section>
+          <section v-if="type === 'service' && serviceContent" class="space-y-5">
+            <h2 class="font-heading text-2xl font-bold uppercase text-primary-navy">* NỘI DUNG</h2>
+            <div class="prose prose-slate max-w-none">
+              <div class="text-base leading-8 text-neutral-700" v-html="serviceContent"></div>
+            </div>
+          </section>
+          <div v-else-if="type !== 'service'" class="prose prose-slate max-w-none">
             <div class="text-base leading-8 text-neutral-700" v-html="bodyText"></div>
           </div>
         </article>
@@ -182,7 +218,7 @@ import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { fetchEquipmentDetail, fetchEquipmentCategories, fetchPageBySlug, fetchPostDetail, fetchProjectDetail, fetchServiceDetail } from '../lib/api'
 import { resolveMediaUrl } from '../lib/media'
-import type { Equipment } from '../types/content'
+import type { Equipment, ServiceDocument, ServiceImage } from '../types/content'
 
 const route = useRoute()
 const loading = ref(true)
@@ -212,7 +248,43 @@ const summaryText = computed(() => {
   }
   return detail.value?.overview || detail.value?.excerpt || detail.value?.description || 'Thông tin chi tiết được đồng bộ trực tiếp từ backend.'
 })
+
+function parseGalleryPaths(gallery: unknown) {
+  if (typeof gallery !== 'string' || !gallery.trim()) return []
+
+  try {
+    const parsed = JSON.parse(gallery)
+    if (!Array.isArray(parsed)) return []
+    return parsed
+      .map((item) => {
+        if (typeof item === 'string') return item
+        if (item && typeof item === 'object') return (item as any).path || (item as any).url || (item as any).filePath || ''
+        return ''
+      })
+      .filter(Boolean)
+  } catch {
+    return gallery.split('\n').map(item => item.trim()).filter(Boolean)
+  }
+}
+
+function hasRenderableContent(value: unknown) {
+  if (typeof value !== 'string') return false
+  const trimmed = value.trim()
+  if (!trimmed) return false
+  if (/<(img|iframe|video|table|ul|ol)\b/i.test(trimmed)) return true
+  return trimmed
+    .replace(/<br\s*\/?>/gi, '')
+    .replace(/<[^>]*>/g, '')
+    .replace(/&nbsp;/gi, ' ')
+    .trim().length > 0
+}
+
 const bodyText = computed(() => detail.value?.content || detail.value?.description || detail.value?.overview || detail.value?.excerpt || 'Chưa có nội dung chi tiết.')
+const serviceContent = computed(() => {
+  if (type.value !== 'service') return ''
+  const content = detail.value?.content
+  return hasRenderableContent(content) ? content : ''
+})
 const projectYear = computed(() => {
   const rawDate = detail.value?.completedAt || detail.value?.startedAt
   if (!rawDate) return 'Đang cập nhật'
@@ -230,24 +302,26 @@ const projectMetadata = computed(() => {
 })
 const projectGalleryImages = computed(() => {
   if (type.value !== 'project') return []
-  const gallery = detail.value?.galleryJson
-  if (!gallery) return []
-
-  try {
-    const parsed = JSON.parse(gallery)
-    if (!Array.isArray(parsed)) return []
-    return parsed
-      .map((item) => {
-        if (typeof item === 'string') return item
-        if (item && typeof item === 'object') return item.path || item.url || item.filePath || ''
-        return ''
-      })
-      .filter(Boolean)
-  } catch {
-    return []
-  }
+  return parseGalleryPaths(detail.value?.galleryJson)
 })
 const currentProjectLightboxImage = computed(() => resolveMediaUrl(projectGalleryImages.value[activeProjectImageIndex.value] || ''))
+const serviceDocuments = computed<ServiceDocument[]>(() => {
+  if (type.value !== 'service') return []
+  const documents = detail.value?.documents
+  if (!Array.isArray(documents)) return []
+  return [...documents].sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0))
+})
+const serviceGalleryImages = computed(() => {
+  if (type.value !== 'service') return []
+  const images = detail.value?.images
+  if (Array.isArray(images) && images.length) {
+    return [...images]
+      .sort((a: ServiceImage, b: ServiceImage) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0))
+      .map((image: ServiceImage) => image.imagePath)
+      .filter(Boolean)
+  }
+  return parseGalleryPaths(detail.value?.galleryJson)
+})
 
 const metadata = computed(() => {
   if (!detail.value) return []

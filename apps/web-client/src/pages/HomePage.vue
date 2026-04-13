@@ -211,7 +211,8 @@ function normalizeHomeContent(input: Partial<HomePageContent> | HomePageContent)
       mode: input.servicesSection?.mode === 'manual' ? 'manual' : fallback.servicesSection.mode,
       limit: Number(input.servicesSection?.limit) || fallback.servicesSection.limit,
       selectedItems: (input.servicesSection?.selectedItems || fallback.servicesSection.selectedItems).map((item) => ({
-        categoryId: Number(item.categoryId) || null,
+        serviceId: Number(item.serviceId) || null,
+        categoryId: item.categoryId == null ? null : Number(item.categoryId) || null,
         icon: item.icon || '',
       })),
     },

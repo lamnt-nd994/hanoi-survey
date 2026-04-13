@@ -8,7 +8,6 @@ import type {
   PublicMenuItem,
   Project,
   ProjectCategory,
-  ServiceCategory,
   SitePage,
   SiteSettings,
   SurveyService,
@@ -52,10 +51,6 @@ export async function fetchServices(params: Record<string, unknown> = {}): Promi
 
 export async function fetchServiceDetail(slug: string): Promise<SurveyService> {
   return unwrap(await api.get(`/api/public/v1/services/${slug}`))
-}
-
-export async function fetchServiceCategories(): Promise<ServiceCategory[]> {
-  return unwrap(await api.get('/api/public/v1/services/categories'))
 }
 
 export async function fetchProjects(params: Record<string, unknown> = {}): Promise<Project[]> {

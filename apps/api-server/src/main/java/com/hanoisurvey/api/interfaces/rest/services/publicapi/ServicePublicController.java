@@ -41,6 +41,9 @@ public class ServicePublicController {
 
     @GetMapping("/{slug}")
     public ApiResponse<SurveyServiceResponse> detail(@PathVariable String slug) {
-        return ApiResponse.ok(SurveyServiceResponse.from(serviceCatalogService.getPublicBySlug(slug)));
+        var service = serviceCatalogService.getPublicBySlug(slug);
+        var documents = serviceCatalogService.getDocumentsByServiceId(service.id()).stream().map(com.hanoisurvey.api.interfaces.rest.services.dto.ServiceDocumentResponse::from).toList();
+        var images = serviceCatalogService.getImagesByService(service).stream().map(com.hanoisurvey.api.interfaces.rest.services.dto.ServiceImageResponse::from).toList();
+        return ApiResponse.ok(SurveyServiceResponse.from(service, documents, images));
     }
 }

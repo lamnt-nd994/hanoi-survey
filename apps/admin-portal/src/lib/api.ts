@@ -137,14 +137,6 @@ export const servicesApi = {
     getData<void>(await api.delete(`/api/admin/v1/services/${id}`)),
   getById: async (id: number) =>
     getData<ServiceEntity>(await api.get(`/api/admin/v1/services/${id}`)),
-  categories: async () =>
-    getData<Category[]>(await api.get('/api/admin/v1/services/categories')),
-  createCategory: async (payload: CategoryPayload) =>
-    getData<Category>(await api.post('/api/admin/v1/services/categories', payload)),
-  updateCategory: async (id: number, payload: CategoryPayload) =>
-    getData<Category>(await api.put(`/api/admin/v1/services/categories/${id}`, payload)),
-  deleteCategory: async (id: number) =>
-    getData<void>(await api.delete(`/api/admin/v1/services/categories/${id}`)),
 }
 
 export const projectsApi = {

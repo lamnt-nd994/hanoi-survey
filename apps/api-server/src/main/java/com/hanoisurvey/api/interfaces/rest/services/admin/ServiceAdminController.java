@@ -77,7 +77,10 @@ public class ServiceAdminController {
 
     @GetMapping("/{id}")
     public ApiResponse<SurveyServiceResponse> detail(@PathVariable Long id) {
-        return ApiResponse.ok(SurveyServiceResponse.from(serviceCatalogService.getAdminById(id)));
+        var service = serviceCatalogService.getAdminById(id);
+        var documents = serviceCatalogService.getDocumentsByServiceId(id).stream().map(com.hanoisurvey.api.interfaces.rest.services.dto.ServiceDocumentResponse::from).toList();
+        var images = serviceCatalogService.getImagesByService(service).stream().map(com.hanoisurvey.api.interfaces.rest.services.dto.ServiceImageResponse::from).toList();
+        return ApiResponse.ok(SurveyServiceResponse.from(service, documents, images));
     }
 
     @PostMapping
@@ -90,6 +93,18 @@ public class ServiceAdminController {
                 request.content(),
                 request.icon(),
                 request.coverImagePath(),
+                request.galleryJson(),
+                request.documents() == null ? List.of() : request.documents().stream().map(item -> new com.hanoisurvey.api.application.services.ServiceDocumentCommand(
+                        item.title(),
+                        item.filePath(),
+                        item.sortOrder()
+                )).toList(),
+                request.images() == null ? List.of() : request.images().stream().map(item -> new com.hanoisurvey.api.application.services.ServiceImageCommand(
+                        item.imagePath(),
+                        item.altText(),
+                        item.caption(),
+                        item.sortOrder()
+                )).toList(),
                 request.status()
         ))));
     }
@@ -104,6 +119,18 @@ public class ServiceAdminController {
                 request.content(),
                 request.icon(),
                 request.coverImagePath(),
+                request.galleryJson(),
+                request.documents() == null ? List.of() : request.documents().stream().map(item -> new com.hanoisurvey.api.application.services.ServiceDocumentCommand(
+                        item.title(),
+                        item.filePath(),
+                        item.sortOrder()
+                )).toList(),
+                request.images() == null ? List.of() : request.images().stream().map(item -> new com.hanoisurvey.api.application.services.ServiceImageCommand(
+                        item.imagePath(),
+                        item.altText(),
+                        item.caption(),
+                        item.sortOrder()
+                )).toList(),
                 request.status()
         ))));
     }
