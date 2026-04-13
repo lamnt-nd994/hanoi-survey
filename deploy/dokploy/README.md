@@ -40,6 +40,7 @@ Important:
 
 - `DB_URL` must point to the MySQL app you deployed in Dokploy
 - `HOST_UPLOADS_DIR` must match your real server folder
+- `api-server`, `web-client`, and `admin-portal` do not need host port publishing in Dokploy; routing is handled by domains and container ports
 
 ### 3) Web client
 

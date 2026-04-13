@@ -19,8 +19,8 @@ services:
       MULTIPART_MAX_FILE_SIZE: ${MULTIPART_MAX_FILE_SIZE:-10MB}
       MULTIPART_MAX_REQUEST_SIZE: ${MULTIPART_MAX_REQUEST_SIZE:-10MB}
       TZ: Asia/Ho_Chi_Minh
-    ports:
-      - "${API_PORT:-8080}:8080"
+    expose:
+      - "8080"
     volumes:
       - type: bind
         source: ${HOST_UPLOADS_DIR:?HOST_UPLOADS_DIR is required}
