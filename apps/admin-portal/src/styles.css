@@ -190,6 +190,35 @@ body {
 .cms-btn-danger:hover { background: #fee2e2; }
 .cms-btn-sm { padding: 5px 10px; font-size: 11px; }
 
+.input-mini-action-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 30px;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  background: #f8fafc;
+  color: #334155;
+  padding: 0 10px;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: all 0.15s ease;
+}
+
+.input-mini-action-btn:hover:not(:disabled) {
+  background: #f1f5f9;
+  border-color: #94a3b8;
+  color: #0f172a;
+}
+
+.input-mini-action-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
 /* Forms */
 .cms-form-group { margin-bottom: 16px; }
 .cms-form-label { display: block; font-size: 12px; font-weight: 600; color: #475569; margin-bottom: 6px; }

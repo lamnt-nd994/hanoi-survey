@@ -14,6 +14,7 @@ public record SurveyService(
         String content,
         String icon,
         String coverImagePath,
+        String galleryJson,
         ContentStatus status,
         LocalDateTime publishedAt,
         LocalDateTime createdAt,

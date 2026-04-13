@@ -2,7 +2,7 @@
   <div v-show="isOpen" class="border-t border-neutral-200 bg-white px-4 py-6 shadow-lg lg:hidden">
     <nav class="flex flex-col gap-2">
       <template v-for="item in navItems" :key="item.resolvedUrl">
-        <div v-if="hasCategories(item)" class="rounded-2xl border border-neutral-100 p-1">
+        <div v-if="hasDropdown(item)" class="rounded-2xl border border-neutral-100 p-1">
           <router-link
             :to="getNavTo(item)"
             @click="emit('close')"
@@ -11,7 +11,20 @@
           >
             {{ item.title }}
           </router-link>
-          <div class="mt-1 space-y-1 px-2 pb-2">
+          <div v-if="isServicesNavItem(item)" class="mt-1 space-y-1 px-2 pb-2">
+            <router-link
+              v-for="service in services"
+              :key="`${item.resolvedUrl}-${service.slug}`"
+              :to="{ name: 'service-detail', params: { slug: service.slug } }"
+              @click="emit('close')"
+              class="flex min-h-[40px] items-center rounded-xl px-3 py-2 text-sm transition-colors"
+              :class="isActiveServiceRoute(service.slug) ? 'bg-accent-green/10 text-accent-green' : 'text-neutral-600 hover:bg-neutral-100 hover:text-primary-navy'"
+            >
+              {{ service.title }}
+            </router-link>
+            <div v-if="!services.length" class="px-3 py-2 text-sm text-neutral-500">Chưa có dịch vụ để hiển thị.</div>
+          </div>
+          <div v-else class="mt-1 space-y-1 px-2 pb-2">
             <router-link
               v-for="category in getMobileNavCategories(item)"
               :key="`${item.resolvedUrl}-${category.slug}`"
@@ -56,17 +69,17 @@
 
 <script setup lang="ts">
 import type { RouteLocationRaw } from 'vue-router'
-import type { EquipmentCategory, PostCategory, ProjectCategory, PublicMenuItem, ServiceCategory } from '../../types/content'
+import type { EquipmentCategory, PostCategory, ProjectCategory, PublicMenuItem, SurveyService } from '../../types/content'
 import AppIcon from '../ui/AppIcon.vue'
 
-type NavCategory = ServiceCategory | ProjectCategory | PostCategory | EquipmentCategory
+type NavCategory = ProjectCategory | PostCategory | EquipmentCategory
 
 const props = defineProps<{
   isOpen: boolean
   navItems: PublicMenuItem[]
   phone: string
   zaloUrl: string
-  serviceCategories: ServiceCategory[]
+  services: SurveyService[]
   projectCategories: ProjectCategory[]
   postCategories: PostCategory[]
   equipmentCategories: EquipmentCategory[]
@@ -74,6 +87,7 @@ const props = defineProps<{
   isActiveNavRoute: (item: PublicMenuItem) => boolean
   isExternalUrl: (path: string) => boolean
   isActiveCategoryRoute: (routeName: string, slug: string) => boolean
+  isActiveServiceRoute: (slug: string) => boolean
   getRouteName: (item: PublicMenuItem) => string
   isServicesNavItem: (item: PublicMenuItem) => boolean
   isProjectsNavItem: (item: PublicMenuItem) => boolean
@@ -85,12 +99,11 @@ const emit = defineEmits<{
   close: []
 }>()
 
-function hasCategories(item: PublicMenuItem) {
+function hasDropdown(item: PublicMenuItem) {
   return props.isServicesNavItem(item) || props.isProjectsNavItem(item) || props.isEquipmentsNavItem(item) || props.isNewsNavItem(item)
 }
 
 function getMobileNavCategories(item: PublicMenuItem): NavCategory[] {
-  if (props.isServicesNavItem(item)) return props.serviceCategories
   if (props.isProjectsNavItem(item)) return props.projectCategories
   if (props.isNewsNavItem(item)) return props.postCategories
   if (props.isEquipmentsNavItem(item)) return props.equipmentCategories

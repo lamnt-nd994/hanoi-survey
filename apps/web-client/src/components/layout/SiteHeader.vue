@@ -47,7 +47,7 @@
 
     <SiteDesktopNav
       :nav-items="navItems"
-      :service-categories="serviceCategories"
+      :services="services"
       :project-categories="projectCategories"
       :post-categories="postCategories"
       :equipment-categories="equipmentCategories"
@@ -55,6 +55,7 @@
       :is-active-nav-route="isActiveNavRoute"
       :is-external-url="isExternalUrl"
       :is-active-category-route="isActiveCategoryRoute"
+      :is-active-service-route="isActiveServiceRoute"
       :get-route-name="getRouteName"
       :is-services-nav-item="isServicesNavItem"
       :is-projects-nav-item="isProjectsNavItem"
@@ -67,7 +68,7 @@
       :nav-items="navItems"
       :phone="phone"
       :zalo-url="zaloUrl"
-      :service-categories="serviceCategories"
+      :services="services"
       :project-categories="projectCategories"
       :post-categories="postCategories"
       :equipment-categories="equipmentCategories"
@@ -75,6 +76,7 @@
       :is-active-nav-route="isActiveNavRoute"
       :is-external-url="isExternalUrl"
       :is-active-category-route="isActiveCategoryRoute"
+      :is-active-service-route="isActiveServiceRoute"
       :get-route-name="getRouteName"
       :is-services-nav-item="isServicesNavItem"
       :is-projects-nav-item="isProjectsNavItem"
@@ -88,7 +90,7 @@
 <script setup lang="ts">
 import type { RouteLocationRaw } from 'vue-router'
 import { resolveMediaUrl } from '../../lib/media'
-import type { EquipmentCategory, PostCategory, ProjectCategory, PublicMenuItem, ServiceCategory } from '../../types/content'
+import type { EquipmentCategory, PostCategory, ProjectCategory, PublicMenuItem, SurveyService } from '../../types/content'
 import SiteDesktopNav from './SiteDesktopNav.vue'
 import SiteMobileNav from './SiteMobileNav.vue'
 import AppIcon from '../ui/AppIcon.vue'
@@ -103,7 +105,7 @@ defineProps<{
   zaloUrl: string
   isMobileMenuOpen: boolean
   navItems: PublicMenuItem[]
-  serviceCategories: ServiceCategory[]
+  services: SurveyService[]
   projectCategories: ProjectCategory[]
   postCategories: PostCategory[]
   equipmentCategories: EquipmentCategory[]
@@ -111,6 +113,7 @@ defineProps<{
   isActiveNavRoute: (item: PublicMenuItem) => boolean
   isExternalUrl: (path: string) => boolean
   isActiveCategoryRoute: (routeName: string, slug: string) => boolean
+  isActiveServiceRoute: (slug: string) => boolean
   getRouteName: (item: PublicMenuItem) => string
   isServicesNavItem: (item: PublicMenuItem) => boolean
   isProjectsNavItem: (item: PublicMenuItem) => boolean

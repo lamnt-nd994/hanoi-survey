@@ -2,7 +2,7 @@
   <div>
     <section class="relative overflow-hidden bg-primary-navy py-16 md:py-24">
       <div class="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(46,125,50,0.22),transparent_24%),linear-gradient(135deg,rgba(255,255,255,0.04),transparent_40%)]" />
-      <div class="container-shell relative text-center">
+      <div class="container-shell relative" :class="currentRouteName === 'services' ? 'text-left' : 'text-center'">
         <div class="eyebrow inline-block text-white/75">{{ eyebrow }}</div>
         <h1 class="section-title mt-4 text-white">{{ title }}</h1>
 <!--        <p class="section-subtitle mx-auto mt-4 max-w-3xl text-neutral-300">{{ copy }}</p>-->
@@ -331,7 +331,7 @@ const pageData: Record<string, StaticPageConfig> = {
   [ROUTE_NAMES.services]: {
     eyebrow: 'Lĩnh vực',
     title: 'Dịch vụ khảo sát và thí nghiệm',
-    copy: 'Danh mục này được lấy trực tiếp từ `/api/public/v1/services`.',
+    copy: 'Dữ liệu được lấy trực tiếp từ `/api/public/v1/services`.',
     items: [],
   },
   [ROUTE_NAMES.projects]: {
@@ -366,28 +366,22 @@ const selectedCategorySlug = computed(() => {
   const category = $route.query.category
   return typeof category === 'string' ? category : ''
 })
-const selectedServiceCategory = computed(() => publicContentStore.serviceCategories.find((item) => item.slug === selectedCategorySlug.value) || null)
 const selectedProjectCategory = computed(() => publicContentStore.projectCategories.find((item) => item.slug === selectedCategorySlug.value) || null)
 const selectedPostCategory = computed(() => publicContentStore.postCategories.find((item) => item.slug === selectedCategorySlug.value) || null)
 const selectedEquipmentCategory = computed(() => publicContentStore.equipmentCategories.find((item) => item.slug === selectedCategorySlug.value) || null)
 const eyebrow = computed(() => {
-  if (currentRouteName.value === ROUTE_NAMES.services && selectedServiceCategory.value) return 'Danh mục dịch vụ'
   if (currentRouteName.value === ROUTE_NAMES.projects && selectedProjectCategory.value) return 'Danh mục dự án'
   if (currentRouteName.value === ROUTE_NAMES.news && selectedPostCategory.value) return 'Danh mục tin tức'
   if (currentRouteName.value === ROUTE_NAMES.equipment && selectedEquipmentCategory.value) return 'Danh mục thiết bị'
   return currentData.value.eyebrow
 })
 const title = computed(() => {
-  if (currentRouteName.value === ROUTE_NAMES.services && selectedServiceCategory.value) return selectedServiceCategory.value.name
   if (currentRouteName.value === ROUTE_NAMES.projects && selectedProjectCategory.value) return selectedProjectCategory.value.name
   if (currentRouteName.value === ROUTE_NAMES.news && selectedPostCategory.value) return selectedPostCategory.value.name
   if (currentRouteName.value === ROUTE_NAMES.equipment && selectedEquipmentCategory.value) return selectedEquipmentCategory.value.name
   return currentData.value.title
 })
 const copy = computed(() => {
-  if (currentRouteName.value === ROUTE_NAMES.services && selectedServiceCategory.value) {
-    return `Danh sách dịch vụ thuộc danh mục ${selectedServiceCategory.value.name.toLowerCase()}.`
-  }
   if (currentRouteName.value === ROUTE_NAMES.projects && selectedProjectCategory.value) {
     return `Danh sách dự án thuộc danh mục ${selectedProjectCategory.value.name.toLowerCase()}.`
   }
@@ -402,8 +396,7 @@ const copy = computed(() => {
 const items = computed(() => currentData.value.items)
 const introItems = computed<IntroCard[]>(() => [])
 const serviceItems = computed(() => {
-  if (currentRouteName.value !== ROUTE_NAMES.services || !selectedServiceCategory.value) return publicContentStore.services
-  return publicContentStore.services.filter((item) => item.categoryId === selectedServiceCategory.value?.id)
+  return publicContentStore.services
 })
 const projectItems = computed(() => {
   if (currentRouteName.value !== ROUTE_NAMES.projects || !selectedProjectCategory.value) return publicContentStore.projects
@@ -563,8 +556,8 @@ async function loadRemoteItems() {
       await publicContentStore.loadIntroPage()
       errorMessage.value = publicContentStore.errors.introPage
     } else if (currentRouteName.value === ROUTE_NAMES.services) {
-      await Promise.all([publicContentStore.loadServiceCategories(), publicContentStore.loadServices()])
-      errorMessage.value = publicContentStore.errors.services || publicContentStore.errors.serviceCategories
+      await publicContentStore.loadServices()
+      errorMessage.value = publicContentStore.errors.services
     } else if (currentRouteName.value === ROUTE_NAMES.projects) {
       await Promise.all([publicContentStore.loadProjectCategories(), publicContentStore.loadProjects()])
       errorMessage.value = publicContentStore.errors.projects || publicContentStore.errors.projectCategories

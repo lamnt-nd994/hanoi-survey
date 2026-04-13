@@ -11,14 +11,14 @@
         </div>
       </div>
 
-      <div v-else-if="displayCategories.length" class="services-grid">
-        <div v-for="category in displayCategories" :key="category.slug || category.name" class="service-card text-center">
+      <div v-else-if="displayServices.length" class="services-grid">
+        <div v-for="service in displayServices" :key="service.slug || service.title" class="service-card text-center">
           <div class="service-icon">
-            <AppIcon :icon="category.icon || 'circle'" class="h-full w-full text-5xl" />
+            <AppIcon :icon="service.icon || 'circle'" class="h-full w-full text-5xl" />
           </div>
-          <h3>{{ category.name }}</h3>
-          <p>{{ category.description }}</p>
-          <router-link :to="category.slug ? { name: 'service-detail', params: { slug: category.slug } } : { name: 'services' }" class="btn-link">
+          <h3>{{ service.title }}</h3>
+          <p>{{ service.description }}</p>
+          <router-link :to="service.slug ? { name: 'service-detail', params: { slug: service.slug } } : { name: 'services' }" class="btn-link">
             Xem chi tiết
             <AppIcon icon="chevronRight" class="ml-1 h-4 w-4" />
           </router-link>
@@ -35,7 +35,7 @@ import { computed, onMounted } from 'vue'
 import AppIcon from '../ui/AppIcon.vue'
 import SectionHeader from '../ui/SectionHeader.vue'
 import { usePublicContentStore } from '../../stores/publicContent'
-import type { HomeSelectedServiceItem, ServiceCategory } from '../../types/content'
+import type { HomeSelectedServiceItem, SurveyService } from '../../types/content'
 
 const props = withDefaults(defineProps<{
   eyebrow?: string
@@ -54,47 +54,38 @@ const props = withDefaults(defineProps<{
 })
 
 const publicContentStore = usePublicContentStore()
-const displayCategories = computed(() => {
+const displayServices = computed(() => {
   if (props.mode !== 'manual') {
-    return [...publicContentStore.serviceCategories]
-      .sort((a, b) => a.sortOrder - b.sortOrder)
+    return [...publicContentStore.services]
       .slice(0, props.limit)
-      .map((category) => ({
-        ...category,
-        icon: resolveCategoryIcon(category),
-        description: resolveCategoryDescription(category),
+      .map((service) => ({
+        ...service,
+        icon: service.icon || 'circle',
+        description: resolveServiceDescription(service),
       }))
   }
 
   return props.selectedItems
     .map((selected) => {
-      const category = publicContentStore.serviceCategories.find((item) => item.id === selected.categoryId)
-      if (!category) return null
+      const service = publicContentStore.services.find((item) => item.id === selected.serviceId)
+        || publicContentStore.services.find((item) => selected.categoryId != null && item.categoryId === selected.categoryId)
+      if (!service) return null
       return {
-        ...category,
-        icon: selected.icon || 'circle',
-        description: resolveCategoryDescription(category),
+        ...service,
+        icon: selected.icon || service.icon || 'circle',
+        description: resolveServiceDescription(service),
       }
     })
-    .filter((category): category is NonNullable<typeof category> => category !== null)
+    .filter((service): service is NonNullable<typeof service> => service !== null)
 })
 
-const loading = computed(() => publicContentStore.loading.serviceCategories || publicContentStore.loading.services)
+const loading = computed(() => publicContentStore.loading.services)
 
 onMounted(async () => {
-  await Promise.all([
-    publicContentStore.loadServiceCategories(),
-    publicContentStore.loadServices(),
-  ])
+  await publicContentStore.loadServices()
 })
 
-function resolveCategoryDescription(category: ServiceCategory) {
-  const firstService = publicContentStore.services.find((item) => item.categoryId === category.id && item.overview?.trim())
-  return firstService?.overview || `Khám phá các hạng mục thuộc danh mục ${category.name.toLowerCase()} với nội dung được quản trị động từ CMS.`
-}
-
-function resolveCategoryIcon(category: ServiceCategory) {
-  const firstService = publicContentStore.services.find((item) => item.categoryId === category.id && item.icon?.trim())
-  return firstService?.icon || 'circle'
+function resolveServiceDescription(service: SurveyService) {
+  return service.overview || 'Dịch vụ được cập nhật trực tiếp từ hệ thống nội dung.'
 }
 </script>

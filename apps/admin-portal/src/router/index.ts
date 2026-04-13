@@ -20,7 +20,6 @@ const router = createRouter({
         { path: 'posts/create', name: 'post-create', component: () => import('@/pages/posts/PostFormPage.vue') },
         { path: 'posts/:id/edit', name: 'post-edit', component: () => import('@/pages/posts/PostFormPage.vue') },
         { path: 'services', name: 'services', component: () => import('@/pages/services/ServicesListPage.vue') },
-        { path: 'services/categories', name: 'service-categories', component: () => import('@/pages/services/ServiceCategoriesPage.vue') },
         { path: 'services/create', name: 'service-create', component: () => import('@/pages/services/ServiceFormPage.vue') },
         { path: 'services/:id/edit', name: 'service-edit', component: () => import('@/pages/services/ServiceFormPage.vue') },
         { path: 'users', name: 'users', component: () => import('@/pages/users/UsersListPage.vue') },
