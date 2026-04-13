@@ -1,14 +1,5 @@
 <template>
   <div>
-    <section class="relative overflow-hidden bg-primary-navy py-16 md:py-24">
-      <div class="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(46,125,50,0.22),transparent_24%),linear-gradient(135deg,rgba(255,255,255,0.04),transparent_40%)]" />
-      <div class="container-shell relative" :class="currentRouteName === 'services' ? 'text-left' : 'text-center'">
-        <div class="eyebrow inline-block text-white/75">{{ eyebrow }}</div>
-        <h1 class="section-title mt-4 text-white">{{ title }}</h1>
-<!--        <p class="section-subtitle mx-auto mt-4 max-w-3xl text-neutral-300">{{ copy }}</p>-->
-      </div>
-    </section>
-
     <section class="container-shell py-16 md:py-20">
       <div v-if="loading" class="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
         <div v-for="index in 6" :key="index" class="panel h-40 animate-pulse bg-neutral-100"></div>
@@ -301,9 +292,6 @@ import { useSiteSettingsStore } from '../stores/siteSettings'
 import { ROUTE_NAMES } from '../router'
 
 type StaticPageConfig = {
-  eyebrow: string
-  title: string
-  copy: string
   items: string[]
 }
 
@@ -323,39 +311,21 @@ const { postsMeta } = storeToRefs(publicContentStore)
 
 const pageData: Record<string, StaticPageConfig> = {
   [ROUTE_NAMES.about]: {
-    eyebrow: 'Giới thiệu',
-    title: 'Thông tin doanh nghiệp',
-    copy: 'Nội dung giới thiệu được đồng bộ từ CMS/backend.',
     items: [],
   },
   [ROUTE_NAMES.services]: {
-    eyebrow: 'Lĩnh vực',
-    title: 'Dịch vụ khảo sát và thí nghiệm',
-    copy: 'Dữ liệu được lấy trực tiếp từ `/api/public/v1/services`.',
     items: [],
   },
   [ROUTE_NAMES.projects]: {
-    eyebrow: 'Dự án',
-    title: 'Hồ sơ dự án tiêu biểu',
-    copy: 'Danh sách dự án được lấy trực tiếp từ `/api/public/v1/projects`.',
     items: [],
   },
   [ROUTE_NAMES.news]: {
-    eyebrow: 'Tin tức - kiến thức',
-    title: 'Bài viết chuyên ngành',
-    copy: 'Nội dung tin tức và kiến thức được lấy trực tiếp từ `/api/public/v1/posts`.',
     items: [],
   },
   [ROUTE_NAMES.equipment]: {
-    eyebrow: 'Thiết bị',
-    title: 'Thiết bị hiện trường',
-    copy: 'Danh mục thiết bị được lấy trực tiếp từ `/api/public/v1/equipments`.',
     items: [],
   },
   [ROUTE_NAMES.contact]: {
-    eyebrow: 'Liên hệ',
-    title: 'Thông tin liên hệ công ty',
-    copy: 'Thông tin văn phòng, đầu mối liên hệ và bản đồ vị trí doanh nghiệp.',
     items: [],
   },
 }
@@ -369,30 +339,6 @@ const selectedCategorySlug = computed(() => {
 const selectedProjectCategory = computed(() => publicContentStore.projectCategories.find((item) => item.slug === selectedCategorySlug.value) || null)
 const selectedPostCategory = computed(() => publicContentStore.postCategories.find((item) => item.slug === selectedCategorySlug.value) || null)
 const selectedEquipmentCategory = computed(() => publicContentStore.equipmentCategories.find((item) => item.slug === selectedCategorySlug.value) || null)
-const eyebrow = computed(() => {
-  if (currentRouteName.value === ROUTE_NAMES.projects && selectedProjectCategory.value) return 'Danh mục dự án'
-  if (currentRouteName.value === ROUTE_NAMES.news && selectedPostCategory.value) return 'Danh mục tin tức'
-  if (currentRouteName.value === ROUTE_NAMES.equipment && selectedEquipmentCategory.value) return 'Danh mục thiết bị'
-  return currentData.value.eyebrow
-})
-const title = computed(() => {
-  if (currentRouteName.value === ROUTE_NAMES.projects && selectedProjectCategory.value) return selectedProjectCategory.value.name
-  if (currentRouteName.value === ROUTE_NAMES.news && selectedPostCategory.value) return selectedPostCategory.value.name
-  if (currentRouteName.value === ROUTE_NAMES.equipment && selectedEquipmentCategory.value) return selectedEquipmentCategory.value.name
-  return currentData.value.title
-})
-const copy = computed(() => {
-  if (currentRouteName.value === ROUTE_NAMES.projects && selectedProjectCategory.value) {
-    return `Danh sách dự án thuộc danh mục ${selectedProjectCategory.value.name.toLowerCase()}.`
-  }
-  if (currentRouteName.value === ROUTE_NAMES.news && selectedPostCategory.value) {
-    return `Danh sách bài viết thuộc danh mục ${selectedPostCategory.value.name.toLowerCase()}.`
-  }
-  if (currentRouteName.value === ROUTE_NAMES.equipment && selectedEquipmentCategory.value) {
-    return `Danh sách thiết bị thuộc danh mục ${selectedEquipmentCategory.value.name.toLowerCase()}.`
-  }
-  return currentData.value.copy
-})
 const items = computed(() => currentData.value.items)
 const introItems = computed<IntroCard[]>(() => [])
 const serviceItems = computed(() => {

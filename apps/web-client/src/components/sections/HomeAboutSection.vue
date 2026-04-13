@@ -13,18 +13,17 @@
         </div>
 
         <div class="max-w-2xl">
-          <div class="text-xs font-semibold uppercase tracking-[0.18em] text-neutral-500">{{ eyebrow }}</div>
-          <h2 class="mt-4 font-heading text-4xl font-bold leading-tight text-primary-navy">{{ title }}</h2>
+          <h2 class="font-heading text-4xl font-bold leading-tight text-primary-navy">{{ title }}</h2>
           <p class="mt-5 text-base leading-8 text-neutral-600">{{ description }}</p>
 
           <div class="mt-7 space-y-3">
             <div v-for="item in highlights" :key="item" class="flex items-start gap-3 text-[1.05rem] font-medium text-primary-navy">
-              <span class="mt-1.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-amber-400 text-[11px] font-bold text-white">•</span>
+              <span class="flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[20px] text-amber-400 font-bold fas fa-check-circle"></span>
               <span>{{ item }}</span>
             </div>
           </div>
 
-          <router-link :to="buttonUrl" class="mt-8 inline-flex items-center gap-2 text-lg font-semibold text-primary-navy underline-offset-4 transition-colors hover:text-accent-green hover:underline">
+          <router-link :to="buttonUrl" class="mt-8 inline-flex items-center gap-2 text-lg font-bold text-primary-navy underline-offset-4 transition-colors hover:underline">
             {{ buttonLabel }}
             <AppIcon icon="arrowRight" class="h-5 w-5" />
           </router-link>

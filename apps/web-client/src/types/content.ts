@@ -271,6 +271,7 @@ export interface AboutPageContent {
   }
   intro: {
     heading: string
+    imagePath: string
     content: string
   }
   coreValues: {

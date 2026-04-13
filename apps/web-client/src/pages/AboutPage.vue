@@ -1,18 +1,5 @@
 <template>
   <div>
-    <section class="relative overflow-hidden py-20 text-white md:py-28">
-      <div
-        class="absolute inset-0 bg-primary-navy"
-        :style="heroBackgroundStyle"
-      />
-      <div class="absolute inset-0 bg-[linear-gradient(135deg,rgba(0,0,0,0.45),rgba(0,28,56,0.78))]" />
-      <div class="container-shell relative text-center">
-<!--        <div class="eyebrow inline-block text-white/75">Giới thiệu</div>-->
-        <h1 class="section-title mt-4 text-white">{{ aboutData.hero.title || page?.title || 'Về Chúng Tôi' }}</h1>
-        <p class="section-subtitle mx-auto mt-4 max-w-3xl text-neutral-200">{{ page?.summary || '' }}</p>
-      </div>
-    </section>
-
     <section class="container-shell py-16 md:py-20">
       <div v-if="loadingState" class="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
         <div v-for="index in 6" :key="index" class="panel h-40 animate-pulse bg-neutral-100"></div>
@@ -21,9 +8,37 @@
       <div v-else-if="errorMessage" class="panel p-8 text-rose-600">{{ errorMessage }}</div>
 
       <template v-else>
-        <section class="mx-auto max-w-4xl text-center">
-          <h2 class="font-heading text-3xl font-bold text-primary-navy">{{ aboutData.intro.heading }}</h2>
-          <div class="prose prose-slate mx-auto mt-6 max-w-none text-left text-base leading-8 text-neutral-600" v-html="aboutData.intro.content"></div>
+        <section class="py-2 md:py-4">
+          <div class="grid gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(420px,0.92fr)] lg:items-start lg:gap-16">
+            <div class="max-w-4xl pt-2">
+              <div class="flex items-center gap-6">
+                <div class="h-14 w-2 shrink-0 bg-orange-500 md:h-18"></div>
+                <div>
+                  <h1 class="font-heading font-extrabold tracking-tight section-title text-primary-navy">
+                    {{ introTitle }}
+                  </h1>
+                </div>
+              </div>
+              <div class="about-intro-copy prose prose-slate mt-4 max-w-none text-left text-[1.15rem] leading-[1.95] text-neutral-600" v-html="aboutData.intro.content"></div>
+            </div>
+
+            <div class="lg:pt-[4.6rem]">
+              <div class="overflow-hidden rounded-[1.75rem] bg-neutral-100 shadow-[0_20px_50px_rgba(15,23,42,0.14)]">
+                <img
+                  v-if="introImagePath"
+                  :src="resolveMediaUrl(introImagePath)"
+                  :alt="introTitle"
+                  class="h-[320px] w-full object-cover md:h-[430px] lg:h-[470px]"
+                />
+                <div v-else class="flex h-[320px] items-center justify-center bg-[linear-gradient(135deg,#214c79_0%,#3f6a94_55%,#d8e0e8_55%,#eef3f7_100%)] px-10 text-center text-white md:h-[430px] lg:h-[470px]">
+                  <div>
+                    <div class="text-xs font-semibold uppercase tracking-[0.24em] text-white/70">Hanoi Survey</div>
+                    <div class="mt-4 font-heading text-3xl font-bold leading-tight">Hình ảnh công trình và hoạt động khảo sát</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
         </section>
 
         <section class="mt-16 rounded-[2rem] bg-neutral-50 px-6 py-10 md:px-10 md:py-14">
@@ -173,6 +188,13 @@ const loadingState = computed(() => loading.value.introPage)
 const errorMessage = computed(() => errors.value.introPage)
 
 const aboutData = computed<AboutPageContent>(() => parseAboutContent(page.value?.contentJson))
+const introTitle = computed(() => aboutData.value.hero.title || page.value?.title || 'Về Chúng Tôi')
+const introImagePath = computed(() => {
+  return aboutData.value.intro.imagePath
+    || aboutData.value.organization.chartImagePath
+    || aboutData.value.capability.imagePath
+    || ''
+})
 const valueItems = computed<AboutPageValueItem[]>(() => aboutData.value.coreValues.items.filter((item) => item.title.trim() || item.description.trim()))
 const timelineItems = computed<AboutPageTimelineItem[]>(() => [...aboutData.value.timeline.items]
   .filter((item) => item.year.trim() || item.title.trim() || item.description.trim())
@@ -180,11 +202,6 @@ const timelineItems = computed<AboutPageTimelineItem[]>(() => [...aboutData.valu
 const departments = computed(() => aboutData.value.organization.departments.filter((item) => item.trim()))
 const capabilityItems = computed<AboutCapabilityItem[]>(() => aboutData.value.capability.items.filter((item) => item.title.trim()))
 const isMobile = computed(() => typeof window !== 'undefined' && window.innerWidth < 768)
-
-const heroBackgroundStyle = computed(() => {
-  const path = aboutData.value.hero.backgroundImagePath
-  return path ? { backgroundImage: `url(${resolveMediaUrl(path)})`, backgroundSize: 'cover', backgroundPosition: 'center' } : undefined
-})
 
 onMounted(async () => {
   await publicContentStore.loadIntroPage()
@@ -203,24 +220,97 @@ function parseAboutContent(raw: string | null | undefined): AboutPageContent {
 
 function createEmptyAboutContent(): AboutPageContent {
   return {
-    hero: { title: '', backgroundImagePath: '' },
-    intro: { heading: '', content: '<p></p>' },
-    coreValues: { sectionTitle: 'Sứ Mệnh & Tầm Nhìn', items: [] },
-    timeline: { sectionTitle: 'Quá Trình Phát Triển', items: [] },
+    hero: { title: 'Về chúng tôi', backgroundImagePath: '' },
+    intro: {
+      heading: 'Doi tac tin cay trong nganh khao sat xay dung',
+      imagePath: '',
+      content: '<p class="ql-align-justify"><strong>CÔNG TY CỔ PHẦN TƯ VẤN KHẢO SÁT XÂY DỰNG HÀ NỘI</strong>&nbsp;(HANOI CONTRUCTION SERVEY CONSULTANT JOIN STOCK COMPANY) là một doanh nghiệp độc lập, tự hào với bề dày kinh nghiệm trong lĩnh vực tư vấn xây dựng.</p><p class="ql-align-justify"><br></p><p class="ql-align-justify">Được thành lập từ năm 2006, chúng tôi cam kết mang lại những giải pháp tư vấn chất lượng cao, đáp ứng các tiêu chuẩn khắt khe nhất của ngành xây dựng Việt Nam.</p><p class="ql-align-justify"><br></p><p class="ql-align-justify">Với sở hữu Trung tâm thí nghiệm và kiểm định xây dựng đạt chuẩn, VietDelta tự tin là đối tác tin cậy cho mọi công trình.</p><p class="ql-align-justify"><br></p><p><strong style="color: rgb(0, 64, 128);">Người đại diện:</strong>&nbsp;Đỗ Xuân Dân – Giám đốc Công ty</p>',
+    },
+    coreValues: {
+      sectionTitle: 'Sứ mệnh và tầm nhìn',
+      items: [
+        {
+          title: 'Sứ mệnh',
+          icon: 'bullseye',
+          description: 'Cung cấp dữ liệu khảo sát và thí nghiệm chính xác, minh bạch, giúp tối ưu giải pháp nền móng và giảm thiểu rủi ro kỹ thuật cho mọi công trình.',
+        },
+        {
+          title: 'Tầm nhìn',
+          icon: 'eye',
+          description: 'Trở thành đơn vị khảo sát và quan trắc được ưu tiên lựa chọn trong các dự án hạ tâng, công nghiệp và phát triển đô thị tại Việt Nam.',
+        },
+        {
+          title: 'Giá trị cốt lõi',
+          icon: 'gem',
+          description: 'Chúng tôi coi chất lượng dữ liệu, tốc độ phối hợp và trách nhiệm nghề nghiệp là nền tảng của mọi dự án.',
+        },
+      ],
+    },
+    timeline: {
+      sectionTitle: 'Quá trình phát triển',
+      items: [
+        {
+          year: '2006',
+          title: 'Khởi đầu',
+          description: 'Thành lập công ty tại Định Công, Hoàng Mai, Hà Nội. Đặt nền móng đầu tiên cho hành trình tư vấn xây dựng.',
+          sortOrder: 1,
+        },
+        {
+          year: '2007',
+          title: 'Mở rộng năng lực Lab',
+          description: 'Thành lập Trung tâm thí nghiệm và kiểm định xây dựng.\n\nĐược cấp quyết định công nhận khả năng thực hiện các phép thử số 1232/QĐ-BXD.',
+          sortOrder: 2,
+        },
+        {
+          year: '2024 - Nay',
+          title: 'Tăng trưởng bền vững',
+          description: 'Tham gia nhieu du an trong diem ve giao thong, cong nghiep va phat trien do thi voi goi dich vu khao sat tron goi.',
+          sortOrder: 4,
+        },
+      ],
+    },
     organization: {
-      sectionTitle: 'Cơ Cấu Tổ Chức',
-      heading: '',
-      description: '',
+      sectionTitle: 'Cơ cấu tổ chức',
+      heading: 'Tổ chức khoa học để triển khai nhanh và kiểm soát chất lượng',
+      description: 'Mô hình vận hành được phân tách rõ giữa khối điều hành, khối kỹ thuật và các đội hiện trường, giúp doanh nghiệm duy trì tiến độ, bảo đảm chất lượng dữ liệu và tăng khả năng phối hợp trên công trường.',
       chartImagePath: '',
-      chartCaption: '',
-      departments: [],
+      chartCaption: 'Sơ đồ tổ chức nhân sự',
+      departments: [
+        'Ban Giám đốc và Hội đồng quản trị',
+        'Phòng Kỹ thuật - Nghiên cứu và Phát triển',
+        'Phòng Thí nghiệm và Kiểm định chất lượng',
+        'Phòng Thiết kế và Xây lấp',
+        'Phòng Hành chính - Nhân sự và Kế toán',
+        'Các đội thi công hiện trường',
+      ],
     },
     capability: {
-      sectionTitle: 'Hồ Sơ Năng Lực',
-      heading: '',
-      description: '',
-      imagePath: '',
-      items: [],
+      sectionTitle: 'Hồ sơ năng lực',
+      heading: 'Năng lực và chứng chỉ của chúng tôi',
+      description: 'Chúng tôi duy trì đầy đủ hồ sơ pháp lý, năng lục hành nghề và các tài liệu kỹ thuật cần thiết để tham gia nhiều loại hình dự án từ dân dụng đến hạ tầng kỹ thuật.',
+      imagePath: 'uploads/2026-04-11/8ad682f4-890d-4bff-8c0f-7c57ffb69739.jpg',
+      items: [
+        {
+          title: 'Giấy phép đăng ký kinh doanh',
+          pdfFilePath: 'uploads/2026-04-11/04dcb4b3-65a6-4bd0-81dd-f71ec2f43cbd.pdf',
+          buttonLabel: 'Xem PDF',
+        },
+        {
+          title: 'Chứng chỉ năng lực hoạt động khảo sát xây dựng',
+          pdfFilePath: 'uploads/2026-04-11/f3bea515-17aa-4dc3-b3e2-e4cc626536fa.pdf',
+          buttonLabel: 'Xem PDF',
+        },
+        {
+          title: 'Chứng nhận hệ thống quản lý chất lượng',
+          pdfFilePath: 'uploads/2026-04-11/89427367-90ea-4c6d-96b5-30d9e5cb4f58.pdf',
+          buttonLabel: 'Xem PDF',
+        },
+        {
+          title: 'Hồ sơ kinh nghiệm các dự án tiêu biểu',
+          pdfFilePath: '',
+          buttonLabel: 'Xem PDF',
+        },
+      ],
     },
   }
 }
@@ -234,6 +324,7 @@ function normalizeAboutContent(input: Partial<AboutPageContent> | AboutPageConte
     },
     intro: {
       heading: input.intro?.heading || fallback.intro.heading,
+      imagePath: input.intro?.imagePath || fallback.intro.imagePath,
       content: normalizeIntroContent(input.intro),
     },
     coreValues: {

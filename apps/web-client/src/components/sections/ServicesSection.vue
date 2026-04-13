@@ -1,7 +1,7 @@
 <template>
   <section class="section bg-light">
     <div class="container-shell">
-      <SectionHeader :eyebrow="eyebrow" :title="title || 'Các Dịch Vụ Chính'" :description="description" centered show-divider />
+      <SectionHeader :eyebrow="eyebrow" :title="title || 'LĨNH VỰC HOẠT ĐỘNG'" :description="description" centered show-divider />
 
       <div v-if="loading" class="services-grid">
         <div v-for="index in 6" :key="index" class="service-card p-8 text-center">

@@ -362,42 +362,34 @@
 
       <div v-else class="space-y-6">
         <section class="rounded-xl border border-gray-200 p-4">
-          <h2 class="text-base font-semibold text-slate-900">Hero</h2>
-          <div class="mt-4 grid gap-4 md:grid-cols-2">
-            <div class="cms-form-group">
-              <label class="cms-form-label">Tiêu đề hero</label>
-              <input v-model="aboutContent.hero.title" class="cms-form-control" placeholder="Về Chúng Tôi" />
-            </div>
-            <div class="cms-form-group">
-              <label class="cms-form-label">Ảnh nền</label>
-              <div class="relative">
-                <input v-model="aboutContent.hero.backgroundImagePath" class="cms-form-control pr-36" placeholder="media/about-hero.jpg" />
-                <button type="button" class="input-action-btn" :disabled="uploadingHeroImage" @click="heroImageInputRef?.click()">
-                  {{ uploadingHeroImage ? 'Đang tải...' : 'Từ máy tính' }}
-                </button>
-              </div>
-              <input ref="heroImageInputRef" type="file" accept=".png,.jpg,.jpeg" class="hidden" @change="handleHeroImageSelected" />
-            </div>
-          </div>
-        </section>
-
-        <section class="rounded-xl border border-gray-200 p-4">
           <div class="flex items-center justify-between gap-3">
             <h2 class="text-base font-semibold text-slate-900">Mở đầu</h2>
             <div class="flex items-center gap-3">
-              <span class="text-xs text-slate-500">Khung soạn thảo nội dung giới thiệu</span>
+              <span class="text-xs text-slate-500">Quản lý phần xuất hiện đầu tiên của trang giới thiệu</span>
               <button type="button" class="cms-btn cms-btn-secondary" :disabled="uploadingIntroImage" @click="openIntroImagePicker">
                 {{ uploadingIntroImage ? 'Đang tải ảnh...' : 'Tải ảnh vào nội dung' }}
               </button>
             </div>
           </div>
-          <div class="mt-4 cms-form-group">
-            <label class="cms-form-label">Heading</label>
-            <input v-model="aboutContent.intro.heading" class="cms-form-control" placeholder="Đối tác tin cậy trong ngành khảo sát xây dựng" />
+          <div class="mt-4 grid gap-4 md:grid-cols-2">
+            <div class="cms-form-group">
+              <label class="cms-form-label">Tiêu đề lớn</label>
+              <input v-model="aboutContent.hero.title" class="cms-form-control" placeholder="Về Chúng Tôi" />
+            </div>
+            <div class="cms-form-group">
+              <label class="cms-form-label">Ảnh mở đầu</label>
+              <div class="relative">
+                <input v-model="aboutContent.intro.imagePath" class="cms-form-control pr-36" placeholder="media/about-intro.jpg" />
+                <button type="button" class="input-action-btn" :disabled="uploadingIntroCoverImage" @click="introCoverImageInputRef?.click()">
+                  {{ uploadingIntroCoverImage ? 'Đang tải...' : 'Từ máy tính' }}
+                </button>
+              </div>
+              <input ref="introCoverImageInputRef" type="file" accept=".png,.jpg,.jpeg" class="hidden" @change="handleIntroCoverImageSelected" />
+            </div>
           </div>
           <div class="cms-form-group">
             <label class="cms-form-label">Nội dung giới thiệu</label>
-            <p class="text-xs text-slate-500">Nhập phần mô tả chi tiết của doanh nghiệp tại đây. Bạn có thể định dạng chữ, danh sách, link và chèn ảnh trực tiếp.</p>
+            <p class="text-xs text-slate-500">Nhập các đoạn mô tả bên trái. Bạn có thể định dạng chữ, danh sách, link và chèn ảnh trực tiếp nếu cần.</p>
           </div>
           <div class="flex items-center gap-2">
             <button type="button" class="editor-tab-btn" :class="{ active: introEditorMode === 'visual' }" @click="introEditorMode = 'visual'">Soạn thảo</button>
@@ -424,8 +416,22 @@
             </div>
           </div>
           <div class="mt-3 rounded-xl border border-slate-200 bg-slate-50 p-4">
-            <div class="text-xs font-medium uppercase tracking-[0.18em] text-slate-500">Xem trước</div>
-            <div class="prose prose-slate mt-3 max-w-none text-sm" v-html="aboutContent.intro.content"></div>
+            <div class="text-xs font-medium uppercase tracking-[0.18em] text-slate-500">Xem trước bố cục mở đầu</div>
+            <div class="mt-4 grid gap-6 rounded-xl bg-white p-4 shadow-sm lg:grid-cols-[minmax(0,1fr)_320px] lg:items-start">
+              <div>
+                <div class="flex items-start gap-4">
+                  <div class="mt-1 h-14 w-1.5 shrink-0 bg-orange-500"></div>
+                  <div>
+                    <div class="text-3xl font-bold text-[#0b4a92]">{{ aboutContent.hero.title || 'Về Chúng Tôi' }}</div>
+                  </div>
+                </div>
+                <div class="prose prose-slate mt-6 max-w-none text-sm" v-html="aboutContent.intro.content"></div>
+              </div>
+              <div class="overflow-hidden rounded-2xl bg-slate-100">
+                <img v-if="aboutContent.intro.imagePath" :src="resolveUploadedMediaUrl(aboutContent.intro.imagePath)" class="h-64 w-full object-cover" />
+                <div v-else class="flex h-64 items-center justify-center px-6 text-center text-sm text-slate-400">Ảnh mở đầu sẽ hiển thị ở đây</div>
+              </div>
+            </div>
           </div>
           <input ref="introImageInputRef" type="file" accept=".png,.jpg,.jpeg" class="hidden" @change="handleIntroImageSelected" />
         </section>
@@ -657,8 +663,8 @@ const projectsStore = useProjectsStore()
 const saving = ref(false)
 const error = ref('')
 const introEditorMode = ref<'visual' | 'html'>('visual')
-const uploadingHeroImage = ref(false)
-const heroImageInputRef = ref<HTMLInputElement | null>(null)
+const uploadingIntroCoverImage = ref(false)
+const introCoverImageInputRef = ref<HTMLInputElement | null>(null)
 const uploadingIntroImage = ref(false)
 const introImageInputRef = ref<HTMLInputElement | null>(null)
 const introQuillRef = ref<any>(null)
@@ -806,12 +812,16 @@ function createSelectedProjectItem(): HomeSelectedProjectItem {
 function createEmptyHomeContent(): HomePageContent {
   return {
     hero: {
-      title: '',
-      subtitle: '',
+      title: 'DỮ LIỆU [TIN CẬY] - NỀN MÓNG [VỮNG BỀN]',
+      subtitle: 'Đối tác tin cậy cung cấp giải pháp toàn diện cho Khảo sát Địa chất, Địa hình, Thí nghiệm và Xây lắp công trình.',
       backgroundImagePath: '',
       badges: [
-        { label: 'Địa hình', iconKey: 'terrain' },
-        { label: 'Địa chất', iconKey: 'geology' },
+        { label: 'Địa hình', iconKey: 'MapPlus' },
+        { label: 'Địa chất', iconKey: 'Earth' },
+        { label: 'Thí nghiệm', iconKey: 'FlaskConical' },
+        { label: 'Quan trắc', iconKey: 'ChartLine' },
+        { label: 'Xây lắp', iconKey: 'fas fa-tools' },
+        { label: 'Giám sát', iconKey: 'Telescope' },
       ],
       primaryCtaLabel: 'Xem dự án',
       primaryCtaUrl: '/du-an',
@@ -827,24 +837,31 @@ function createEmptyHomeContent(): HomePageContent {
     },
     aboutSection: {
       eyebrow: 'Về chúng tôi',
-      title: 'Đơn vị khảo sát xây dựng tập trung vào độ chính xác và tiến độ thực địa',
-      description: '',
-      imagePath: '',
+      title: 'VỀ CHÚNG TÔI',
+      description: 'CÔNG TY CỔ PHẦN KHẢO SÁT XÂY DỰNG HÀ NỘI tự hào là đơn vị hàng đầu trong lĩnh vực khảo sát xây dựng tại Việt Nam. Chúng tôi cam kết mang lại sự chính xác tuyệt đối trong từng số liệu.',
+      imagePath: 'uploads/2026-04-13/b50a87be-0c01-4bb8-b469-3ee561b571f8.jpg',
       highlights: [
-        'Thiết bị khảo sát và đo đạc được bố trí theo yêu cầu từng công trình.',
-        'Đội ngũ kỹ sư bám sát hiện trường, phối hợp nhanh với chủ đầu tư và tư vấn thiết kế.',
-        'Quy trình triển khai gọn, hồ sơ bàn giao rõ ràng, phù hợp tiến độ thi công.',
+        'Hệ thống máy móc hiện đại bậc nhất.',
+        'Đội ngũ kỹ sư giàu kinh nghiệm.',
+        'Quy trình làm việc chuyên nghiệp, chuẩn ISO.',
       ],
-      buttonLabel: 'Xem hồ sơ năng lực',
+      buttonLabel: 'Xem thêm',
       buttonUrl: '/gioi-thieu',
     },
     servicesSection: {
       eyebrow: 'Lĩnh vực',
-      title: 'Các Dịch Vụ Chính',
+      title: 'LĨNH VỰC HOẠT ĐỘNG',
       description: '',
-      mode: 'latest',
+      mode: 'manual',
       limit: 6,
-      selectedItems: [],
+      selectedItems: [
+        { serviceId: 11, categoryId: 2, icon: 'fas fa-map-marked-alt' },
+        { serviceId: 13, categoryId: 1, icon: 'fas fa-globe-asia' },
+        { serviceId: 14, categoryId: 4, icon: 'fas fa-flask' },
+        { serviceId: 16, categoryId: null, icon: 'fas fa-hard-hat' },
+        { serviceId: 12, categoryId: null, icon: 'fa-solid fa-water' },
+        { serviceId: 15, categoryId: null, icon: 'fas fa-chart-line' },
+      ],
     },
     projectsSection: {
       eyebrow: 'Dự án',
@@ -857,8 +874,8 @@ function createEmptyHomeContent(): HomePageContent {
     finalCta: {
       eyebrow: 'Tư vấn nhanh ngoài hiện trường',
       title: 'Sẵn sàng khảo sát cho dự án mới?',
-      description: '',
-      items: ['Trong ngày', 'Miền Bắc', 'Nhà xưởng, khu công nghiệp, hạ tầng kỹ thuật'],
+      description: 'Đội kỹ sư của Hanoi CSC có thể hỗ trợ từ giai đoạn lập phương án khảo sát, báo giá, bố trí nhân lực đến bàn giao hồ sơ đúng tiến độ.',
+      items: [],
       primaryButtonLabel: 'Xem dự án',
       primaryButtonUrl: '/du-an',
       secondaryButtonLabel: 'Liên hệ',
@@ -870,24 +887,97 @@ function createEmptyHomeContent(): HomePageContent {
 
 function createEmptyAboutContent(): AboutPageContent {
   return {
-    hero: { title: '', backgroundImagePath: '' },
-    intro: { heading: '', content: '<p></p>' },
-    coreValues: { sectionTitle: 'Sứ Mệnh & Tầm Nhìn', items: [createValueItem()] },
-    timeline: { sectionTitle: 'Quá Trình Phát Triển', items: [createTimelineItem()] },
+    hero: { title: 'Về chúng tôi', backgroundImagePath: '' },
+    intro: {
+      heading: 'Doi tac tin cay trong nganh khao sat xay dung',
+      imagePath: '',
+      content: '<p class="ql-align-justify"><strong>CÔNG TY CỔ PHẦN TƯ VẤN KHẢO SÁT XÂY DỰNG HÀ NỘI</strong>&nbsp;(HANOI CONTRUCTION SERVEY CONSULTANT JOIN STOCK COMPANY) là một doanh nghiệp độc lập, tự hào với bề dày kinh nghiệm trong lĩnh vực tư vấn xây dựng.</p><p class="ql-align-justify"><br></p><p class="ql-align-justify">Được thành lập từ năm 2006, chúng tôi cam kết mang lại những giải pháp tư vấn chất lượng cao, đáp ứng các tiêu chuẩn khắt khe nhất của ngành xây dựng Việt Nam.</p><p class="ql-align-justify"><br></p><p class="ql-align-justify">Với sở hữu Trung tâm thí nghiệm và kiểm định xây dựng đạt chuẩn, VietDelta tự tin là đối tác tin cậy cho mọi công trình.</p><p class="ql-align-justify"><br></p><p><strong style="color: rgb(0, 64, 128);">Người đại diện:</strong>&nbsp;Đỗ Xuân Dân – Giám đốc Công ty</p>',
+    },
+    coreValues: {
+      sectionTitle: 'Sứ mệnh và tầm nhìn',
+      items: [
+        {
+          title: 'Sứ mệnh',
+          icon: 'bullseye',
+          description: 'Cung cấp dữ liệu khảo sát và thí nghiệm chính xác, minh bạch, giúp tối ưu giải pháp nền móng và giảm thiểu rủi ro kỹ thuật cho mọi công trình.',
+        },
+        {
+          title: 'Tầm nhìn',
+          icon: 'eye',
+          description: 'Trở thành đơn vị khảo sát và quan trắc được ưu tiên lựa chọn trong các dự án hạ tâng, công nghiệp và phát triển đô thị tại Việt Nam.',
+        },
+        {
+          title: 'Giá trị cốt lõi',
+          icon: 'gem',
+          description: 'Chúng tôi coi chất lượng dữ liệu, tốc độ phối hợp và trách nhiệm nghề nghiệp là nền tảng của mọi dự án.',
+        },
+      ],
+    },
+    timeline: {
+      sectionTitle: 'Quá trình phát triển',
+      items: [
+        {
+          year: '2006',
+          title: 'Khởi đầu',
+          description: 'Thành lập công ty tại Định Công, Hoàng Mai, Hà Nội. Đặt nền móng đầu tiên cho hành trình tư vấn xây dựng.',
+          sortOrder: 1,
+        },
+        {
+          year: '2007',
+          title: 'Mở rộng năng lực Lab',
+          description: 'Thành lập Trung tâm thí nghiệm và kiểm định xây dựng.\n\nĐược cấp quyết định công nhận khả năng thực hiện các phép thử số 1232/QĐ-BXD.',
+          sortOrder: 2,
+        },
+        {
+          year: '2024 - Nay',
+          title: 'Tăng trưởng bền vững',
+          description: 'Tham gia nhieu du an trong diem ve giao thong, cong nghiep va phat trien do thi voi goi dich vu khao sat tron goi.',
+          sortOrder: 4,
+        },
+      ],
+    },
     organization: {
-      sectionTitle: 'Cơ Cấu Tổ Chức',
-      heading: '',
-      description: '',
+      sectionTitle: 'Cơ cấu tổ chức',
+      heading: 'Tổ chức khoa học để triển khai nhanh và kiểm soát chất lượng',
+      description: 'Mô hình vận hành được phân tách rõ giữa khối điều hành, khối kỹ thuật và các đội hiện trường, giúp doanh nghiệm duy trì tiến độ, bảo đảm chất lượng dữ liệu và tăng khả năng phối hợp trên công trường.',
       chartImagePath: '',
-      chartCaption: '',
-      departments: [''],
+      chartCaption: 'Sơ đồ tổ chức nhân sự',
+      departments: [
+        'Ban Giám đốc và Hội đồng quản trị',
+        'Phòng Kỹ thuật - Nghiên cứu và Phát triển',
+        'Phòng Thí nghiệm và Kiểm định chất lượng',
+        'Phòng Thiết kế và Xây lấp',
+        'Phòng Hành chính - Nhân sự và Kế toán',
+        'Các đội thi công hiện trường',
+      ],
     },
     capability: {
-      sectionTitle: 'Hồ Sơ Năng Lực',
-      heading: '',
-      description: '',
-      imagePath: '',
-      items: [createCapabilityItem()],
+      sectionTitle: 'Hồ sơ năng lực',
+      heading: 'Năng lực và chứng chỉ của chúng tôi',
+      description: 'Chúng tôi duy trì đầy đủ hồ sơ pháp lý, năng lục hành nghề và các tài liệu kỹ thuật cần thiết để tham gia nhiều loại hình dự án từ dân dụng đến hạ tầng kỹ thuật.',
+      imagePath: 'uploads/2026-04-11/8ad682f4-890d-4bff-8c0f-7c57ffb69739.jpg',
+      items: [
+        {
+          title: 'Giấy phép đăng ký kinh doanh',
+          pdfFilePath: 'uploads/2026-04-11/04dcb4b3-65a6-4bd0-81dd-f71ec2f43cbd.pdf',
+          buttonLabel: 'Xem PDF',
+        },
+        {
+          title: 'Chứng chỉ năng lực hoạt động khảo sát xây dựng',
+          pdfFilePath: 'uploads/2026-04-11/f3bea515-17aa-4dc3-b3e2-e4cc626536fa.pdf',
+          buttonLabel: 'Xem PDF',
+        },
+        {
+          title: 'Chứng nhận hệ thống quản lý chất lượng',
+          pdfFilePath: 'uploads/2026-04-11/89427367-90ea-4c6d-96b5-30d9e5cb4f58.pdf',
+          buttonLabel: 'Xem PDF',
+        },
+        {
+          title: 'Hồ sơ kinh nghiệm các dự án tiêu biểu',
+          pdfFilePath: '',
+          buttonLabel: 'Xem PDF',
+        },
+      ],
     },
   }
 }
@@ -905,7 +995,7 @@ function parseAboutContent(raw: string | null | undefined): AboutPageContent {
 
 function normalizeAboutContent(input: Partial<AboutPageContent> | AboutPageContent): AboutPageContent {
   const hero = input.hero ?? { title: '', backgroundImagePath: '' }
-  const intro = input.intro ?? { heading: '', content: '<p></p>' }
+  const intro = input.intro ?? { heading: '', imagePath: '', content: '<p></p>' }
   const coreValues = input.coreValues ?? { sectionTitle: 'Sứ Mệnh & Tầm Nhìn', items: [] }
   const timeline = input.timeline ?? { sectionTitle: 'Quá Trình Phát Triển', items: [] }
   const organization = input.organization ?? {
@@ -931,6 +1021,7 @@ function normalizeAboutContent(input: Partial<AboutPageContent> | AboutPageConte
     },
     intro: {
       heading: intro.heading || '',
+      imagePath: intro.imagePath || '',
       content: normalizeIntroContent(intro),
     },
     coreValues: {
@@ -1082,10 +1173,10 @@ function openIntroImagePicker() {
   introImageInputRef.value?.click()
 }
 
-async function handleHeroImageSelected(event: Event) {
-  const storagePath = await uploadImageFromInput(event, uploadingHeroImage, 'Tải ảnh nền thất bại')
+async function handleIntroCoverImageSelected(event: Event) {
+  const storagePath = await uploadImageFromInput(event, uploadingIntroCoverImage, 'Tải ảnh mở đầu thất bại')
   if (storagePath) {
-    aboutContent.hero.backgroundImagePath = storagePath
+    aboutContent.intro.imagePath = storagePath
   }
 }
 
