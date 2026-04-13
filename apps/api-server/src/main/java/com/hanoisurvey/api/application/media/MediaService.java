@@ -13,6 +13,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.time.LocalDate;
+import java.util.Set;
 import java.util.List;
 import java.util.UUID;
 
@@ -20,6 +21,16 @@ import java.util.UUID;
 public class MediaService {
 
     private static final long MAX_SIZE = 10 * 1024 * 1024;
+    private static final Set<String> SUPPORTED_DOCUMENT_CONTENT_TYPES = Set.of(
+            "application/pdf",
+            "application/msword",
+            "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+            "application/vnd.ms-excel",
+            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            "application/vnd.ms-powerpoint",
+            "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+            "text/plain"
+    );
 
     private final MediaFileRepositoryPort repository;
     private final Path uploadRoot;
@@ -44,23 +55,25 @@ public class MediaService {
 
         try {
             String cleanedFileName = StringUtils.cleanPath(file.getOriginalFilename() == null ? "file" : file.getOriginalFilename());
+            String contentType = file.getContentType();
             String extension = "";
             int extIndex = cleanedFileName.lastIndexOf('.');
             if (extIndex >= 0) {
                 extension = cleanedFileName.substring(extIndex);
             }
 
+            String contentFolder = resolveContentFolder(contentType);
             String dailySegment = LocalDate.now().toString();
-            Path dailyFolder = uploadRoot.resolve(dailySegment);
+            Path dailyFolder = uploadRoot.resolve(contentFolder).resolve(dailySegment);
             Files.createDirectories(dailyFolder);
 
             String newFileName = UUID.randomUUID() + extension;
             Path destination = dailyFolder.resolve(newFileName);
             Files.copy(file.getInputStream(), destination, StandardCopyOption.REPLACE_EXISTING);
 
-            String publicPath = uploadPublicPrefix + "/" + dailySegment + "/" + newFileName;
+            String publicPath = uploadPublicPrefix + "/" + contentFolder + "/" + dailySegment + "/" + newFileName;
 
-            return repository.save(new MediaFile(null, cleanedFileName, file.getContentType(), file.getSize(), publicPath, altText, null));
+            return repository.save(new MediaFile(null, cleanedFileName, contentType, file.getSize(), publicPath, altText, null));
         } catch (IOException exception) {
             throw new IllegalArgumentException("Upload thất bại: " + exception.getMessage());
         }
@@ -85,9 +98,16 @@ public class MediaService {
             throw new IllegalArgumentException("Tệp vượt quá 10MB");
         }
         String contentType = file.getContentType();
-        if (contentType == null || (!contentType.startsWith("image/") && !contentType.equals("application/pdf"))) {
-            throw new IllegalArgumentException("Chỉ hỗ trợ ảnh hoặc PDF");
+        if (contentType == null || (!contentType.startsWith("image/") && !SUPPORTED_DOCUMENT_CONTENT_TYPES.contains(contentType))) {
+            throw new IllegalArgumentException("Chỉ hỗ trợ ảnh hoặc tài liệu phổ biến");
         }
+    }
+
+    private String resolveContentFolder(String contentType) {
+        if (contentType != null && contentType.startsWith("image/")) {
+            return "images";
+        }
+        return "documents";
     }
 
     private Path resolveStoredPath(String storedPath) {

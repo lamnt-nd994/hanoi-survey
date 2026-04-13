@@ -8,6 +8,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.List;
 
 @Configuration
 public class WebConfig implements WebMvcConfigurer {
@@ -18,10 +19,16 @@ public class WebConfig implements WebMvcConfigurer {
     @Value("${app.upload-public-prefix:uploads}")
     private String uploadPublicPrefix;
 
+    private final List<String> corsAllowedOrigins;
+
+    public WebConfig(@Value("${app.cors-allowed-origins:http://localhost:5173,http://localhost:5174}") List<String> corsAllowedOrigins) {
+        this.corsAllowedOrigins = corsAllowedOrigins;
+    }
+
     @Override
     public void addCorsMappings(CorsRegistry registry) {
         registry.addMapping("/api/**")
-                .allowedOrigins("http://localhost:5173", "http://localhost:5174")
+                .allowedOrigins(corsAllowedOrigins.toArray(String[]::new))
                 .allowedMethods("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS")
                 .allowedHeaders("*");
     }

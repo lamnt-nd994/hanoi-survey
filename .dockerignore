@@ -1,0 +1,14 @@
+.git
+.idea
+.vscode
+node_modules
+apps/*/node_modules
+dist
+apps/*/dist
+target
+apps/*/target
+coverage
+.vite
+*.log
+.DS_Store
+Thumbs.db

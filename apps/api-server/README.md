@@ -68,6 +68,72 @@ Default DB config in `src/main/resources/application.yml`:
 
 - Swagger UI: `http://localhost:8080/swagger`
 
+## Production deploy with Docker / Dokploy
+
+Files added for production:
+
+- `Dockerfile`: build and run Spring Boot in image `eclipse-temurin:21-jre-jammy`
+- `docker-compose.prod.yml`: production stack for API + MySQL (+ Adminer optional)
+- `.env.prod.example`: sample environment variables for Dokploy/server
+- `deploy/dokploy/*`: split Dokploy deployment files for `mysql`, `api-server`, `web-client`, `admin-portal`
+
+### 1) Prepare host folders on server
+
+Create 2 absolute directories on your server before deploy:
+
+- one for uploaded files, for example: `/srv/hanoi-survey/uploads`
+- one for MySQL data, for example: `/srv/hanoi-survey/mysql`
+
+This is important because the production compose file uses bind mounts:
+
+- `HOST_UPLOADS_DIR -> /var/opt/hanoi-survey/uploads`
+- `HOST_MYSQL_DATA_DIR -> /var/lib/mysql`
+
+With this setup, files uploaded from the CMS will exist directly on your server folder, so you can inspect them outside the container.
+
+### 2) Configure environment variables
+
+Copy `.env.prod.example` to your production environment and replace at least these values:
+
+- `JWT_SECRET`
+- `APP_CORS_ALLOWED_ORIGINS`
+- `HOST_UPLOADS_DIR`
+- `HOST_MYSQL_DATA_DIR`
+- `MYSQL_PASSWORD`
+- `MYSQL_ROOT_PASSWORD`
+
+### 3) Deploy in Dokploy
+
+Recommended Dokploy setup is the split deployment in `deploy/dokploy/`:
+
+- `deploy/dokploy/mysql.compose.yml`
+- `deploy/dokploy/api.compose.yml`
+- `deploy/dokploy/web.compose.yml`
+- `deploy/dokploy/admin.compose.yml`
+
+Use `deploy/dokploy/README.md` for the deployment order and env files.
+
+The old all-in-one compose is still available if you want one-shot deployment:
+
+If you deploy this backend via Docker Compose in Dokploy, use:
+
+- compose file: `apps/api-server/docker-compose.prod.yml`
+- context / working directory: `apps/api-server`
+
+Recommended production domains:
+
+- public/admin frontend domains must be included in `APP_CORS_ALLOWED_ORIGINS`
+- uploaded files will be public under `https://your-api-domain/uploads/...`
+
+### 4) Production application profile
+
+`application-prod.yml` is configured for container deployment:
+
+- default MySQL host inside Docker network: `mysql:3306`
+- upload directory inside container: `/var/opt/hanoi-survey/uploads`
+- proxy-aware headers enabled with `server.forward-headers-strategy: framework`
+- Swagger disabled in production
+
 ## Stop services
 
 ```bash
