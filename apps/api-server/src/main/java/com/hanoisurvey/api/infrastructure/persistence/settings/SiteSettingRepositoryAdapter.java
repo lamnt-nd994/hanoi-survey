@@ -33,6 +33,7 @@ public class SiteSettingRepositoryAdapter implements SiteSettingRepositoryPort {
         entity.setHeroBannerPath(siteSetting.heroBannerPath());
         entity.setCompanyIntro(siteSetting.companyIntro());
         entity.setTaxCode(siteSetting.taxCode());
+        entity.setLicenseNumber(siteSetting.licenseNumber());
         entity.setBusinessLicensePath(siteSetting.businessLicensePath());
         entity.setLicenseIssuedBy(siteSetting.licenseIssuedBy());
         entity.setLicenseIssuedDate(siteSetting.licenseIssuedDate());
@@ -65,6 +66,7 @@ public class SiteSettingRepositoryAdapter implements SiteSettingRepositoryPort {
                 entity.getHeroBannerPath(),
                 entity.getCompanyIntro(),
                 entity.getTaxCode(),
+                entity.getLicenseNumber(),
                 entity.getBusinessLicensePath(),
                 entity.getLicenseIssuedBy(),
                 entity.getLicenseIssuedDate(),

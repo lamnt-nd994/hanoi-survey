@@ -354,6 +354,7 @@ export interface SiteSettings {
   heroBannerPath: string
   companyIntro: string
   taxCode: string
+  licenseNumber: string
   businessLicensePath: string
   licenseIssuedBy: string
   licenseIssuedDate: string | null

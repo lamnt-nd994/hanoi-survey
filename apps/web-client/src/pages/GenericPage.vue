@@ -33,9 +33,10 @@
         </div>
       </div>
 
-      <div v-else-if="currentRouteName === 'projects'" class="grid gap-6 md:grid-cols-2">
+      <div v-else-if="currentRouteName === 'projects'" class="space-y-8">
+        <div class="grid gap-6 md:grid-cols-2 xl:grid-cols-4">
         <router-link
-          v-for="item in projectItems"
+          v-for="item in paginatedProjectItems"
           :key="item.slug"
           :to="item.slug ? { name: 'project-detail', params: { slug: item.slug } } : { name: 'projects' }"
           class="project-card group flex h-full flex-col overflow-hidden border border-neutral-200 bg-white transition-all duration-300 hover:-translate-y-1 hover:border-accent-green/30 hover:shadow-2xl hover:shadow-primary-navy/10"
@@ -90,8 +91,18 @@
               <span class="text-accent-green transition-transform group-hover:translate-x-1">Chi tiet</span>
             </div>
           </div>
-          </router-link>
+        </router-link>
         </div>
+
+        <div v-if="projectTotalPages > 1" class="flex items-center justify-center gap-1 pt-2">
+          <button :disabled="safeProjectPage <= 1" @click="goToProjectPage(safeProjectPage - 1)" class="flex h-9 w-9 items-center justify-center rounded border border-neutral-200 text-neutral-500 transition-colors hover:border-primary-navy hover:text-primary-navy disabled:cursor-default disabled:opacity-30">&laquo;</button>
+          <template v-for="p in projectVisiblePages" :key="`project-page-${p}`">
+            <span v-if="p === '...'" class="flex h-9 w-9 items-center justify-center text-neutral-400">...</span>
+            <button v-else @click="goToProjectPage(p as number)" class="flex h-9 w-9 items-center justify-center rounded border text-sm transition-colors" :class="p === safeProjectPage ? 'border-primary-navy bg-primary-navy text-white' : 'border-neutral-200 text-neutral-600 hover:border-primary-navy hover:text-primary-navy'">{{ p }}</button>
+          </template>
+          <button :disabled="safeProjectPage >= projectTotalPages" @click="goToProjectPage(safeProjectPage + 1)" class="flex h-9 w-9 items-center justify-center rounded border border-neutral-200 text-neutral-500 transition-colors hover:border-primary-navy hover:text-primary-navy disabled:cursor-default disabled:opacity-30">&raquo;</button>
+        </div>
+      </div>
 
       <div v-else-if="currentRouteName === 'news'" class="space-y-8">
         <div v-if="!postItems.length" class="panel p-8 text-center text-neutral-500">
@@ -258,29 +269,6 @@
           </div>
         </section>
 
-        <section v-if="settings?.businessLicensePath" class="rounded-[2rem] border border-neutral-200 bg-white p-6 shadow-sm lg:p-8">
-          <div class="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
-            <div class="max-w-2xl">
-              <div class="text-[11px] font-semibold uppercase tracking-[0.18em] text-neutral-400">Hồ sơ pháp lý</div>
-              <h3 class="mt-3 font-heading text-2xl font-bold text-primary-navy">Giấy phép doanh nghiệp</h3>
-              <div class="mt-4 grid gap-3 text-sm text-neutral-600 sm:grid-cols-3">
-                <div v-if="settings?.taxCode"><strong>Mã số thuế:</strong> {{ settings.taxCode }}</div>
-                <div v-if="settings?.licenseIssuedBy"><strong>Nơi cấp:</strong> {{ settings.licenseIssuedBy }}</div>
-                <div v-if="settings?.licenseIssuedDate"><strong>Ngày cấp:</strong> {{ settings.licenseIssuedDate }}</div>
-              </div>
-            </div>
-
-            <a :href="resolveMediaUrl(settings.businessLicensePath)" target="_blank" rel="noopener noreferrer" class="btn-primary inline-flex">
-              Tải giấy phép
-            </a>
-          </div>
-
-          <div class="mt-6 overflow-hidden rounded-[1.5rem] border border-neutral-200 bg-neutral-50">
-            <img v-if="isImageAsset(settings.businessLicensePath)" :src="resolveMediaUrl(settings.businessLicensePath)" alt="Giấy phép doanh nghiệp" class="max-h-[28rem] w-full object-contain" />
-            <iframe v-else-if="isPdfAsset(settings.businessLicensePath)" :src="resolveMediaUrl(settings.businessLicensePath)" class="h-[28rem] w-full" />
-            <div v-else class="px-4 py-6 text-sm text-neutral-500">Không xem trước được file này.</div>
-          </div>
-        </section>
       </div>
 
       <div v-else-if="introItems.length" class="grid gap-6 md:grid-cols-2 xl:grid-cols-4">
@@ -421,6 +409,33 @@ const projectItems = computed(() => {
   if (currentRouteName.value !== ROUTE_NAMES.projects || !selectedProjectCategory.value) return publicContentStore.projects
   return publicContentStore.projects.filter((item) => item.categoryId === selectedProjectCategory.value?.id)
 })
+const projectPageSize = 8
+const currentProjectPage = computed(() => {
+  const rawPage = Array.isArray($route.query.page) ? $route.query.page[0] : $route.query.page
+  const page = Number(rawPage || 1)
+  return Number.isFinite(page) && page > 0 ? page : 1
+})
+const projectTotalPages = computed(() => Math.max(1, Math.ceil(projectItems.value.length / projectPageSize)))
+const safeProjectPage = computed(() => Math.min(currentProjectPage.value, projectTotalPages.value))
+const paginatedProjectItems = computed(() => {
+  const start = (safeProjectPage.value - 1) * projectPageSize
+  return projectItems.value.slice(start, start + projectPageSize)
+})
+const projectVisiblePages = computed<(number | string)[]>(() => {
+  const totalPages = projectTotalPages.value
+  const page = safeProjectPage.value
+  if (totalPages <= 7) {
+    return Array.from({ length: totalPages }, (_, index) => index + 1)
+  }
+  const pages: (number | string)[] = [1]
+  if (page > 3) pages.push('...')
+  for (let index = Math.max(2, page - 1); index <= Math.min(totalPages - 1, page + 1); index += 1) {
+    pages.push(index)
+  }
+  if (page < totalPages - 2) pages.push('...')
+  pages.push(totalPages)
+  return pages
+})
 const postItems = computed(() => publicContentStore.posts)
 const currentNewsPage = computed(() => {
   const rawPage = Array.isArray($route.query.page) ? $route.query.page[0] : $route.query.page
@@ -494,15 +509,47 @@ function normalizeMapEmbedUrl(rawUrl: string | null | undefined, fallbackAddress
   }
 
   if (/google\.[^/]+\/maps/i.test(normalized) || /maps\.app\.goo\.gl/i.test(normalized)) {
-    return fallback
+    return buildGoogleEmbedUrl(normalized, fallback)
   }
 
   return normalized
 }
 
+function buildGoogleEmbedUrl(rawUrl: string, fallback: string) {
+  try {
+    const url = new URL(rawUrl)
+    const query = url.searchParams.get('q') || url.searchParams.get('query')
+    if (query) {
+      return `https://www.google.com/maps?q=${encodeURIComponent(query)}&output=embed`
+    }
+
+    const coordinates = url.pathname.match(/@(-?\d+(?:\.\d+)?),(-?\d+(?:\.\d+)?)/)
+    if (coordinates) {
+      return `https://www.google.com/maps?q=${coordinates[1]},${coordinates[2]}&output=embed`
+    }
+
+    const placeMatch = url.pathname.match(/\/maps\/place\/([^/]+)/i)
+    if (placeMatch?.[1]) {
+      const place = decodeURIComponent(placeMatch[1]).replace(/\+/g, ' ')
+      return `https://www.google.com/maps?q=${encodeURIComponent(place)}&output=embed`
+    }
+
+    return `https://www.google.com/maps?q=${encodeURIComponent(rawUrl)}&output=embed`
+  } catch {
+    return fallback
+  }
+}
+
 async function goToNewsPage(page: number) {
   await router.push({
     name: ROUTE_NAMES.news,
+    query: page > 1 ? { ...$route.query, page: String(page) } : Object.fromEntries(Object.entries($route.query).filter(([key]) => key !== 'page')),
+  })
+}
+
+async function goToProjectPage(page: number) {
+  await router.push({
+    name: ROUTE_NAMES.projects,
     query: page > 1 ? { ...$route.query, page: String(page) } : Object.fromEntries(Object.entries($route.query).filter(([key]) => key !== 'page')),
   })
 }

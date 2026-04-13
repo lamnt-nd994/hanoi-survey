@@ -21,7 +21,7 @@ const router = createRouter({
   routes: [
     {
       path: '/',
-      component: () => import('../components/PublicLayout.vue'),
+      component: () => import('../components/layout/PublicLayout.vue'),
       children: [
         { path: '', name: ROUTE_NAMES.home, component: () => import('../pages/HomePage.vue') },
         { path: 'gioi-thieu', name: ROUTE_NAMES.about, component: () => import('../pages/AboutPage.vue') },

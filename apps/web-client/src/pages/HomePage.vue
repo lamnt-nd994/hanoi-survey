@@ -12,46 +12,16 @@
 
   <StatsBar :items="homeData.stats.items" />
 
-  <section class="py-16 md:py-20">
-    <div class="container-shell">
-      <div class="grid gap-8 lg:grid-cols-[1.05fr_0.95fr] lg:items-center">
-        <div class="overflow-hidden rounded-[2rem] border border-neutral-200 bg-neutral-100 shadow-sm">
-          <img
-            v-if="aboutImagePath"
-            :src="resolveMediaUrl(aboutImagePath)"
-            :alt="siteName"
-            class="h-[320px] w-full object-cover"
-          />
-          <div v-else class="flex h-[320px] items-center justify-center bg-[linear-gradient(135deg,#16365f_0%,#264d7e_48%,#d6dde6_48%,#eef2f6_100%)] px-10 text-center text-white">
-            <div>
-              <div class="text-xs font-semibold uppercase tracking-[0.22em] text-white/70">Hanoi Survey</div>
-              <div class="mt-4 font-heading text-3xl font-bold leading-tight">Khảo sát chính xác cho nền móng và hạ tầng</div>
-            </div>
-          </div>
-        </div>
-
-        <div class="max-w-2xl">
-          <div class="text-xs font-semibold uppercase tracking-[0.18em] text-neutral-500">{{ homeData.aboutSection.eyebrow }}</div>
-          <h2 class="mt-4 font-heading text-4xl font-bold leading-tight text-primary-navy">{{ homeData.aboutSection.title }}</h2>
-          <p class="mt-5 text-base leading-8 text-neutral-600">
-            {{ homeData.aboutSection.description || companyIntro || `${siteName} cung cấp dịch vụ khảo sát địa chất, địa hình, thủy văn, quan trắc và thí nghiệm xây dựng cho công trình dân dụng, công nghiệp và hạ tầng kỹ thuật.` }}
-          </p>
-
-          <div class="mt-7 space-y-3">
-            <div v-for="item in aboutHighlights" :key="item" class="flex items-start gap-3 text-[1.05rem] font-medium text-primary-navy">
-              <span class="mt-1.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-amber-400 text-[11px] font-bold text-white">•</span>
-              <span>{{ item }}</span>
-            </div>
-          </div>
-
-          <router-link :to="homeData.aboutSection.buttonUrl" class="mt-8 inline-flex items-center gap-2 text-lg font-semibold text-primary-navy underline-offset-4 transition-colors hover:text-accent-green hover:underline">
-            {{ homeData.aboutSection.buttonLabel }}
-            <span aria-hidden="true">→</span>
-          </router-link>
-        </div>
-      </div>
-    </div>
-  </section>
+  <HomeAboutSection
+    :site-name="siteName"
+    :eyebrow="homeData.aboutSection.eyebrow"
+    :title="homeData.aboutSection.title"
+    :description="homeData.aboutSection.description || companyIntro || `${siteName} cung cấp dịch vụ khảo sát địa chất, địa hình, thủy văn, quan trắc và thí nghiệm xây dựng cho công trình dân dụng, công nghiệp và hạ tầng kỹ thuật.`"
+    :image-path="aboutImagePath"
+    :highlights="aboutHighlights"
+    :button-label="homeData.aboutSection.buttonLabel"
+    :button-url="homeData.aboutSection.buttonUrl"
+  />
 
   <ServicesGrid
     :eyebrow="homeData.servicesSection.eyebrow"
@@ -75,39 +45,28 @@
     :selected-items="homeData.projectsSection.selectedItems"
   />
 
-  <section class="py-16 md:py-24">
-    <div class="container-shell">
-      <div class="panel rounded-[32px] p-8 md:p-10 lg:p-12 text-center">
-        <div class="mx-auto max-w-3xl">
-          <div class="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500 md:text-sm">{{ homeData.finalCta.eyebrow }}</div>
-          <h2 class="section-title mt-4 mx-auto max-w-3xl">{{ homeData.finalCta.title }}</h2>
-          <p class="section-subtitle mt-4 mx-auto max-w-2xl">{{ homeData.finalCta.description }}</p>
-
-          <div class="mt-8 flex flex-wrap items-center justify-center gap-4">
-            <router-link :to="homeData.finalCta.primaryButtonUrl" class="inline-flex min-h-[44px] min-w-[44px] items-center justify-center rounded-full bg-slate-900 px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-slate-700">
-              {{ homeData.finalCta.primaryButtonLabel }}
-            </router-link>
-            <router-link :to="homeData.finalCta.secondaryButtonUrl" class="inline-flex min-h-[44px] min-w-[44px] items-center justify-center rounded-full border border-slate-300 px-6 py-3 text-sm font-semibold text-slate-700 transition-colors hover:bg-slate-50">
-              {{ homeData.finalCta.secondaryButtonLabel }}
-            </router-link>
-            <a v-if="homeData.finalCta.showPhoneButton && mergedContactInfo.phone" :href="`tel:${mergedContactInfo.phone}`" class="btn-outline">
-              Gọi ngay: {{ mergedContactInfo.phone }}
-            </a>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
+  <FinalCtaSection
+    :eyebrow="homeData.finalCta.eyebrow"
+    :title="homeData.finalCta.title"
+    :description="homeData.finalCta.description"
+    :primary-button-label="homeData.finalCta.primaryButtonLabel"
+    :primary-button-url="homeData.finalCta.primaryButtonUrl"
+    :secondary-button-label="homeData.finalCta.secondaryButtonLabel"
+    :secondary-button-url="homeData.finalCta.secondaryButtonUrl"
+    :show-phone-button="homeData.finalCta.showPhoneButton"
+    :phone="mergedContactInfo.phone"
+  />
 </template>
 
 <script setup lang="ts">
 import { computed, onMounted } from 'vue'
 import { storeToRefs } from 'pinia'
-import Hero from '../components/Hero.vue'
-import StatsBar from '../components/StatsBar.vue'
-import ServicesGrid from '../components/ServicesGrid.vue'
-import ProjectsCarousel from '../components/ProjectsCarousel.vue'
-import { resolveMediaUrl } from '../lib/media'
+import Hero from '../components/sections/HeroSection.vue'
+import StatsBar from '../components/sections/StatsSection.vue'
+import ServicesGrid from '../components/sections/ServicesSection.vue'
+import ProjectsCarousel from '../components/sections/ProjectsSection.vue'
+import HomeAboutSection from '../components/sections/HomeAboutSection.vue'
+import FinalCtaSection from '../components/sections/FinalCtaSection.vue'
 import { usePublicContentStore } from '../stores/publicContent'
 import { useSiteSettingsStore } from '../stores/siteSettings'
 import type { HomePageContent } from '../types/content'

@@ -62,7 +62,7 @@ export const usePublicContentStore = defineStore('public-content', () => {
     loading.services = true
     errors.services = ''
     try {
-      services.value = await fetchServices({ page: 1, size: 12 })
+      services.value = await fetchServices({ page: 1, size: 100 })
       return services.value
     } catch {
       errors.services = 'Không tải được danh sách dịch vụ.'

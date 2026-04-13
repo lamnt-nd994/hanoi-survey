@@ -9,6 +9,7 @@ export interface SiteSettings {
   heroBannerPath: string | null
   companyIntro: string | null
   taxCode: string | null
+  licenseNumber: string | null
   businessLicensePath: string | null
   licenseIssuedBy: string | null
   licenseIssuedDate: string | null

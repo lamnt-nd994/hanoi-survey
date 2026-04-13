@@ -88,6 +88,7 @@
             <div class="cms-form-group md:col-span-2">
               <label class="cms-form-label">Tiêu đề</label>
               <input v-model="homeContent.hero.title" class="cms-form-control" placeholder="Khảo sát chính xác - Nền móng vững chắc" />
+              <div class="mt-1 text-xs text-slate-500">Dùng <code>[ ]</code> để tô nổi bật, ví dụ: <code>Dữ liệu [tin cậy] - nền móng [vững bền]</code></div>
             </div>
             <div class="cms-form-group md:col-span-2">
               <label class="cms-form-label">Phụ đề</label>
