@@ -3,7 +3,7 @@
     <div class="container-shell">
       <div class="grid gap-8 lg:grid-cols-[1.05fr_0.95fr] lg:items-center">
         <div class="overflow-hidden rounded-[2rem] border border-neutral-200 bg-neutral-100 shadow-sm">
-          <img v-if="imagePath" :src="resolveMediaUrl(imagePath)" :alt="siteName" class="h-[320px] w-full object-cover" />
+          <img v-if="imagePath" :src="resolveMediaUrl(imagePath)" :alt="siteName" class="h-[380px] w-full object-cover" />
           <div v-else class="flex h-[320px] items-center justify-center bg-[linear-gradient(135deg,#16365f_0%,#264d7e_48%,#d6dde6_48%,#eef2f6_100%)] px-10 text-center text-white">
             <div>
               <div class="text-xs font-semibold uppercase tracking-[0.22em] text-white/70">Hanoi Survey</div>

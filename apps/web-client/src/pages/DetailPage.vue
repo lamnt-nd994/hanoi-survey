@@ -1,14 +1,5 @@
 <template>
   <div>
-    <section class="relative overflow-hidden bg-primary-navy py-16 md:py-24">
-      <div class="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(46,125,50,0.24),transparent_24%),linear-gradient(135deg,rgba(255,255,255,0.04),transparent_40%)]" />
-      <div class="container-shell relative" :class="type === 'service' ? 'text-center' : ''">
-        <div class="eyebrow text-white/75">{{ eyebrow }}</div>
-        <h1 class="section-title mt-4 text-white" :class="type === 'service' ? 'mx-auto max-w-5xl text-4xl md:text-6xl' : 'max-w-4xl'">{{ detail?.title || detail?.name || 'Đang tải...' }}</h1>
-<!--        <p class="section-subtitle mt-4 max-w-3xl text-neutral-300">{{ summaryText }}</p>-->
-      </div>
-    </section>
-
     <section class="container-shell py-16 md:py-14">
       <div v-if="loading" class="grid gap-6">
         <div class="panel h-40 animate-pulse bg-neutral-100"></div>
@@ -233,22 +224,6 @@ const slug = computed(() => typeof route.params.slug === 'string' ? route.params
 const isEquipmentCategory = ref(false)
 const categoryEquipments = ref<Equipment[]>([])
 
-const eyebrow = computed(() => {
-  if (type.value === 'service') return 'Lĩnh vực'
-  if (type.value === 'project') return 'Dự án'
-  if (type.value === 'post') return 'Tin tức - kiến thức'
-  if (type.value === 'equipment') return isEquipmentCategory.value ? 'Danh mục thiết bị' : 'Thiết bị'
-  if (type.value === 'page') return 'Trang thông tin'
-  return 'Chi tiết'
-})
-
-const summaryText = computed(() => {
-  if (type.value === 'equipment' && isEquipmentCategory.value) {
-    return `Danh sách ${categoryEquipments.value.length} thiết bị thuộc danh mục ${detail.value?.name || ''}`
-  }
-  return detail.value?.overview || detail.value?.excerpt || detail.value?.description || 'Thông tin chi tiết được đồng bộ trực tiếp từ backend.'
-})
-
 function parseGalleryPaths(gallery: unknown) {
   if (typeof gallery !== 'string' || !gallery.trim()) return []
 
@@ -359,23 +334,20 @@ async function loadDetail() {
     if (type.value === 'service') detail.value = await fetchServiceDetail(slug.value)
     else if (type.value === 'project') detail.value = await fetchProjectDetail(slug.value)
     else if (type.value === 'post') detail.value = await fetchPostDetail(slug.value)
-    else if (type.value === 'equipment') {
-      try {
-        detail.value = await fetchEquipmentDetail(slug.value)
-      } catch {
-        const categories = await fetchEquipmentCategories()
-        const category = categories.find((c: any) => c.slug === slug.value)
-        if (category) {
-          isEquipmentCategory.value = true
-          detail.value = { name: category.name }
-          const { fetchEquipments } = await import('../lib/api')
-          const all = await fetchEquipments({ categorySlug: slug.value, size: 100 })
-          categoryEquipments.value = all.filter((item) => item.categoryId === category.id)
-        } else {
-          throw new Error('Not found')
-        }
-      }
-    }
+     else if (type.value === 'equipment') {
+       const categories = await fetchEquipmentCategories()
+       const category = categories.find((c: any) => c.slug === slug.value)
+
+       if (category) {
+         isEquipmentCategory.value = true
+         detail.value = { name: category.name }
+         const { fetchEquipments } = await import('../lib/api')
+         const all = await fetchEquipments({ categorySlug: slug.value, size: 100 })
+         categoryEquipments.value = all.filter((item) => item.categoryId === category.id)
+       } else {
+         detail.value = await fetchEquipmentDetail(slug.value)
+       }
+     }
     else if (type.value === 'page') detail.value = await fetchPageBySlug(slug.value)
     else detail.value = null
   } catch {

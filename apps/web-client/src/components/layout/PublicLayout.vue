@@ -28,6 +28,8 @@
       @close-mobile-menu="isMobileMenuOpen = false"
     />
 
+    <Breadcrumbs v-if="shouldShowBreadcrumb" :items="breadcrumbItems" />
+
     <main>
       <router-view />
     </main>
@@ -55,12 +57,14 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useRoute, type RouteLocationRaw } from 'vue-router'
 import FloatingCTA from '../FloatingCTA.vue'
 import SiteFooter from './SiteFooter.vue'
 import SiteHeader from './SiteHeader.vue'
+import Breadcrumbs from '../ui/Breadcrumbs.vue'
+import { fetchEquipmentDetail, fetchPageBySlug, fetchPostDetail, fetchProjectDetail, fetchServiceDetail } from '../../lib/api'
 import { usePublicContentStore } from '../../stores/publicContent'
 import { usePublicMenusStore } from '../../stores/publicMenus'
 import { useSiteSettingsStore } from '../../stores/siteSettings'
@@ -75,16 +79,53 @@ const publicMenusStore = usePublicMenusStore()
 const { siteName, companyNameEn, shortName, logoPath, footerText, mergedContactInfo } = storeToRefs(siteSettingsStore)
 const { mainMenuItems: navItems } = storeToRefs(publicMenusStore)
 const { services, projectCategories, postCategories, equipmentCategories } = storeToRefs(publicContentStore)
+const breadcrumbDetailLabel = ref('')
 
 const companyName = computed(() => companyNameEn.value || shortName.value || 'Hanoi Construction Survey Consultant Joint Stock Company')
+const shouldShowBreadcrumb = computed(() => route.name !== ROUTE_NAMES.home)
+
+const breadcrumbItems = computed(() => {
+  const items: Array<{ label: string; to?: RouteLocationRaw; current?: boolean }> = [
+    { label: 'Trang chủ', to: { name: ROUTE_NAMES.home } },
+  ]
+
+  switch (route.name) {
+    case ROUTE_NAMES.about:
+      return [...items, { label: 'Giới thiệu', current: true }]
+    case ROUTE_NAMES.services:
+      return [...items, { label: 'Lĩnh vực', current: true }]
+    case ROUTE_NAMES.serviceDetail:
+      return [...items, { label: 'Lĩnh vực', to: { name: ROUTE_NAMES.services } }, { label: breadcrumbDetailLabel.value || formatSlugLabel(String(route.params.slug || '')) || 'Chi tiết', current: true }]
+    case ROUTE_NAMES.projects:
+    case ROUTE_NAMES.projectCategory:
+      return [...items, { label: 'Dự án', current: true }]
+    case ROUTE_NAMES.projectDetail:
+      return [...items, { label: 'Dự án', to: { name: ROUTE_NAMES.projects } }, { label: breadcrumbDetailLabel.value || formatSlugLabel(String(route.params.slug || '')) || 'Chi tiết', current: true }]
+    case ROUTE_NAMES.news:
+    case ROUTE_NAMES.newsCategory:
+      return [...items, { label: 'Tin tức', current: true }]
+    case ROUTE_NAMES.newsDetail:
+      return [...items, { label: 'Tin tức', to: { name: ROUTE_NAMES.news } }, { label: breadcrumbDetailLabel.value || formatSlugLabel(String(route.params.slug || '')) || 'Chi tiết', current: true }]
+    case ROUTE_NAMES.equipment:
+      return [...items, { label: 'Máy móc - thiết bị', current: true }]
+    case ROUTE_NAMES.equipmentDetail:
+      return [...items, { label: 'Máy móc - thiết bị', to: { name: ROUTE_NAMES.equipment } }, { label: breadcrumbDetailLabel.value || formatSlugLabel(String(route.params.slug || '')) || 'Chi tiết', current: true }]
+    case ROUTE_NAMES.page:
+      return [...items, { label: breadcrumbDetailLabel.value || formatSlugLabel(String(route.params.slug || '')) || 'Trang thông tin', current: true }]
+    case ROUTE_NAMES.contact:
+      return [...items, { label: 'Liên hệ', current: true }]
+    default:
+      return items
+  }
+})
 
 const routeParents: Record<string, string[]> = {
   [ROUTE_NAMES.home]: [ROUTE_NAMES.home],
   [ROUTE_NAMES.about]: [ROUTE_NAMES.about],
   [ROUTE_NAMES.services]: [ROUTE_NAMES.services, ROUTE_NAMES.serviceDetail],
-  [ROUTE_NAMES.projects]: [ROUTE_NAMES.projects, ROUTE_NAMES.projectDetail],
+  [ROUTE_NAMES.projects]: [ROUTE_NAMES.projects, ROUTE_NAMES.projectCategory, ROUTE_NAMES.projectDetail],
   [ROUTE_NAMES.equipment]: [ROUTE_NAMES.equipment, ROUTE_NAMES.equipmentDetail],
-  [ROUTE_NAMES.news]: [ROUTE_NAMES.news, ROUTE_NAMES.newsDetail],
+  [ROUTE_NAMES.news]: [ROUTE_NAMES.news, ROUTE_NAMES.newsCategory, ROUTE_NAMES.newsDetail],
   [ROUTE_NAMES.contact]: [ROUTE_NAMES.contact],
 }
 
@@ -116,7 +157,18 @@ function getNavTo(item: PublicMenuItem, categorySlug?: string): RouteLocationRaw
 
   const routeName = getNavRouteName(item)
   if (!routeName) return item.resolvedUrl
-  if (categorySlug) return { name: routeName, query: { category: categorySlug } }
+  if (categorySlug) {
+    if (routeName === ROUTE_NAMES.equipment) {
+      return { name: ROUTE_NAMES.equipmentDetail, params: { slug: categorySlug } }
+    }
+    if (routeName === ROUTE_NAMES.projects) {
+      return { name: ROUTE_NAMES.projectCategory, params: { category: categorySlug } }
+    }
+    if (routeName === ROUTE_NAMES.news) {
+      return { name: ROUTE_NAMES.newsCategory, params: { category: categorySlug } }
+    }
+    return { name: routeName, query: { category: categorySlug } }
+  }
   return { name: routeName }
 }
 
@@ -134,6 +186,13 @@ function isExternalUrl(path: string) {
 }
 
 function isActiveCategoryRoute(routeName: string, slug: string) {
+  if (routeName === ROUTE_NAMES.equipment) {
+    return route.name === ROUTE_NAMES.equipmentDetail && route.params.slug === slug
+  }
+  if (routeName === ROUTE_NAMES.projects || routeName === ROUTE_NAMES.news) {
+    const expectedRoute = routeName === ROUTE_NAMES.projects ? ROUTE_NAMES.projectCategory : ROUTE_NAMES.newsCategory
+    return route.name === expectedRoute && route.params.category === slug
+  }
   return route.name === routeName && route.query.category === slug
 }
 
@@ -167,4 +226,67 @@ onMounted(async () => {
     publicContentStore.loadEquipmentCategories(),
   ])
 })
+
+watch(() => route.fullPath, () => {
+  void loadBreadcrumbDetailLabel()
+}, { immediate: true })
+
+async function loadBreadcrumbDetailLabel() {
+  breadcrumbDetailLabel.value = ''
+
+  const slug = typeof route.params.slug === 'string' ? route.params.slug : ''
+  const category = typeof route.params.category === 'string' ? route.params.category : ''
+
+  if (route.name === ROUTE_NAMES.projectCategory) {
+    const existing = projectCategories.value.find((item) => item.slug === category)
+    breadcrumbDetailLabel.value = existing?.name || formatSlugLabel(category)
+    return
+  }
+
+  if (route.name === ROUTE_NAMES.newsCategory) {
+    const existing = postCategories.value.find((item) => item.slug === category)
+    breadcrumbDetailLabel.value = existing?.name || formatSlugLabel(category)
+    return
+  }
+
+  if (!slug) return
+
+  try {
+    if (route.name === ROUTE_NAMES.serviceDetail) {
+      const existing = services.value.find((item) => item.slug === slug)
+      breadcrumbDetailLabel.value = existing?.title || (await fetchServiceDetail(slug)).title
+      return
+    }
+
+    if (route.name === ROUTE_NAMES.projectDetail) {
+      breadcrumbDetailLabel.value = (await fetchProjectDetail(slug)).title
+      return
+    }
+
+    if (route.name === ROUTE_NAMES.newsDetail) {
+      breadcrumbDetailLabel.value = (await fetchPostDetail(slug)).title
+      return
+    }
+
+    if (route.name === ROUTE_NAMES.equipmentDetail) {
+      const existingCategory = equipmentCategories.value.find((item) => item.slug === slug)
+      breadcrumbDetailLabel.value = existingCategory?.name || (await fetchEquipmentDetail(slug)).name
+      return
+    }
+
+    if (route.name === ROUTE_NAMES.page) {
+      breadcrumbDetailLabel.value = (await fetchPageBySlug(slug)).title
+    }
+  } catch {
+    breadcrumbDetailLabel.value = formatSlugLabel(slug)
+  }
+}
+
+function formatSlugLabel(slug: string) {
+  return slug
+    .split('-')
+    .filter(Boolean)
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .join(' ')
+}
 </script>
