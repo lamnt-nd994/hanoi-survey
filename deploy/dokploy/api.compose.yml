@@ -3,7 +3,6 @@ services:
     build:
       context: ../../apps/api-server
       dockerfile: Dockerfile
-    container_name: hanoi-survey-api
     restart: unless-stopped
     environment:
       SPRING_PROFILES_ACTIVE: prod
