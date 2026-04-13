@@ -259,21 +259,21 @@
 
           <div v-else class="mt-4">
             <div class="flex items-center justify-between gap-3">
-              <h3 class="text-sm font-semibold text-slate-800">Danh mục dịch vụ được chọn</h3>
-              <button type="button" class="cms-btn cms-btn-secondary" @click="homeContent.servicesSection.selectedItems.push(createSelectedServiceItem())">+ Thêm danh mục</button>
+              <h3 class="text-sm font-semibold text-slate-800">Dịch vụ được chọn</h3>
+              <button type="button" class="cms-btn cms-btn-secondary" @click="homeContent.servicesSection.selectedItems.push(createSelectedServiceItem())">+ Thêm dịch vụ</button>
             </div>
             <div class="mt-3 space-y-3">
               <div v-for="(item, index) in homeContent.servicesSection.selectedItems" :key="`selected-service-${index}`" class="rounded-lg border border-gray-200 p-3">
                 <div class="flex items-center justify-between gap-3">
-                  <div class="text-sm font-medium text-slate-700">Danh mục {{ index + 1 }}</div>
+                  <div class="text-sm font-medium text-slate-700">Dịch vụ {{ index + 1 }}</div>
                   <button type="button" class="cms-act-btn delete" @click="removeAnyArrayItem(homeContent.servicesSection.selectedItems, index)">&#10005;</button>
                 </div>
                 <div class="mt-3 grid gap-4 md:grid-cols-2">
                   <div class="cms-form-group">
-                    <label class="cms-form-label">Chọn danh mục</label>
-                    <select v-model.number="item.categoryId" class="cms-form-control">
-                      <option :value="null">-- Chọn danh mục dịch vụ --</option>
-                      <option v-for="category in availableServiceCategories" :key="category.id" :value="category.id">{{ category.name }}</option>
+                    <label class="cms-form-label">Chọn dịch vụ</label>
+                    <select v-model.number="item.serviceId" class="cms-form-control">
+                      <option :value="null">-- Chọn dịch vụ --</option>
+                      <option v-for="service in availableServices" :key="service.id" :value="service.id">{{ service.title }}</option>
                     </select>
                   </div>
                   <div class="cms-form-group">
@@ -645,8 +645,8 @@ import type {
   HomeSelectedServiceItem,
   HomeStatItem,
   PagePayload,
-  Category,
   ProjectEntity,
+  ServiceEntity,
 } from '@/types'
 
 const route = useRoute()
@@ -719,12 +719,12 @@ const homeContent = reactive<HomePageContent>(createEmptyHomeContent())
 
 const serializedAboutContent = computed(() => JSON.stringify(normalizeAboutContent(aboutContent), null, 2))
 const serializedHomeContent = computed(() => JSON.stringify(normalizeHomeContent(homeContent), null, 2))
-const availableServiceCategories = computed<Category[]>(() => servicesStore.categories.filter((item) => item.active))
+const availableServices = computed<ServiceEntity[]>(() => servicesStore.items.filter((item) => item.status === 'PUBLISHED'))
 const availableProjects = computed<ProjectEntity[]>(() => projectsStore.items.filter((item) => item.status === 'PUBLISHED'))
 
 onMounted(async () => {
   await Promise.all([
-    servicesStore.fetchCategories(),
+    servicesStore.fetchList(1, 100),
     projectsStore.fetchList(1, 100),
   ])
 
@@ -796,7 +796,7 @@ function createHomeStatItem(): HomeStatItem {
 }
 
 function createSelectedServiceItem(): HomeSelectedServiceItem {
-  return { categoryId: null, icon: '' }
+  return { serviceId: null, icon: '' }
 }
 
 function createSelectedProjectItem(): HomeSelectedProjectItem {
@@ -1022,7 +1022,8 @@ function normalizeHomeContent(input: Partial<HomePageContent> | HomePageContent)
       mode: input.servicesSection?.mode === 'manual' ? 'manual' : fallback.servicesSection.mode,
       limit: Number(input.servicesSection?.limit) || fallback.servicesSection.limit,
       selectedItems: (input.servicesSection?.selectedItems || fallback.servicesSection.selectedItems).map((item) => ({
-        categoryId: Number(item.categoryId) || null,
+        serviceId: Number(item.serviceId) || null,
+        categoryId: item.categoryId == null ? null : Number(item.categoryId) || null,
         icon: item.icon || '',
       })),
     },

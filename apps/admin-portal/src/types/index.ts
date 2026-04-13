@@ -53,7 +53,8 @@ export interface HomeSectionConfig {
 }
 
 export interface HomeSelectedServiceItem {
-  categoryId: number | null
+  serviceId: number | null
+  categoryId?: number | null
   icon: string
 }
 
@@ -200,27 +201,58 @@ export interface PostPayload {
   status: 'DRAFT' | 'PUBLISHED' | 'ARCHIVED'
 }
 
+export interface ServiceDocumentEntity extends BaseEntity {
+  title: string
+  filePath: string
+  sortOrder: number
+}
+
+export interface ServiceDocumentPayload {
+  title: string
+  filePath: string
+  sortOrder: number
+}
+
+export interface ServiceImageEntity extends BaseEntity {
+  imagePath: string
+  altText: string | null
+  caption: string | null
+  sortOrder: number
+}
+
+export interface ServiceImagePayload {
+  imagePath: string
+  altText: string
+  caption: string
+  sortOrder: number
+}
+
 export interface ServiceEntity extends BaseEntity {
-  categoryId: number
+  categoryId: number | null
   title: string
   slug: string
   overview: string
   content: string
   icon: string
   coverImagePath: string
+  galleryJson: string
   status: 'DRAFT' | 'PUBLISHED' | 'ARCHIVED'
+  documents: ServiceDocumentEntity[]
+  images: ServiceImageEntity[]
   categoryName?: string
-  serviceCategoryName?: string
 }
 
 export interface ServicePayload {
-  categoryId: number
+  categoryId?: number | null
   title: string
   slug: string
   overview: string
   content: string
   icon: string
   coverImagePath?: string
+  galleryJson: string
+  documents: ServiceDocumentPayload[]
+  images: ServiceImagePayload[]
   status: 'DRAFT' | 'PUBLISHED' | 'ARCHIVED'
 }
 

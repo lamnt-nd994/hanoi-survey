@@ -51,13 +51,18 @@ public class SurveyServiceRepositoryAdapter implements SurveyServiceRepositoryPo
     public SurveyService save(SurveyService surveyService) {
         SurveyServiceEntity entity = surveyService.id() == null ? new SurveyServiceEntity() : repository.findById(surveyService.id()).orElseGet(SurveyServiceEntity::new);
         entity.setId(surveyService.id());
-        entity.setCategory(categoryRepository.findById(surveyService.categoryId()).orElseThrow());
+        if (surveyService.categoryId() == null || surveyService.categoryId() <= 0) {
+            entity.setCategory(null);
+        } else {
+            entity.setCategory(categoryRepository.findById(surveyService.categoryId()).orElseThrow());
+        }
         entity.setTitle(surveyService.title());
         entity.setSlug(surveyService.slug());
         entity.setOverview(surveyService.overview());
         entity.setContent(surveyService.content());
         entity.setIcon(surveyService.icon());
         entity.setCoverImagePath(surveyService.coverImagePath());
+        entity.setGalleryJson(surveyService.galleryJson());
         entity.setStatus(surveyService.status());
         entity.setPublishedAt(surveyService.publishedAt());
         return toDomain(repository.save(entity));
@@ -69,6 +74,7 @@ public class SurveyServiceRepositoryAdapter implements SurveyServiceRepositoryPo
     }
 
     private SurveyService toDomain(SurveyServiceEntity entity) {
-        return new SurveyService(entity.getId(), entity.getCategory().getId(), entity.getCategory().getName(), entity.getTitle(), entity.getSlug(), entity.getOverview(), entity.getContent(), entity.getIcon(), entity.getCoverImagePath(), entity.getStatus(), entity.getPublishedAt(), entity.getCreatedAt(), entity.getUpdatedAt());
+        ServiceCategoryEntity category = entity.getCategory();
+        return new SurveyService(entity.getId(), category == null ? null : category.getId(), category == null ? null : category.getName(), entity.getTitle(), entity.getSlug(), entity.getOverview(), entity.getContent(), entity.getIcon(), entity.getCoverImagePath(), entity.getGalleryJson(), entity.getStatus(), entity.getPublishedAt(), entity.getCreatedAt(), entity.getUpdatedAt());
     }
 }

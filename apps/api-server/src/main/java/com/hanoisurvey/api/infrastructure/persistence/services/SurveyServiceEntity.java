@@ -18,7 +18,7 @@ import java.time.LocalDateTime;
 public class SurveyServiceEntity extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "category_id", nullable = false)
+    @JoinColumn(name = "category_id")
     private ServiceCategoryEntity category;
 
     @Column(nullable = false)
@@ -37,6 +37,9 @@ public class SurveyServiceEntity extends BaseEntity {
 
     @Column(name = "cover_image_path")
     private String coverImagePath;
+
+    @Column(name = "gallery_json", columnDefinition = "LONGTEXT")
+    private String galleryJson;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
@@ -99,6 +102,14 @@ public class SurveyServiceEntity extends BaseEntity {
 
     public void setCoverImagePath(String coverImagePath) {
         this.coverImagePath = coverImagePath;
+    }
+
+    public String getGalleryJson() {
+        return galleryJson;
+    }
+
+    public void setGalleryJson(String galleryJson) {
+        this.galleryJson = galleryJson;
     }
 
     public ContentStatus getStatus() {

@@ -40,10 +40,6 @@
               <span class="cms-subnav-icon">&#8226;</span>
               <span class="cms-sidebar-label">Quản lý dịch vụ</span>
             </router-link>
-            <router-link to="/services/categories" class="cms-nav-item cms-subnav-item" :class="{ active: route.path === '/services/categories' }">
-              <span class="cms-subnav-icon">&#8226;</span>
-              <span class="cms-sidebar-label">Danh mục dịch vụ</span>
-            </router-link>
           </div>
         </div>
         <div>
@@ -165,7 +161,6 @@ const pageTitles: Record<string, string> = {
   '/menus': 'Menu',
   '/posts': 'Bài viết',
   '/services': 'Dịch vụ',
-  '/services/categories': 'Danh mục dịch vụ',
   '/users': 'Người dùng',
   '/users/roles': 'Vai trò người dùng',
   '/projects': 'Dự án',

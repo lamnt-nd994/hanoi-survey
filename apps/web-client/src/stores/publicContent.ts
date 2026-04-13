@@ -1,7 +1,6 @@
 import { reactive, ref } from 'vue'
 import { defineStore } from 'pinia'
 import {
-  fetchServiceCategories,
   fetchEquipments,
   fetchEquipmentCategories,
   fetchPostCategories,
@@ -12,13 +11,12 @@ import {
   fetchServices,
   type PaginationMeta,
 } from '../lib/api'
-import type { Equipment, EquipmentCategory, Post, PostCategory, Project, ProjectCategory, ServiceCategory, SitePage, SurveyService } from '../types/content'
+import type { Equipment, EquipmentCategory, Post, PostCategory, Project, ProjectCategory, SitePage, SurveyService } from '../types/content'
 
-type ResourceKey = 'services' | 'serviceCategories' | 'projects' | 'projectCategories' | 'posts' | 'postCategories' | 'equipments' | 'equipmentCategories' | 'introPage' | 'homePage'
+type ResourceKey = 'services' | 'projects' | 'projectCategories' | 'posts' | 'postCategories' | 'equipments' | 'equipmentCategories' | 'introPage' | 'homePage'
 
 export const usePublicContentStore = defineStore('public-content', () => {
   const services = ref<SurveyService[]>([])
-  const serviceCategories = ref<ServiceCategory[]>([])
   const projects = ref<Project[]>([])
   const projectCategories = ref<ProjectCategory[]>([])
   const posts = ref<Post[]>([])
@@ -31,7 +29,6 @@ export const usePublicContentStore = defineStore('public-content', () => {
 
   const loading = reactive<Record<ResourceKey, boolean>>({
     services: false,
-    serviceCategories: false,
     projects: false,
     projectCategories: false,
     posts: false,
@@ -44,7 +41,6 @@ export const usePublicContentStore = defineStore('public-content', () => {
 
   const errors = reactive<Record<ResourceKey, string>>({
     services: '',
-    serviceCategories: '',
     projects: '',
     projectCategories: '',
     posts: '',
@@ -70,24 +66,6 @@ export const usePublicContentStore = defineStore('public-content', () => {
       return services.value
     } finally {
       loading.services = false
-    }
-  }
-
-  async function loadServiceCategories(force = false) {
-    if (loading.serviceCategories) return serviceCategories.value
-    if (serviceCategories.value.length && !force) return serviceCategories.value
-
-    loading.serviceCategories = true
-    errors.serviceCategories = ''
-    try {
-      serviceCategories.value = await fetchServiceCategories()
-      return serviceCategories.value
-    } catch {
-      errors.serviceCategories = 'Không tải được danh mục dịch vụ.'
-      serviceCategories.value = []
-      return serviceCategories.value
-    } finally {
-      loading.serviceCategories = false
     }
   }
 
@@ -239,7 +217,6 @@ export const usePublicContentStore = defineStore('public-content', () => {
 
   return {
     services,
-    serviceCategories,
     projects,
     projectCategories,
     posts,
@@ -252,7 +229,6 @@ export const usePublicContentStore = defineStore('public-content', () => {
     loading,
     errors,
     loadServices,
-    loadServiceCategories,
     loadProjects,
     loadProjectCategories,
     loadPosts,

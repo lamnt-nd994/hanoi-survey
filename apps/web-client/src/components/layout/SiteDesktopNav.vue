@@ -3,7 +3,7 @@
     <div class="container-shell">
       <nav class="flex items-center justify-center gap-2 py-3">
         <template v-for="item in navItems" :key="item.resolvedUrl">
-          <div v-if="hasCategories(item)" class="group relative text-white">
+          <div v-if="hasDropdown(item)" class="group relative text-white">
             <router-link
               :to="getNavTo(item)"
               class="flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold text-white transition-all"
@@ -15,7 +15,19 @@
 
             <div class="invisible absolute left-0 top-full z-50 pt-2 opacity-0 transition-all duration-150 group-hover:visible group-hover:opacity-100">
               <div class="w-[18rem] overflow-hidden rounded-lg border border-neutral-300 bg-white shadow-[0_16px_32px_rgba(15,23,42,0.08)]">
-                <div v-if="getCategories(item).length" class="p-2">
+                <div v-if="props.isServicesNavItem(item) && services.length" class="p-2">
+                  <router-link
+                    v-for="service in services"
+                    :key="service.id"
+                    :to="{ name: 'service-detail', params: { slug: service.slug } }"
+                    class="flex min-h-[2.75rem] items-center justify-between gap-3 rounded-md px-3 py-2 text-sm leading-5 transition-colors"
+                    :class="isActiveServiceRoute(service.slug) ? 'bg-neutral-100 text-primary-navy' : 'text-neutral-700 hover:bg-neutral-50 hover:text-primary-navy'"
+                  >
+                    <span>{{ service.title }}</span>
+                    <AppIcon icon="chevronRight" class="h-4 w-4 shrink-0 text-neutral-300" />
+                  </router-link>
+                </div>
+                <div v-else-if="getCategories(item).length" class="p-2">
                   <router-link
                     v-for="category in getCategories(item)"
                     :key="category.id"
@@ -27,7 +39,7 @@
                   </router-link>
                 </div>
                 <div v-else class="px-4 py-3 text-sm text-neutral-500">
-                  Chưa có danh mục để hiển thị.
+                  Chưa có dữ liệu để hiển thị.
                 </div>
               </div>
             </div>
@@ -53,14 +65,14 @@
 
 <script setup lang="ts">
 import type { RouteLocationRaw } from 'vue-router'
-import type { EquipmentCategory, PostCategory, ProjectCategory, PublicMenuItem, ServiceCategory } from '../../types/content'
+import type { EquipmentCategory, PostCategory, ProjectCategory, PublicMenuItem, SurveyService } from '../../types/content'
 import AppIcon from '../ui/AppIcon.vue'
 
-type NavCategory = ServiceCategory | ProjectCategory | PostCategory | EquipmentCategory
+type NavCategory = ProjectCategory | PostCategory | EquipmentCategory
 
 const props = defineProps<{
   navItems: PublicMenuItem[]
-  serviceCategories: ServiceCategory[]
+  services: SurveyService[]
   projectCategories: ProjectCategory[]
   postCategories: PostCategory[]
   equipmentCategories: EquipmentCategory[]
@@ -68,6 +80,7 @@ const props = defineProps<{
   isActiveNavRoute: (item: PublicMenuItem) => boolean
   isExternalUrl: (path: string) => boolean
   isActiveCategoryRoute: (routeName: string, slug: string) => boolean
+  isActiveServiceRoute: (slug: string) => boolean
   getRouteName: (item: PublicMenuItem) => string
   isServicesNavItem: (item: PublicMenuItem) => boolean
   isProjectsNavItem: (item: PublicMenuItem) => boolean
@@ -75,12 +88,11 @@ const props = defineProps<{
   isNewsNavItem: (item: PublicMenuItem) => boolean
 }>()
 
-function hasCategories(item: PublicMenuItem) {
+function hasDropdown(item: PublicMenuItem) {
   return props.isServicesNavItem(item) || props.isProjectsNavItem(item) || props.isEquipmentsNavItem(item) || props.isNewsNavItem(item)
 }
 
 function getCategories(item: PublicMenuItem): NavCategory[] {
-  if (props.isServicesNavItem(item)) return props.serviceCategories
   if (props.isProjectsNavItem(item)) return props.projectCategories
   if (props.isEquipmentsNavItem(item)) return props.equipmentCategories
   if (props.isNewsNavItem(item)) return props.postCategories

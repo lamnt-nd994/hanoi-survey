@@ -10,7 +10,7 @@
       :zalo-url="mergedContactInfo.zaloUrl"
       :is-mobile-menu-open="isMobileMenuOpen"
       :nav-items="navItems"
-      :service-categories="serviceCategories"
+      :services="services"
       :project-categories="projectCategories"
       :post-categories="postCategories"
       :equipment-categories="equipmentCategories"
@@ -18,6 +18,7 @@
       :is-active-nav-route="isActiveNavRoute"
       :is-external-url="isExternalUrl"
       :is-active-category-route="isActiveCategoryRoute"
+      :is-active-service-route="isActiveServiceRoute"
       :get-route-name="getNavRouteNameSafe"
       :is-services-nav-item="isServicesNavItem"
       :is-projects-nav-item="isProjectsNavItem"
@@ -73,7 +74,7 @@ const siteSettingsStore = useSiteSettingsStore()
 const publicMenusStore = usePublicMenusStore()
 const { siteName, companyNameEn, shortName, logoPath, footerText, mergedContactInfo } = storeToRefs(siteSettingsStore)
 const { mainMenuItems: navItems } = storeToRefs(publicMenusStore)
-const { serviceCategories, projectCategories, postCategories, equipmentCategories } = storeToRefs(publicContentStore)
+const { services, projectCategories, postCategories, equipmentCategories } = storeToRefs(publicContentStore)
 
 const companyName = computed(() => companyNameEn.value || shortName.value || 'Hanoi Construction Survey Consultant Joint Stock Company')
 
@@ -136,6 +137,10 @@ function isActiveCategoryRoute(routeName: string, slug: string) {
   return route.name === routeName && route.query.category === slug
 }
 
+function isActiveServiceRoute(slug: string) {
+  return route.name === ROUTE_NAMES.serviceDetail && route.params.slug === slug
+}
+
 function isServicesNavItem(item: PublicMenuItem) {
   return item.resolvedUrl === '/linh-vuc' || /dịch vụ|linh vực|lĩnh vực/i.test(item.title)
 }
@@ -156,7 +161,7 @@ onMounted(async () => {
   await Promise.all([
     siteSettingsStore.ensureLoaded(),
     publicMenusStore.loadMainMenu(),
-    publicContentStore.loadServiceCategories(),
+    publicContentStore.loadServices(),
     publicContentStore.loadProjectCategories(),
     publicContentStore.loadPostCategories(),
     publicContentStore.loadEquipmentCategories(),

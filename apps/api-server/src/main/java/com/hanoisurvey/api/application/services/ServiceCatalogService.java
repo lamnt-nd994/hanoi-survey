@@ -1,29 +1,35 @@
 package com.hanoisurvey.api.application.services;
 
 import com.hanoisurvey.api.domain.services.ServiceCategory;
+import com.hanoisurvey.api.domain.services.ServiceDocument;
+import com.hanoisurvey.api.domain.services.ServiceImage;
 import com.hanoisurvey.api.domain.services.SurveyService;
 import com.hanoisurvey.api.domain.shared.ContentStatus;
 import com.hanoisurvey.api.domain.shared.NotFoundException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
 
 @Service
 public class ServiceCatalogService {
 
-    private static final Logger log = LoggerFactory.getLogger(ServiceCatalogService.class);
     private final ServiceCategoryRepositoryPort categoryRepository;
     private final SurveyServiceRepositoryPort serviceRepository;
+    private final ServiceDocumentRepositoryPort documentRepository;
+    private final ServiceImageRepositoryPort imageRepository;
 
-    public ServiceCatalogService(ServiceCategoryRepositoryPort categoryRepository, SurveyServiceRepositoryPort serviceRepository) {
+    public ServiceCatalogService(ServiceCategoryRepositoryPort categoryRepository, SurveyServiceRepositoryPort serviceRepository, ServiceDocumentRepositoryPort documentRepository, ServiceImageRepositoryPort imageRepository) {
         this.categoryRepository = categoryRepository;
         this.serviceRepository = serviceRepository;
+        this.documentRepository = documentRepository;
+        this.imageRepository = imageRepository;
     }
 
     @Transactional(readOnly = true)
@@ -62,8 +68,7 @@ public class ServiceCatalogService {
 
     @Transactional(readOnly = true)
     public Page<SurveyService> getPublicList(String categorySlug, Pageable pageable) {
-        log.info(serviceRepository.findPublished(categorySlug, pageable).toString());
-        return serviceRepository.findPublished(categorySlug, pageable);
+        return serviceRepository.findPublished(null, pageable);
     }
 
     @Transactional(readOnly = true)
@@ -76,17 +81,38 @@ public class ServiceCatalogService {
         return serviceRepository.findById(id).orElseThrow(() -> new NotFoundException("Không tìm thấy lĩnh vực"));
     }
 
+    @Transactional(readOnly = true)
+    public List<ServiceDocument> getDocumentsByServiceId(Long serviceId) {
+        return documentRepository.findByServiceId(serviceId);
+    }
+
+    @Transactional(readOnly = true)
+    public List<ServiceImage> getImagesByService(SurveyService service) {
+        List<ServiceImage> images = imageRepository.findByServiceId(service.id());
+        if (!images.isEmpty()) {
+            return images;
+        }
+
+        return fallbackImagesFromGalleryJson(service);
+    }
+
     @Transactional
     public SurveyService createService(SurveyServiceCommand command) {
-        categoryRepository.findById(command.categoryId()).orElseThrow(() -> new NotFoundException("Không tìm thấy danh mục lĩnh vực"));
-        return serviceRepository.save(toDomain(command, null));
+        validateOptionalCategory(command.categoryId());
+        SurveyService created = serviceRepository.save(toDomain(command, null));
+        replaceDocuments(created.id(), command.documents());
+        replaceImages(created.id(), command.images());
+        return created;
     }
 
     @Transactional
     public SurveyService updateService(Long id, SurveyServiceCommand command) {
         serviceRepository.findById(id).orElseThrow(() -> new NotFoundException("Không tìm thấy lĩnh vực"));
-        categoryRepository.findById(command.categoryId()).orElseThrow(() -> new NotFoundException("Không tìm thấy danh mục lĩnh vực"));
-        return serviceRepository.save(toDomain(command, id));
+        validateOptionalCategory(command.categoryId());
+        SurveyService updated = serviceRepository.save(toDomain(command, id));
+        replaceDocuments(id, command.documents());
+        replaceImages(id, command.images());
+        return updated;
     }
 
     @Transactional
@@ -94,7 +120,111 @@ public class ServiceCatalogService {
         if (!serviceRepository.existsById(id)) {
             throw new NotFoundException("Không tìm thấy lĩnh vực");
         }
+        documentRepository.deleteByServiceId(id);
+        imageRepository.deleteByServiceId(id);
         serviceRepository.deleteById(id);
+    }
+
+    private void replaceDocuments(Long serviceId, List<ServiceDocumentCommand> documents) {
+        documentRepository.deleteByServiceId(serviceId);
+        List<ServiceDocumentCommand> normalized = normalizeDocuments(documents);
+        if (normalized.isEmpty()) {
+            return;
+        }
+
+        documentRepository.saveAll(serviceId, normalized.stream().map(item -> new ServiceDocument(
+                null,
+                serviceId,
+                item.title(),
+                item.filePath(),
+                item.sortOrder(),
+                null,
+                null
+        )).toList());
+    }
+
+    private List<ServiceDocumentCommand> normalizeDocuments(List<ServiceDocumentCommand> documents) {
+        if (documents == null || documents.isEmpty()) {
+            return List.of();
+        }
+
+        return documents.stream()
+                .filter(item -> item != null && item.title() != null && !item.title().isBlank() && item.filePath() != null && !item.filePath().isBlank())
+                .sorted(Comparator.comparing(item -> item.sortOrder() == null ? Integer.MAX_VALUE : item.sortOrder()))
+                .map(item -> new ServiceDocumentCommand(item.title().trim(), item.filePath().trim(), item.sortOrder() == null ? 0 : item.sortOrder()))
+                .toList();
+    }
+
+    private void replaceImages(Long serviceId, List<ServiceImageCommand> images) {
+        imageRepository.deleteByServiceId(serviceId);
+        List<ServiceImageCommand> normalized = normalizeImages(images);
+        if (normalized.isEmpty()) {
+            return;
+        }
+
+        imageRepository.saveAll(serviceId, normalized.stream().map(item -> new ServiceImage(
+                null,
+                serviceId,
+                item.imagePath(),
+                item.altText(),
+                item.caption(),
+                item.sortOrder(),
+                null,
+                null
+        )).toList());
+    }
+
+    private List<ServiceImageCommand> normalizeImages(List<ServiceImageCommand> images) {
+        if (images == null || images.isEmpty()) {
+            return List.of();
+        }
+
+        return images.stream()
+                .filter(item -> item != null && item.imagePath() != null && !item.imagePath().isBlank())
+                .sorted(Comparator.comparing(item -> item.sortOrder() == null ? Integer.MAX_VALUE : item.sortOrder()))
+                .map(item -> new ServiceImageCommand(
+                        item.imagePath().trim(),
+                        item.altText() == null ? null : item.altText().trim(),
+                        item.caption() == null ? null : item.caption().trim(),
+                        item.sortOrder() == null ? 0 : item.sortOrder()
+                ))
+                .toList();
+    }
+
+    private List<ServiceImage> fallbackImagesFromGalleryJson(SurveyService service) {
+        String galleryJson = service.galleryJson();
+        if (galleryJson == null || galleryJson.isBlank()) {
+            return List.of();
+        }
+
+        List<String> paths = Arrays.stream(galleryJson.split("\\R"))
+                .map(String::trim)
+                .filter(path -> !path.isBlank())
+                .distinct()
+                .toList();
+
+        List<ServiceImage> images = new ArrayList<>();
+        for (int index = 0; index < paths.size(); index += 1) {
+            images.add(new ServiceImage(
+                    null,
+                    service.id(),
+                    paths.get(index),
+                    service.title(),
+                    null,
+                    index,
+                    null,
+                    null
+            ));
+        }
+        return images;
+    }
+
+    private void validateOptionalCategory(Long categoryId) {
+        if (categoryId == null || categoryId <= 0) {
+            return;
+        }
+
+        categoryRepository.findById(categoryId).orElseThrow(() -> new NotFoundException("Không tìm thấy danh mục lĩnh vực"));
     }
 
     private SurveyService toDomain(SurveyServiceCommand command, Long id) {
@@ -108,6 +238,7 @@ public class ServiceCatalogService {
                 command.content(),
                 command.icon(),
                 command.coverImagePath(),
+                command.galleryJson(),
                 command.status(),
                 command.status() == ContentStatus.PUBLISHED ? LocalDateTime.now() : null,
                 null,

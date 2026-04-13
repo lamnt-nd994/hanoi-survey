@@ -29,18 +29,40 @@ export interface SiteSettings {
 
 export interface SurveyService {
   id: number
-  categoryId: number
-  categoryName: string
+  categoryId: number | null
+  categoryName: string | null
   title: string
   slug: string
   overview: string
   content: string
   icon: string | null
   coverImagePath: string | null
+  galleryJson: string | null
+  documents: ServiceDocument[]
+  images: ServiceImage[]
   status: string
   publishedAt: string | null
   createdAt: string
   updatedAt: string
+}
+
+export interface ServiceDocument {
+  id: number
+  title: string
+  filePath: string
+  sortOrder: number
+  createdAt: string
+  updatedAt: string
+}
+
+export interface ServiceImage {
+  id: number | null
+  imagePath: string
+  altText: string | null
+  caption: string | null
+  sortOrder: number
+  createdAt: string | null
+  updatedAt: string | null
 }
 
 export interface ServiceCategory {
@@ -168,7 +190,8 @@ export interface HomeSectionConfig {
 }
 
 export interface HomeSelectedServiceItem {
-  categoryId: number | null
+  serviceId: number | null
+  categoryId?: number | null
   icon: string
 }
 
