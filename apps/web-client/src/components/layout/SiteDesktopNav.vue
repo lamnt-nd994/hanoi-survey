@@ -24,7 +24,6 @@
                     :class="isActiveServiceRoute(service.slug) ? 'bg-neutral-100 text-primary-navy' : 'text-neutral-700 hover:bg-neutral-50 hover:text-primary-navy'"
                   >
                     <span>{{ service.title }}</span>
-                    <AppIcon icon="chevronRight" class="h-4 w-4 shrink-0 text-neutral-300" />
                   </router-link>
                 </div>
                 <div v-else-if="getCategories(item).length" class="p-2">

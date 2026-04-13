@@ -5,6 +5,7 @@ import com.hanoisurvey.api.domain.shared.NotFoundException;
 import jakarta.validation.ConstraintViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -49,6 +50,15 @@ public class GlobalExceptionHandler {
         return ResponseEntity.badRequest().body(new ErrorResponse(
                 false,
                 new ErrorResponse.ErrorBody("VALIDATION_ERROR", "Dữ liệu không hợp lệ", details),
+                null
+        ));
+    }
+
+    @ExceptionHandler(AuthenticationException.class)
+    public ResponseEntity<ErrorResponse> handleAuthentication(AuthenticationException exception) {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new ErrorResponse(
+                false,
+                new ErrorResponse.ErrorBody("UNAUTHORIZED", "Tên đăng nhập hoặc mật khẩu không đúng", List.of()),
                 null
         ));
     }
