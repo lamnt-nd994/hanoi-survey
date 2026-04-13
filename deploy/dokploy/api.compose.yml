@@ -1,0 +1,27 @@
+services:
+  api:
+    build:
+      context: ../../apps/api-server
+      dockerfile: Dockerfile
+    container_name: hanoi-survey-api
+    restart: unless-stopped
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+      SERVER_PORT: 8080
+      DB_URL: ${DB_URL:?DB_URL is required}
+      DB_USERNAME: ${DB_USERNAME:?DB_USERNAME is required}
+      DB_PASSWORD: ${DB_PASSWORD:?DB_PASSWORD is required}
+      JWT_SECRET: ${JWT_SECRET:?JWT_SECRET is required}
+      APP_UPLOAD_DIR: /var/opt/hanoi-survey/uploads
+      APP_UPLOAD_PUBLIC_PREFIX: ${APP_UPLOAD_PUBLIC_PREFIX:-uploads}
+      APP_CORS_ALLOWED_ORIGINS: ${APP_CORS_ALLOWED_ORIGINS:?APP_CORS_ALLOWED_ORIGINS is required}
+      APP_LOG_LEVEL: ${APP_LOG_LEVEL:-INFO}
+      MULTIPART_MAX_FILE_SIZE: ${MULTIPART_MAX_FILE_SIZE:-10MB}
+      MULTIPART_MAX_REQUEST_SIZE: ${MULTIPART_MAX_REQUEST_SIZE:-10MB}
+      TZ: Asia/Ho_Chi_Minh
+    ports:
+      - "${API_PORT:-8080}:8080"
+    volumes:
+      - type: bind
+        source: ${HOST_UPLOADS_DIR:?HOST_UPLOADS_DIR is required}
+        target: /var/opt/hanoi-survey/uploads
