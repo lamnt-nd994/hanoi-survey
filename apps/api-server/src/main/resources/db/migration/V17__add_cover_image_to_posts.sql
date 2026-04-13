@@ -1,0 +1,1 @@
+ALTER TABLE posts ADD COLUMN cover_image_path VARCHAR(500) DEFAULT NULL AFTER content;

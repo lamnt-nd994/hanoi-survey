@@ -1,0 +1,6 @@
+ALTER TABLE roles
+    ADD COLUMN is_admin_access BIT NOT NULL DEFAULT b'0';
+
+UPDATE roles
+SET is_admin_access = b'1'
+WHERE code IN ('ROLE_ADMIN', 'ROLE_EDITOR', 'ROLE_STAFF', 'ROLE_VIEWER', 'SUPER_ADMIN', 'EDITOR', 'CONTENT_STAFF');

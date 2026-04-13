@@ -1,0 +1,542 @@
+<template>
+  <div>
+    <section class="relative overflow-hidden bg-primary-navy py-16 md:py-24">
+      <div class="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(46,125,50,0.22),transparent_24%),linear-gradient(135deg,rgba(255,255,255,0.04),transparent_40%)]" />
+      <div class="container-shell relative text-center">
+        <div class="eyebrow inline-block text-white/75">{{ eyebrow }}</div>
+        <h1 class="section-title mt-4 text-white">{{ title }}</h1>
+<!--        <p class="section-subtitle mx-auto mt-4 max-w-3xl text-neutral-300">{{ copy }}</p>-->
+      </div>
+    </section>
+
+    <section class="container-shell py-16 md:py-20">
+      <div v-if="loading" class="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+        <div v-for="index in 6" :key="index" class="panel h-40 animate-pulse bg-neutral-100"></div>
+      </div>
+
+      <div v-else-if="errorMessage" class="panel p-8 text-rose-600">{{ errorMessage }}</div>
+
+      <div v-else-if="currentRouteName === 'services'" class="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+        <div v-for="(item, index) in serviceItems" :key="item.slug" class="service-card group p-6">
+          <div class="mb-4 flex items-start justify-between">
+            <span class="flex h-12 w-12 items-center justify-center rounded-xl bg-accent-green text-xl font-bold text-white shadow-glow">
+              {{ String(index + 1).padStart(2, '0') }}
+            </span>
+            <svg class="h-6 w-6 text-neutral-400 transition-all group-hover:text-accent-green group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+            </svg>
+          </div>
+          <router-link :to="item.slug ? { name: 'service-detail', params: { slug: item.slug } } : { name: 'services' }" class="font-heading text-xl font-bold text-primary-navy hover:text-accent-green">
+            {{ item.title || item }}
+          </router-link>
+          <p class="mt-3 text-sm leading-7 text-neutral-600">{{ item.overview || 'Dịch vụ triển khai theo tiêu chuẩn hiện hành, phù hợp hồ sơ thiết kế, thi công và kiểm định.' }}</p>
+        </div>
+      </div>
+
+      <div v-else-if="currentRouteName === 'projects'" class="grid gap-6 md:grid-cols-2">
+        <router-link
+          v-for="item in projectItems"
+          :key="item.slug"
+          :to="item.slug ? { name: 'project-detail', params: { slug: item.slug } } : { name: 'projects' }"
+          class="project-card group flex h-full flex-col overflow-hidden border border-neutral-200 bg-white transition-all duration-300 hover:-translate-y-1 hover:border-accent-green/30 hover:shadow-2xl hover:shadow-primary-navy/10"
+        >
+          <div class="relative h-56 overflow-hidden bg-gradient-to-br from-primary-navy to-primary-light">
+            <img
+              v-if="item.coverImagePath"
+              :src="resolveMediaUrl(item.coverImagePath)"
+              :alt="item.title"
+              class="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+              @error="handleImageError"
+            />
+            <div class="absolute inset-0 bg-gradient-to-t from-primary-navy/80 via-primary-navy/35 to-transparent" />
+            <div class="absolute inset-x-0 bottom-0 flex items-end justify-between gap-4 p-6">
+              <div>
+                <span class="eyebrow inline-block text-white/80">{{ item.categoryName }}</span>
+                <h3 class="mt-2 font-heading text-2xl font-bold leading-tight text-white">{{ item.title }}</h3>
+              </div>
+              <span class="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-white/20 bg-white/10 text-white transition-all group-hover:bg-accent-green group-hover:border-accent-green">
+                <svg class="h-5 w-5 transition-transform group-hover:translate-x-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                </svg>
+              </span>
+            </div>
+          </div>
+
+          <div class="flex flex-1 flex-col gap-4 p-6">
+            <div class="space-y-3 text-sm text-neutral-600">
+              <div class="flex items-start gap-3">
+                <svg class="mt-0.5 h-4 w-4 shrink-0 text-accent-green" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+                <span>{{ item.location || 'Địa điểm đang được cập nhật' }}</span>
+              </div>
+              <div class="flex items-start gap-3">
+                <svg class="mt-0.5 h-4 w-4 shrink-0 text-accent-green" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
+                </svg>
+                <span>{{ item.scaleText || 'Quy mô đang được cập nhật' }}</span>
+              </div>
+              <div v-if="item.clientName" class="flex items-start gap-3">
+                <svg class="mt-0.5 h-4 w-4 shrink-0 text-accent-green" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5V4H2v16h5m10 0v-2a4 4 0 00-4-4H9a4 4 0 00-4 4v2m12 0H7m6-11a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+                <span>{{ item.clientName }}</span>
+              </div>
+            </div>
+
+            <div class="mt-auto flex items-center justify-between border-t border-neutral-100 pt-4 text-sm font-semibold text-primary-navy">
+              <span>Xem chi tiết dự án</span>
+              <span class="text-accent-green transition-transform group-hover:translate-x-1">Chi tiet</span>
+            </div>
+          </div>
+          </router-link>
+        </div>
+
+      <div v-else-if="currentRouteName === 'news'" class="space-y-8">
+        <div v-if="!postItems.length" class="panel p-8 text-center text-neutral-500">
+          Chưa có bài viết nào.
+        </div>
+
+        <template v-else>
+          <router-link
+            :to="postItems[0].slug ? { name: 'news-detail', params: { slug: postItems[0].slug } } : { name: 'news' }"
+            class="group block overflow-hidden rounded-[2rem] border border-neutral-200 bg-white transition-all duration-300 hover:-translate-y-1 hover:border-accent-green/30 hover:shadow-2xl hover:shadow-primary-navy/10"
+          >
+            <div class="grid md:grid-cols-[320px_minmax(0,1fr)]">
+              <div class="relative h-56 overflow-hidden bg-gradient-to-br from-primary-navy to-primary-light md:h-full md:min-h-[15rem]">
+                <img
+                  v-if="postItems[0].coverImagePath"
+                  :src="resolveMediaUrl(postItems[0].coverImagePath)"
+                  :alt="postItems[0].title"
+                  class="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                  @error="handleImageError"
+                />
+                <div class="absolute inset-0 bg-gradient-to-t from-primary-navy/80 via-primary-navy/35 to-transparent" />
+              </div>
+              <div class="flex flex-1 flex-col justify-center p-6 md:p-7">
+                <span v-if="postItems[0].categoryName" class="text-xs font-semibold uppercase tracking-[0.1em] text-accent-green">{{ postItems[0].categoryName }}</span>
+                <h2 class="mt-2 font-heading text-xl font-bold leading-snug text-primary-navy transition-colors md:text-2xl">{{ postItems[0].title }}</h2>
+                <p v-if="postItems[0].excerpt" class="mt-3 text-sm leading-7 text-neutral-500 line-clamp-2">{{ postItems[0].excerpt }}</p>
+                <span v-if="postItems[0].publishedAt" class="mt-4 text-xs text-neutral-400">{{ formatDate(postItems[0].publishedAt) }}</span>
+              </div>
+            </div>
+          </router-link>
+
+          <div class="divide-y divide-neutral-200 border-y border-neutral-200">
+            <router-link
+              v-for="item in postItems.slice(1)"
+              :key="item.slug"
+              :to="item.slug ? { name: 'news-detail', params: { slug: item.slug } } : { name: 'news' }"
+              class="group flex gap-4 py-5 transition-colors first:pt-5 last:pb-5"
+            >
+              <div class="relative h-14 w-20 shrink-0 overflow-hidden rounded bg-neutral-100 md:h-16 md:w-24">
+                <img
+                  v-if="item.coverImagePath"
+                  :src="resolveMediaUrl(item.coverImagePath)"
+                  :alt="item.title"
+                  class="absolute inset-0 h-full w-full object-cover"
+                  @error="($event.target as HTMLImageElement).style.display = 'none'"
+                />
+                <div v-else class="flex h-full w-full items-center justify-center">
+                  <svg class="h-8 w-8 text-neutral-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z"/></svg>
+                </div>
+              </div>
+              <div class="flex min-w-0 flex-1 flex-col justify-center">
+                <h3 class="font-heading text-base font-semibold leading-snug text-primary-navy transition-colors group-hover:text-accent-green">{{ item.title }}</h3>
+                <div class="mt-1 flex items-center gap-3 text-xs text-neutral-400">
+                  <span v-if="item.categoryName">{{ item.categoryName }}</span>
+                  <span v-if="item.categoryName && item.publishedAt">&middot;</span>
+                  <span v-if="item.publishedAt">{{ formatDate(item.publishedAt) }}</span>
+                </div>
+              </div>
+              <svg class="hidden h-4 w-4 shrink-0 self-center text-neutral-300 transition-colors group-hover:text-accent-green sm:block" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+            </router-link>
+          </div>
+
+          <div v-if="postsMeta.totalPages > 1" class="flex items-center justify-center gap-1 pt-2">
+            <button :disabled="currentNewsPage <= 1" @click="goToNewsPage(currentNewsPage - 1)" class="flex h-9 w-9 items-center justify-center rounded border border-neutral-200 text-neutral-500 transition-colors hover:border-primary-navy hover:text-primary-navy disabled:cursor-default disabled:opacity-30">&laquo;</button>
+            <template v-for="p in newsVisiblePages" :key="p">
+              <span v-if="p === '...'" class="flex h-9 w-9 items-center justify-center text-neutral-400">...</span>
+              <button v-else @click="goToNewsPage(p as number)" class="flex h-9 w-9 items-center justify-center rounded border text-sm transition-colors" :class="p === currentNewsPage ? 'border-primary-navy bg-primary-navy text-white' : 'border-neutral-200 text-neutral-600 hover:border-primary-navy hover:text-primary-navy'">{{ p }}</button>
+            </template>
+            <button :disabled="currentNewsPage >= postsMeta.totalPages" @click="goToNewsPage(currentNewsPage + 1)" class="flex h-9 w-9 items-center justify-center rounded border border-neutral-200 text-neutral-500 transition-colors hover:border-primary-navy hover:text-primary-navy disabled:cursor-default disabled:opacity-30">&raquo;</button>
+          </div>
+        </template>
+      </div>
+
+      <div v-else-if="currentRouteName === 'equipment'" class="space-y-12">
+        <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+          <router-link
+            v-for="category in sortedEquipmentCategories"
+            :key="category.id"
+            :to="category.slug ? { name: 'equipment-detail', params: { slug: category.slug } } : { name: 'equipment' }"
+            class="stat-card group hover:border-accent-green/30"
+          >
+            <div class="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-accent-green/10 text-accent-green transition-all group-hover:scale-110">
+              <IconRenderer :icon="category.icon || 'settings-2'" class="h-8 w-8" />
+            </div>
+            <h3 class="font-heading text-xl font-bold text-primary-navy transition-colors group-hover:text-accent-green">{{ category.name }}</h3>
+            <div class="mt-2 text-sm text-neutral-500">{{ publicContentStore.equipments.filter((e) => e.categoryId === category.id).length }} thiết bị</div>
+          </router-link>
+        </div>
+      </div>
+
+      <div v-else-if="currentRouteName === 'contact'" class="space-y-8">
+        <section class="overflow-hidden rounded-[2rem] border border-neutral-200 bg-white shadow-[0_24px_60px_rgba(15,23,42,0.08)]">
+          <div class="grid lg:grid-cols-[0.92fr_1.08fr]">
+            <div class="border-b border-neutral-200 bg-primary-navy px-6 py-8 text-white lg:border-b-0 lg:border-r lg:border-white/10 lg:px-8 lg:py-10">
+              <div class="text-[11px] font-semibold uppercase tracking-[0.22em] text-white/55">Liên hệ khảo sát</div>
+              <h2 class="mt-4 font-heading text-3xl font-bold leading-tight lg:text-[2.35rem]">Trao đổi trực tiếp về nhu cầu khảo sát công trình</h2>
+              <p class="mt-4 max-w-xl text-sm leading-7 text-white/72 lg:text-[0.95rem]">
+                Phù hợp cho khảo sát địa chất, địa hình, thủy văn, quan trắc và thí nghiệm xây dựng. Chúng tôi ưu tiên phản hồi nhanh, gọn và đúng đầu việc.
+              </p>
+
+              <div class="mt-8 space-y-4 border-t border-white/10 pt-6">
+                <a v-if="mergedContactInfo.phone" :href="`tel:${mergedContactInfo.phone}`" class="group flex items-center justify-between gap-4 rounded-2xl border border-white/10 bg-white/5 px-5 py-4 transition-colors hover:bg-white/10">
+                  <div class="flex items-center gap-4">
+                    <span class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-accent-green text-white">
+                      <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" /></svg>
+                    </span>
+                    <div>
+                      <div class="text-[11px] font-semibold uppercase tracking-[0.16em] text-white/55">Hotline</div>
+                      <div class="mt-1 text-lg font-semibold">{{ mergedContactInfo.phone }}</div>
+                    </div>
+                  </div>
+                  <span class="text-white/35 transition-transform group-hover:translate-x-1">→</span>
+                </a>
+
+                <a v-if="mergedContactInfo.email" :href="`mailto:${mergedContactInfo.email}`" class="group flex items-center justify-between gap-4 rounded-2xl border border-white/10 bg-white/5 px-5 py-4 transition-colors hover:bg-white/10">
+                  <div class="flex items-center gap-4">
+                    <span class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-white/10 text-white">
+                      <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
+                    </span>
+                    <div>
+                      <div class="text-[11px] font-semibold uppercase tracking-[0.16em] text-white/55">Email</div>
+                      <div class="mt-1 text-base font-medium">{{ mergedContactInfo.email }}</div>
+                    </div>
+                  </div>
+                  <span class="text-white/35 transition-transform group-hover:translate-x-1">→</span>
+                </a>
+              </div>
+
+              <div class="mt-8 grid gap-3 sm:grid-cols-3 lg:grid-cols-1 xl:grid-cols-3">
+                <div class="rounded-2xl border border-white/10 px-4 py-4">
+                  <div class="text-[11px] font-semibold uppercase tracking-[0.16em] text-white/50">Phạm vi</div>
+                  <div class="mt-2 text-sm leading-6 text-white/88">Địa chất, địa hình, thủy văn, quan trắc</div>
+                </div>
+                <div class="rounded-2xl border border-white/10 px-4 py-4">
+                  <div class="text-[11px] font-semibold uppercase tracking-[0.16em] text-white/50">Phản hồi</div>
+                  <div class="mt-2 text-sm leading-6 text-white/88">Ưu tiên xử lý nhanh qua điện thoại và email</div>
+                </div>
+                <div class="rounded-2xl border border-white/10 px-4 py-4">
+                  <div class="text-[11px] font-semibold uppercase tracking-[0.16em] text-white/50">Thời gian</div>
+                  <div class="mt-2 text-sm leading-6 text-white/88">{{ mergedContactInfo.workingHours || 'Theo lịch làm việc của công ty' }}</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="px-6 py-8 lg:px-8 lg:py-10">
+              <div class="rounded-[1.7rem] border border-neutral-200 bg-neutral-50 px-5 py-5">
+                <div class="text-[11px] font-semibold uppercase tracking-[0.16em] text-neutral-400">Văn phòng giao dịch</div>
+                <div class="mt-3 text-xl font-semibold leading-8 text-primary-navy">{{ mergedContactInfo.officeAddress || mergedContactInfo.address }}</div>
+                <div class="mt-5 text-sm leading-7 text-neutral-600">
+                  Vui lòng liên hệ trước để chúng tôi bố trí đúng bộ phận kỹ thuật hoặc kinh doanh phụ trách đầu việc khảo sát của bạn.
+                </div>
+              </div>
+
+              <div class="mt-5 overflow-hidden rounded-[1.7rem] border border-neutral-200 p-2 md:p-3">
+                <iframe
+                  :src="contactMapEmbedUrl"
+                  class="h-[480px] w-full rounded-[1.2rem] border-0"
+                  loading="lazy"
+                  referrerpolicy="no-referrer-when-downgrade"
+                  allowfullscreen
+                />
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section v-if="settings?.businessLicensePath" class="rounded-[2rem] border border-neutral-200 bg-white p-6 shadow-sm lg:p-8">
+          <div class="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
+            <div class="max-w-2xl">
+              <div class="text-[11px] font-semibold uppercase tracking-[0.18em] text-neutral-400">Hồ sơ pháp lý</div>
+              <h3 class="mt-3 font-heading text-2xl font-bold text-primary-navy">Giấy phép doanh nghiệp</h3>
+              <div class="mt-4 grid gap-3 text-sm text-neutral-600 sm:grid-cols-3">
+                <div v-if="settings?.taxCode"><strong>Mã số thuế:</strong> {{ settings.taxCode }}</div>
+                <div v-if="settings?.licenseIssuedBy"><strong>Nơi cấp:</strong> {{ settings.licenseIssuedBy }}</div>
+                <div v-if="settings?.licenseIssuedDate"><strong>Ngày cấp:</strong> {{ settings.licenseIssuedDate }}</div>
+              </div>
+            </div>
+
+            <a :href="resolveMediaUrl(settings.businessLicensePath)" target="_blank" rel="noopener noreferrer" class="btn-primary inline-flex">
+              Tải giấy phép
+            </a>
+          </div>
+
+          <div class="mt-6 overflow-hidden rounded-[1.5rem] border border-neutral-200 bg-neutral-50">
+            <img v-if="isImageAsset(settings.businessLicensePath)" :src="resolveMediaUrl(settings.businessLicensePath)" alt="Giấy phép doanh nghiệp" class="max-h-[28rem] w-full object-contain" />
+            <iframe v-else-if="isPdfAsset(settings.businessLicensePath)" :src="resolveMediaUrl(settings.businessLicensePath)" class="h-[28rem] w-full" />
+            <div v-else class="px-4 py-6 text-sm text-neutral-500">Không xem trước được file này.</div>
+          </div>
+        </section>
+      </div>
+
+      <div v-else-if="introItems.length" class="grid gap-6 md:grid-cols-2 xl:grid-cols-4">
+        <article v-for="item in introItems" :key="item.title" class="stat-card group hover:border-accent-green/30">
+          <div class="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-accent-green/10 text-accent-green transition-all group-hover:bg-accent-green group-hover:text-white">
+            <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          </div>
+          <h3 class="font-heading text-xl font-bold text-primary-navy">{{ item.title }}</h3>
+          <div class="mt-3 text-sm leading-7 text-neutral-600" v-html="item.body"></div>
+        </article>
+      </div>
+
+      <div v-else class="panel p-8 text-center text-neutral-500">
+        Chưa có dữ liệu để hiển thị.
+      </div>
+    </section>
+  </div>
+</template>
+
+<script setup lang="ts">
+import { computed, ref, watch } from 'vue'
+import { storeToRefs } from 'pinia'
+import { useRoute, useRouter } from 'vue-router'
+import IconRenderer from '../components/IconRenderer.vue'
+import { resolveMediaUrl } from '../lib/media'
+import { usePublicContentStore } from '../stores/publicContent'
+import { useSiteSettingsStore } from '../stores/siteSettings'
+import { ROUTE_NAMES } from '../router'
+
+type StaticPageConfig = {
+  eyebrow: string
+  title: string
+  copy: string
+  items: string[]
+}
+
+type IntroCard = {
+  title: string
+  body: string
+}
+
+const $route = useRoute()
+const router = useRouter()
+const loading = ref(false)
+const errorMessage = ref('')
+const publicContentStore = usePublicContentStore()
+const siteSettingsStore = useSiteSettingsStore()
+const { mergedContactInfo, siteName, settings } = storeToRefs(siteSettingsStore)
+const { postsMeta } = storeToRefs(publicContentStore)
+
+const pageData: Record<string, StaticPageConfig> = {
+  [ROUTE_NAMES.about]: {
+    eyebrow: 'Giới thiệu',
+    title: 'Thông tin doanh nghiệp',
+    copy: 'Nội dung giới thiệu được đồng bộ từ CMS/backend.',
+    items: [],
+  },
+  [ROUTE_NAMES.services]: {
+    eyebrow: 'Lĩnh vực',
+    title: 'Dịch vụ khảo sát và thí nghiệm',
+    copy: 'Danh mục này được lấy trực tiếp từ `/api/public/v1/services`.',
+    items: [],
+  },
+  [ROUTE_NAMES.projects]: {
+    eyebrow: 'Dự án',
+    title: 'Hồ sơ dự án tiêu biểu',
+    copy: 'Danh sách dự án được lấy trực tiếp từ `/api/public/v1/projects`.',
+    items: [],
+  },
+  [ROUTE_NAMES.news]: {
+    eyebrow: 'Tin tức - kiến thức',
+    title: 'Bài viết chuyên ngành',
+    copy: 'Nội dung tin tức và kiến thức được lấy trực tiếp từ `/api/public/v1/posts`.',
+    items: [],
+  },
+  [ROUTE_NAMES.equipment]: {
+    eyebrow: 'Thiết bị',
+    title: 'Thiết bị hiện trường',
+    copy: 'Danh mục thiết bị được lấy trực tiếp từ `/api/public/v1/equipments`.',
+    items: [],
+  },
+  [ROUTE_NAMES.contact]: {
+    eyebrow: 'Liên hệ',
+    title: 'Thông tin liên hệ công ty',
+    copy: 'Thông tin văn phòng, đầu mối liên hệ và bản đồ vị trí doanh nghiệp.',
+    items: [],
+  },
+}
+
+const currentRouteName = computed(() => $route.name as string || ROUTE_NAMES.about)
+const currentData = computed(() => pageData[currentRouteName.value] || pageData[ROUTE_NAMES.about])
+const selectedCategorySlug = computed(() => {
+  const category = $route.query.category
+  return typeof category === 'string' ? category : ''
+})
+const selectedServiceCategory = computed(() => publicContentStore.serviceCategories.find((item) => item.slug === selectedCategorySlug.value) || null)
+const selectedProjectCategory = computed(() => publicContentStore.projectCategories.find((item) => item.slug === selectedCategorySlug.value) || null)
+const selectedPostCategory = computed(() => publicContentStore.postCategories.find((item) => item.slug === selectedCategorySlug.value) || null)
+const selectedEquipmentCategory = computed(() => publicContentStore.equipmentCategories.find((item) => item.slug === selectedCategorySlug.value) || null)
+const eyebrow = computed(() => {
+  if (currentRouteName.value === ROUTE_NAMES.services && selectedServiceCategory.value) return 'Danh mục dịch vụ'
+  if (currentRouteName.value === ROUTE_NAMES.projects && selectedProjectCategory.value) return 'Danh mục dự án'
+  if (currentRouteName.value === ROUTE_NAMES.news && selectedPostCategory.value) return 'Danh mục tin tức'
+  if (currentRouteName.value === ROUTE_NAMES.equipment && selectedEquipmentCategory.value) return 'Danh mục thiết bị'
+  return currentData.value.eyebrow
+})
+const title = computed(() => {
+  if (currentRouteName.value === ROUTE_NAMES.services && selectedServiceCategory.value) return selectedServiceCategory.value.name
+  if (currentRouteName.value === ROUTE_NAMES.projects && selectedProjectCategory.value) return selectedProjectCategory.value.name
+  if (currentRouteName.value === ROUTE_NAMES.news && selectedPostCategory.value) return selectedPostCategory.value.name
+  if (currentRouteName.value === ROUTE_NAMES.equipment && selectedEquipmentCategory.value) return selectedEquipmentCategory.value.name
+  return currentData.value.title
+})
+const copy = computed(() => {
+  if (currentRouteName.value === ROUTE_NAMES.services && selectedServiceCategory.value) {
+    return `Danh sách dịch vụ thuộc danh mục ${selectedServiceCategory.value.name.toLowerCase()}.`
+  }
+  if (currentRouteName.value === ROUTE_NAMES.projects && selectedProjectCategory.value) {
+    return `Danh sách dự án thuộc danh mục ${selectedProjectCategory.value.name.toLowerCase()}.`
+  }
+  if (currentRouteName.value === ROUTE_NAMES.news && selectedPostCategory.value) {
+    return `Danh sách bài viết thuộc danh mục ${selectedPostCategory.value.name.toLowerCase()}.`
+  }
+  if (currentRouteName.value === ROUTE_NAMES.equipment && selectedEquipmentCategory.value) {
+    return `Danh sách thiết bị thuộc danh mục ${selectedEquipmentCategory.value.name.toLowerCase()}.`
+  }
+  return currentData.value.copy
+})
+const items = computed(() => currentData.value.items)
+const introItems = computed<IntroCard[]>(() => [])
+const serviceItems = computed(() => {
+  if (currentRouteName.value !== ROUTE_NAMES.services || !selectedServiceCategory.value) return publicContentStore.services
+  return publicContentStore.services.filter((item) => item.categoryId === selectedServiceCategory.value?.id)
+})
+const projectItems = computed(() => {
+  if (currentRouteName.value !== ROUTE_NAMES.projects || !selectedProjectCategory.value) return publicContentStore.projects
+  return publicContentStore.projects.filter((item) => item.categoryId === selectedProjectCategory.value?.id)
+})
+const postItems = computed(() => publicContentStore.posts)
+const currentNewsPage = computed(() => {
+  const rawPage = Array.isArray($route.query.page) ? $route.query.page[0] : $route.query.page
+  const page = Number(rawPage || 1)
+  return Number.isFinite(page) && page > 0 ? page : 1
+})
+const newsVisiblePages = computed<(number | string)[]>(() => {
+  const totalPages = postsMeta.value.totalPages || 1
+  const page = currentNewsPage.value
+  if (totalPages <= 7) {
+    return Array.from({ length: totalPages }, (_, index) => index + 1)
+  }
+  const pages: (number | string)[] = [1]
+  if (page > 3) pages.push('...')
+  for (let index = Math.max(2, page - 1); index <= Math.min(totalPages - 1, page + 1); index += 1) {
+    pages.push(index)
+  }
+  if (page < totalPages - 2) pages.push('...')
+  pages.push(totalPages)
+  return pages
+})
+const equipmentItems = computed(() => {
+  if (currentRouteName.value !== ROUTE_NAMES.equipment || !selectedEquipmentCategory.value) return publicContentStore.equipments
+  return publicContentStore.equipments.filter((item) => item.categoryId === selectedEquipmentCategory.value?.id)
+})
+const sortedEquipmentCategories = computed(() => [...publicContentStore.equipmentCategories].sort((a, b) => a.sortOrder - b.sortOrder))
+const equipmentGroups = computed(() => sortedEquipmentCategories.value
+  .map((category) => ({
+    id: category.id,
+    slug: category.slug,
+    name: category.name,
+    items: equipmentItems.value.filter((item) => item.categoryId === category.id),
+  }))
+  .filter((group) => group.items.length))
+const contactMapEmbedUrl = computed(() => normalizeMapEmbedUrl(settings.value?.mapEmbed, mergedContactInfo.value.officeAddress || mergedContactInfo.value.address))
+
+function handleImageError(event: Event) {
+  const image = event.target as HTMLImageElement | null
+  if (!image) return
+  image.style.display = 'none'
+}
+
+function formatDate(dateStr: string | null): string {
+  if (!dateStr) return ''
+  try {
+    return new Date(dateStr).toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' })
+  } catch {
+    return dateStr
+  }
+}
+
+function isImageAsset(path: string) {
+  return /\.(png|jpe?g|gif|webp|svg)$/i.test(path)
+}
+
+function isPdfAsset(path: string) {
+  return /\.pdf$/i.test(path)
+}
+
+function normalizeMapEmbedUrl(rawUrl: string | null | undefined, fallbackAddress: string) {
+  const fallback = `https://www.google.com/maps?q=${encodeURIComponent(fallbackAddress || 'Hanoi Survey')}&output=embed`
+
+  if (!rawUrl || !rawUrl.trim()) {
+    return fallback
+  }
+
+  const normalized = rawUrl.trim()
+
+  if (/google\.com\/maps\/embed/i.test(normalized) || /[?&]output=embed(?:&|$)/i.test(normalized)) {
+    return normalized
+  }
+
+  if (/google\.[^/]+\/maps/i.test(normalized) || /maps\.app\.goo\.gl/i.test(normalized)) {
+    return fallback
+  }
+
+  return normalized
+}
+
+async function goToNewsPage(page: number) {
+  await router.push({
+    name: ROUTE_NAMES.news,
+    query: page > 1 ? { ...$route.query, page: String(page) } : Object.fromEntries(Object.entries($route.query).filter(([key]) => key !== 'page')),
+  })
+}
+
+async function loadRemoteItems() {
+  loading.value = true
+  errorMessage.value = ''
+
+  try {
+    if (currentRouteName.value === ROUTE_NAMES.about) {
+      await publicContentStore.loadIntroPage()
+      errorMessage.value = publicContentStore.errors.introPage
+    } else if (currentRouteName.value === ROUTE_NAMES.services) {
+      await Promise.all([publicContentStore.loadServiceCategories(), publicContentStore.loadServices()])
+      errorMessage.value = publicContentStore.errors.services || publicContentStore.errors.serviceCategories
+    } else if (currentRouteName.value === ROUTE_NAMES.projects) {
+      await Promise.all([publicContentStore.loadProjectCategories(), publicContentStore.loadProjects()])
+      errorMessage.value = publicContentStore.errors.projects || publicContentStore.errors.projectCategories
+    } else if (currentRouteName.value === ROUTE_NAMES.news) {
+      await Promise.all([
+        publicContentStore.loadPostCategories(),
+        publicContentStore.loadPosts(currentNewsPage.value, true, selectedCategorySlug.value),
+      ])
+      errorMessage.value = publicContentStore.errors.posts || publicContentStore.errors.postCategories
+    } else if (currentRouteName.value === ROUTE_NAMES.equipment) {
+      await Promise.all([publicContentStore.loadEquipmentCategories(), publicContentStore.loadEquipments()])
+      errorMessage.value = publicContentStore.errors.equipments || publicContentStore.errors.equipmentCategories
+    } else if (currentRouteName.value === ROUTE_NAMES.contact) {
+      await siteSettingsStore.ensureLoaded()
+    }
+  } finally {
+    loading.value = false
+  }
+}
+
+watch(() => $route.fullPath, loadRemoteItems, { immediate: true })
+</script>

@@ -1,0 +1,20 @@
+spring:
+  config:
+    activate:
+      on-profile: dev
+  datasource:
+    url: ${DB_URL:jdbc:mysql://localhost:3310/hanoi_survey?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Ho_Chi_Minh}
+    username: ${DB_USERNAME:root}
+    password: ${DB_PASSWORD:root}
+  jpa:
+    show-sql: ${JPA_SHOW_SQL:false}
+
+logging:
+  level:
+    com.hanoisurvey.api: ${APP_LOG_LEVEL:INFO}
+    org.springframework.web: INFO
+    org.hibernate.SQL: ${HIBERNATE_SQL_LOG_LEVEL:OFF}
+
+app:
+  upload-dir: E:\data\uploads
+  upload-public-prefix: uploads

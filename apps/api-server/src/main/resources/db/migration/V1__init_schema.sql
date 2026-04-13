@@ -1,0 +1,202 @@
+CREATE TABLE IF NOT EXISTS menus (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    code VARCHAR(100) NOT NULL UNIQUE,
+    name VARCHAR(255) NOT NULL,
+    position VARCHAR(50) NOT NULL,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS menu_items (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    menu_id BIGINT NOT NULL,
+    parent_id BIGINT NULL,
+    title VARCHAR(255) NOT NULL,
+    item_type VARCHAR(50) NOT NULL,
+    ref_id BIGINT NULL,
+    url VARCHAR(500) NULL,
+    icon VARCHAR(255) NULL,
+    sort_order INT NOT NULL DEFAULT 0,
+    is_visible BIT NOT NULL DEFAULT b'1',
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    CONSTRAINT fk_menu_items_menu FOREIGN KEY (menu_id) REFERENCES menus(id),
+    CONSTRAINT fk_menu_items_parent FOREIGN KEY (parent_id) REFERENCES menu_items(id)
+);
+
+CREATE TABLE IF NOT EXISTS pages (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    title VARCHAR(255) NOT NULL,
+    slug VARCHAR(255) NOT NULL UNIQUE,
+    summary TEXT NULL,
+    content LONGTEXT NULL,
+    status VARCHAR(30) NOT NULL,
+    published_at DATETIME NULL,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS post_categories (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    name VARCHAR(255) NOT NULL,
+    slug VARCHAR(255) NOT NULL UNIQUE,
+    parent_id BIGINT NULL,
+    sort_order INT NOT NULL DEFAULT 0,
+    is_active BIT NOT NULL DEFAULT b'1',
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    CONSTRAINT fk_post_category_parent FOREIGN KEY (parent_id) REFERENCES post_categories(id)
+);
+
+CREATE TABLE IF NOT EXISTS posts (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    category_id BIGINT NOT NULL,
+    title VARCHAR(255) NOT NULL,
+    slug VARCHAR(255) NOT NULL UNIQUE,
+    excerpt TEXT NULL,
+    content LONGTEXT NULL,
+    status VARCHAR(30) NOT NULL,
+    published_at DATETIME NULL,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    CONSTRAINT fk_posts_category FOREIGN KEY (category_id) REFERENCES post_categories(id)
+);
+
+CREATE TABLE IF NOT EXISTS service_categories (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    name VARCHAR(255) NOT NULL,
+    slug VARCHAR(255) NOT NULL UNIQUE,
+    parent_id BIGINT NULL,
+    sort_order INT NOT NULL DEFAULT 0,
+    is_active BIT NOT NULL DEFAULT b'1',
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    CONSTRAINT fk_service_category_parent FOREIGN KEY (parent_id) REFERENCES service_categories(id)
+);
+
+CREATE TABLE IF NOT EXISTS services (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    category_id BIGINT NOT NULL,
+    title VARCHAR(255) NOT NULL,
+    slug VARCHAR(255) NOT NULL UNIQUE,
+    overview TEXT NULL,
+    content LONGTEXT NULL,
+    icon VARCHAR(255) NULL,
+    status VARCHAR(30) NOT NULL,
+    published_at DATETIME NULL,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    CONSTRAINT fk_services_category FOREIGN KEY (category_id) REFERENCES service_categories(id)
+);
+
+CREATE TABLE IF NOT EXISTS project_categories (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    name VARCHAR(255) NOT NULL,
+    slug VARCHAR(255) NOT NULL UNIQUE,
+    parent_id BIGINT NULL,
+    sort_order INT NOT NULL DEFAULT 0,
+    is_active BIT NOT NULL DEFAULT b'1',
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    CONSTRAINT fk_project_category_parent FOREIGN KEY (parent_id) REFERENCES project_categories(id)
+);
+
+CREATE TABLE IF NOT EXISTS projects (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    category_id BIGINT NOT NULL,
+    title VARCHAR(255) NOT NULL,
+    slug VARCHAR(255) NOT NULL UNIQUE,
+    client_name VARCHAR(255) NULL,
+    location VARCHAR(255) NULL,
+    started_at DATETIME NULL,
+    completed_at DATETIME NULL,
+    scale_text VARCHAR(255) NULL,
+    content LONGTEXT NULL,
+    status VARCHAR(30) NOT NULL,
+    published_at DATETIME NULL,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    CONSTRAINT fk_projects_category FOREIGN KEY (category_id) REFERENCES project_categories(id)
+);
+
+CREATE TABLE IF NOT EXISTS equipments (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    name VARCHAR(255) NOT NULL,
+    slug VARCHAR(255) NOT NULL UNIQUE,
+    model VARCHAR(255) NULL,
+    manufacturer VARCHAR(255) NULL,
+    production_year INT NULL,
+    description TEXT NULL,
+    status VARCHAR(30) NOT NULL,
+    sort_order INT NOT NULL DEFAULT 0,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS media_files (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    file_name VARCHAR(255) NOT NULL,
+    mime_type VARCHAR(150) NOT NULL,
+    size_bytes BIGINT NOT NULL,
+    storage_path VARCHAR(600) NOT NULL,
+    alt_text VARCHAR(255) NULL,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS contacts (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    full_name VARCHAR(255) NOT NULL,
+    company_name VARCHAR(255) NULL,
+    phone VARCHAR(100) NOT NULL,
+    email VARCHAR(255) NULL,
+    subject VARCHAR(255) NULL,
+    message TEXT NOT NULL,
+    status VARCHAR(30) NOT NULL,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS quote_requests (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    full_name VARCHAR(255) NOT NULL,
+    company_name VARCHAR(255) NULL,
+    phone VARCHAR(100) NOT NULL,
+    email VARCHAR(255) NULL,
+    service_category_id BIGINT NULL,
+    project_location VARCHAR(255) NULL,
+    request_detail TEXT NOT NULL,
+    status VARCHAR(30) NOT NULL,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    CONSTRAINT fk_quote_service_category FOREIGN KEY (service_category_id) REFERENCES service_categories(id)
+);
+
+CREATE TABLE IF NOT EXISTS site_settings (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    site_name VARCHAR(255) NOT NULL,
+    hotline VARCHAR(100) NULL,
+    email VARCHAR(255) NULL,
+    address VARCHAR(500) NULL,
+    map_embed TEXT NULL,
+    footer_text TEXT NULL,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS audit_logs (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    actor VARCHAR(255) NOT NULL,
+    action VARCHAR(100) NOT NULL,
+    entity_type VARCHAR(100) NOT NULL,
+    entity_id BIGINT NULL,
+    payload LONGTEXT NULL,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX idx_pages_status_pub ON pages(status, published_at);
+CREATE INDEX idx_posts_status_pub ON posts(status, published_at);
+CREATE INDEX idx_services_status_pub ON services(status, published_at);
+CREATE INDEX idx_projects_status_pub ON projects(status, published_at);
+CREATE INDEX idx_equipments_status ON equipments(status, sort_order);
+CREATE INDEX idx_menu_items_menu_order ON menu_items(menu_id, sort_order);

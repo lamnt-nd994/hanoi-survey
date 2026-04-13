@@ -1,0 +1,41 @@
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Environment overrides
+.env
+.env.*
+!.env.example
+
+# Frontend dependencies and build output
+node_modules/
+apps/*/node_modules/
+dist/
+apps/*/dist/
+coverage/
+.vite/
+
+# Java / Spring build output
+target/
+*.class
+
+# Local runtime data
+uploads/
+
+# IDE files
+.idea/
+*.iml
+.vscode/
+.classpath
+.project
+.settings/
+
+# Windows reserved filename accidentally created in backend folder
+apps/api-server/nul

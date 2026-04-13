@@ -1,0 +1,29 @@
+spring:
+  config:
+    activate:
+      on-profile: prod
+  datasource:
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+  jpa:
+    show-sql: false
+
+springdoc:
+  api-docs:
+    enabled: false
+  swagger-ui:
+    enabled: false
+
+logging:
+  level:
+    root: INFO
+    com.hanoisurvey.api: ${APP_LOG_LEVEL:INFO}
+    org.springframework.web: INFO
+    org.hibernate.SQL: OFF
+
+app:
+  upload-dir: ${APP_UPLOAD_DIR:/var/opt/hanoi-survey/uploads}
+  upload-public-prefix: ${APP_UPLOAD_PUBLIC_PREFIX:uploads}
+  jwt:
+    secret: ${JWT_SECRET}
