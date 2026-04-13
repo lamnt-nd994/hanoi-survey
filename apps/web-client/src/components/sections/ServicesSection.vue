@@ -1,7 +1,7 @@
 <template>
   <section class="section bg-light">
     <div class="container-shell">
-      <SectionHeader :eyebrow="eyebrow" :title="title || 'LĨNH VỰC HOẠT ĐỘNG'" :description="description" centered show-divider />
+      <SectionHeader :title="title || 'LĨNH VỰC HOẠT ĐỘNG'" centered />
 
       <div v-if="loading" class="services-grid">
         <div v-for="index in 6" :key="index" class="service-card p-8 text-center">
@@ -38,16 +38,12 @@ import { usePublicContentStore } from '../../stores/publicContent'
 import type { HomeSelectedServiceItem, SurveyService } from '../../types/content'
 
 const props = withDefaults(defineProps<{
-  eyebrow?: string
   title?: string
-  description?: string
   mode?: 'latest' | 'manual'
   limit?: number
   selectedItems?: HomeSelectedServiceItem[]
 }>(), {
-  eyebrow: '',
   title: 'Các Dịch Vụ Chính',
-  description: '',
   mode: 'latest',
   limit: 6,
   selectedItems: () => [],

@@ -24,8 +24,8 @@
         </div>
       </div>
 
-      <div v-else-if="currentRouteName === 'projects'" class="space-y-8">
-        <div class="grid gap-6 md:grid-cols-2 xl:grid-cols-4">
+      <div v-else-if="[ROUTE_NAMES.projects, ROUTE_NAMES.projectCategory].includes(currentRouteName as any)" class="space-y-8">
+        <div class="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
         <router-link
           v-for="item in paginatedProjectItems"
           :key="item.slug"
@@ -95,7 +95,7 @@
         </div>
       </div>
 
-      <div v-else-if="currentRouteName === 'news'" class="space-y-8">
+      <div v-else-if="[ROUTE_NAMES.news, ROUTE_NAMES.newsCategory].includes(currentRouteName as any)" class="space-y-8">
         <div v-if="!postItems.length" class="panel p-8 text-center text-neutral-500">
           Chưa có bài viết nào.
         </div>
@@ -333,6 +333,8 @@ const pageData: Record<string, StaticPageConfig> = {
 const currentRouteName = computed(() => $route.name as string || ROUTE_NAMES.about)
 const currentData = computed(() => pageData[currentRouteName.value] || pageData[ROUTE_NAMES.about])
 const selectedCategorySlug = computed(() => {
+  const categoryParam = $route.params.category
+  if (typeof categoryParam === 'string') return categoryParam
   const category = $route.query.category
   return typeof category === 'string' ? category : ''
 })
@@ -345,7 +347,7 @@ const serviceItems = computed(() => {
   return publicContentStore.services
 })
 const projectItems = computed(() => {
-  if (currentRouteName.value !== ROUTE_NAMES.projects || !selectedProjectCategory.value) return publicContentStore.projects
+  if (![ROUTE_NAMES.projects, ROUTE_NAMES.projectCategory].includes(currentRouteName.value as any) || !selectedProjectCategory.value) return publicContentStore.projects
   return publicContentStore.projects.filter((item) => item.categoryId === selectedProjectCategory.value?.id)
 })
 const projectPageSize = 8
@@ -480,16 +482,32 @@ function buildGoogleEmbedUrl(rawUrl: string, fallback: string) {
 }
 
 async function goToNewsPage(page: number) {
+  const categorySlug = typeof $route.params.category === 'string' ? $route.params.category : ''
+  const query = page > 1 ? { ...$route.query, page: String(page) } : Object.fromEntries(Object.entries($route.query).filter(([key]) => key !== 'page'))
+
+  if (categorySlug) {
+    await router.push({ name: ROUTE_NAMES.newsCategory, params: { category: categorySlug }, query })
+    return
+  }
+
   await router.push({
     name: ROUTE_NAMES.news,
-    query: page > 1 ? { ...$route.query, page: String(page) } : Object.fromEntries(Object.entries($route.query).filter(([key]) => key !== 'page')),
+    query,
   })
 }
 
 async function goToProjectPage(page: number) {
+  const categorySlug = typeof $route.params.category === 'string' ? $route.params.category : ''
+  const query = page > 1 ? { ...$route.query, page: String(page) } : Object.fromEntries(Object.entries($route.query).filter(([key]) => key !== 'page'))
+
+  if (categorySlug) {
+    await router.push({ name: ROUTE_NAMES.projectCategory, params: { category: categorySlug }, query })
+    return
+  }
+
   await router.push({
     name: ROUTE_NAMES.projects,
-    query: page > 1 ? { ...$route.query, page: String(page) } : Object.fromEntries(Object.entries($route.query).filter(([key]) => key !== 'page')),
+    query,
   })
 }
 
@@ -504,10 +522,10 @@ async function loadRemoteItems() {
     } else if (currentRouteName.value === ROUTE_NAMES.services) {
       await publicContentStore.loadServices()
       errorMessage.value = publicContentStore.errors.services
-    } else if (currentRouteName.value === ROUTE_NAMES.projects) {
+    } else if ([ROUTE_NAMES.projects, ROUTE_NAMES.projectCategory].includes(currentRouteName.value as any)) {
       await Promise.all([publicContentStore.loadProjectCategories(), publicContentStore.loadProjects()])
       errorMessage.value = publicContentStore.errors.projects || publicContentStore.errors.projectCategories
-    } else if (currentRouteName.value === ROUTE_NAMES.news) {
+    } else if ([ROUTE_NAMES.news, ROUTE_NAMES.newsCategory].includes(currentRouteName.value as any)) {
       await Promise.all([
         publicContentStore.loadPostCategories(),
         publicContentStore.loadPosts(currentNewsPage.value, true, selectedCategorySlug.value),

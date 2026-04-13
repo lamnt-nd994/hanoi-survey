@@ -24,9 +24,7 @@
   />
 
   <ServicesGrid
-    :eyebrow="homeData.servicesSection.eyebrow"
     :title="homeData.servicesSection.title"
-    :description="homeData.servicesSection.description"
     :mode="homeData.servicesSection.mode"
     :limit="homeData.servicesSection.limit"
     :selected-items="homeData.servicesSection.selectedItems"
