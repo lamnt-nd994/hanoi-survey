@@ -43,6 +43,7 @@ public class SiteSettingController {
                 request.heroBannerPath(),
                 request.companyIntro(),
                 request.taxCode(),
+                request.licenseNumber(),
                 request.businessLicensePath(),
                 request.licenseIssuedBy(),
                 request.licenseIssuedDate(),

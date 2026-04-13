@@ -13,6 +13,7 @@ public record SiteSetting(
         String heroBannerPath,
         String companyIntro,
         String taxCode,
+        String licenseNumber,
         String businessLicensePath,
         String licenseIssuedBy,
         LocalDate licenseIssuedDate,

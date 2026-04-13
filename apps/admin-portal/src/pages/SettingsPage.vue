@@ -65,6 +65,10 @@
             <input v-model="form.taxCode" class="cms-form-control" placeholder="Mã số thuế" />
           </div>
           <div class="cms-form-group">
+            <label class="cms-form-label">Giấy phép số</label>
+            <input v-model="form.licenseNumber" class="cms-form-control" placeholder="Số giấy phép" />
+          </div>
+          <div class="cms-form-group">
             <label class="cms-form-label">Nơi cấp giấy phép</label>
             <input v-model="form.licenseIssuedBy" class="cms-form-control" placeholder="Cơ quan cấp" />
           </div>
@@ -178,6 +182,7 @@ const form = reactive<SiteSettings>({
   heroBannerPath: '',
   companyIntro: '',
   taxCode: '',
+  licenseNumber: '',
   businessLicensePath: '',
   licenseIssuedBy: '',
   licenseIssuedDate: null,
@@ -217,6 +222,7 @@ watch(() => store.settings, (val) => {
     heroBannerPath: val.heroBannerPath || '',
     companyIntro: val.companyIntro || '',
     taxCode: val.taxCode || '',
+    licenseNumber: val.licenseNumber || '',
     businessLicensePath: val.businessLicensePath || '',
     licenseIssuedBy: val.licenseIssuedBy || '',
     licenseIssuedDate: val.licenseIssuedDate || null,

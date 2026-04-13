@@ -4,8 +4,8 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        heading: ['Montserrat', 'sans-serif'],
-        body: ['Open Sans', 'sans-serif']
+        heading: ['Segoe UI', 'Roboto', 'sans-serif'],
+        body: ['Segoe UI', 'Roboto', 'sans-serif']
       },
       colors: {
         primary: {

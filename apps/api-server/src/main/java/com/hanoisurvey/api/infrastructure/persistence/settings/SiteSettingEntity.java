@@ -35,6 +35,9 @@ public class SiteSettingEntity extends BaseEntity {
     @Column(name = "tax_code")
     private String taxCode;
 
+    @Column(name = "license_number")
+    private String licenseNumber;
+
     @Column(name = "business_license_path")
     private String businessLicensePath;
 
@@ -155,6 +158,14 @@ public class SiteSettingEntity extends BaseEntity {
 
     public String getBusinessLicensePath() {
         return businessLicensePath;
+    }
+
+    public String getLicenseNumber() {
+        return licenseNumber;
+    }
+
+    public void setLicenseNumber(String licenseNumber) {
+        this.licenseNumber = licenseNumber;
     }
 
     public void setBusinessLicensePath(String businessLicensePath) {

@@ -29,6 +29,7 @@ public class SiteSettingService {
                 command.heroBannerPath(),
                 command.companyIntro(),
                 command.taxCode(),
+                command.licenseNumber(),
                 command.businessLicensePath(),
                 command.licenseIssuedBy(),
                 command.licenseIssuedDate(),
@@ -50,6 +51,6 @@ public class SiteSettingService {
     }
 
     private SiteSetting defaultSetting() {
-        return new SiteSetting(null, "Hanoi Survey", null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null);
+        return new SiteSetting(null, "Hanoi Survey", null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null);
     }
 }

@@ -11,7 +11,7 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
-import type { HomeStatItem } from '../types/content'
+import type { HomeStatItem } from '../../types/content'
 
 const props = withDefaults(defineProps<{
   items?: HomeStatItem[]
