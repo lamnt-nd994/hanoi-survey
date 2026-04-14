@@ -1,5 +1,5 @@
 import type { Router } from 'vue-router'
-import { clearStoredToken, getStoredToken } from '@/lib/api'
+import { clearStoredToken, getStoredToken } from '@/lib/api-client'
 import { useAuthStore } from '@/stores/auth'
 
 let userFetched = false

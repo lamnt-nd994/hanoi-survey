@@ -4,19 +4,19 @@ export const servicesRoutes: RouteRecordRaw[] = [
   {
     path: 'services',
     name: 'services',
-    component: () => import('@/pages/services/ServicesListPage.vue'),
+    component: () => import('@/features/services/pages/ServicesListPage.vue'),
     meta: { title: 'Dịch vụ', section: 'services', requiresAuth: true, layout: 'admin' },
   },
   {
     path: 'services/create',
     name: 'service-create',
-    component: () => import('@/pages/services/ServiceFormPage.vue'),
+    component: () => import('@/features/services/pages/ServiceFormPage.vue'),
     meta: { title: 'Tạo dịch vụ', section: 'services', requiresAuth: true, layout: 'admin' },
   },
   {
     path: 'services/:id/edit',
     name: 'service-edit',
-    component: () => import('@/pages/services/ServiceFormPage.vue'),
+    component: () => import('@/features/services/pages/ServiceFormPage.vue'),
     meta: { title: 'Chỉnh sửa dịch vụ', section: 'services', requiresAuth: true, layout: 'admin' },
   },
 ]

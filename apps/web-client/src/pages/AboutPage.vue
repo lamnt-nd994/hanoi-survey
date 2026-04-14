@@ -156,7 +156,7 @@
                 </li>
               </ul>
             </div>
-            <div class="panel p-4">
+            <div>
               <img
                 v-if="aboutData.capability.imagePath"
                 :src="resolveMediaUrl(aboutData.capability.imagePath)"
@@ -190,10 +190,7 @@ const errorMessage = computed(() => errors.value.introPage)
 const aboutData = computed<AboutPageContent>(() => parseAboutContent(page.value?.contentJson))
 const introTitle = computed(() => aboutData.value.hero.title || page.value?.title || 'Về Chúng Tôi')
 const introImagePath = computed(() => {
-  return aboutData.value.intro.imagePath
-    || aboutData.value.organization.chartImagePath
-    || aboutData.value.capability.imagePath
-    || ''
+  return aboutData.value.intro.imagePath || ''
 })
 const valueItems = computed<AboutPageValueItem[]>(() => aboutData.value.coreValues.items.filter((item) => item.title.trim() || item.description.trim()))
 const timelineItems = computed<AboutPageTimelineItem[]>(() => [...aboutData.value.timeline.items]

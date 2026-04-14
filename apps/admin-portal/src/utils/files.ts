@@ -1,3 +1,5 @@
+import type { ApiErrorLike } from '@/types/api'
+
 export const MAX_UPLOAD_SIZE_BYTES = 100 * 1024 * 1024
 
 export type FileKind = 'image' | 'pdf' | 'image-or-pdf'
@@ -29,11 +31,12 @@ export function validateSelectedFile(file: File, kind: FileKind) {
   return ''
 }
 
-export function extractApiError(error: any, fallback = 'Thao tác thất bại') {
-  const details = error?.response?.data?.error?.details
+export function extractApiError(error: unknown, fallback = 'Thao tác thất bại') {
+  const apiError = error as ApiErrorLike
+  const details = apiError.response?.data?.error?.details
   if (Array.isArray(details) && details.length) {
     return details.map((item: { field?: string; message?: string }) => `${item.field || 'field'}: ${item.message || 'Không hợp lệ'}`).join('; ')
   }
 
-  return error?.response?.data?.error?.message || error?.message || fallback
+  return apiError.response?.data?.error?.message || apiError.message || fallback
 }

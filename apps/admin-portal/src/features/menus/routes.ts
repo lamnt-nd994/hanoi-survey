@@ -4,7 +4,7 @@ export const menusRoutes: RouteRecordRaw[] = [
   {
     path: 'menus',
     name: 'menus',
-    component: () => import('@/pages/MenusPage.vue'),
+    component: () => import('@/features/menus/pages/MenusPage.vue'),
     meta: { title: 'Menu', section: 'menus', requiresAuth: true, layout: 'admin' },
   },
 ]

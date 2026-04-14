@@ -4,7 +4,7 @@ export const authRoutes: RouteRecordRaw[] = [
   {
     path: '/login',
     name: 'login',
-    component: () => import('@/pages/LoginPage.vue'),
+    component: () => import('@/features/auth/pages/LoginPage.vue'),
     meta: { title: 'Đăng nhập', layout: 'blank' },
   },
 ]

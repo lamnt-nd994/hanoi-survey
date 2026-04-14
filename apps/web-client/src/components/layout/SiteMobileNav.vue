@@ -1,5 +1,8 @@
 <template>
-  <div v-show="isOpen" class="border-t border-neutral-200 bg-white px-4 py-6 shadow-lg lg:hidden">
+  <div
+    v-show="isOpen"
+    class="max-h-[calc(100dvh-6rem)] overflow-y-auto overscroll-contain border-t border-neutral-200 bg-white px-4 py-6 shadow-lg lg:hidden"
+  >
     <nav class="flex flex-col gap-2">
       <template v-for="item in navItems" :key="item.resolvedUrl">
         <div v-if="hasDropdown(item)" class="rounded-2xl border border-neutral-100 p-1">

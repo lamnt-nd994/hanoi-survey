@@ -1,5 +1,5 @@
 import { ref } from 'vue'
-import { mediaApi } from '@/lib/api'
+import { mediaApi } from '@/features/media/api/mediaApi'
 import { useToastsStore } from '@/stores/toasts'
 import { extractApiError, validateSelectedFile } from '@/utils/files'
 
@@ -37,7 +37,7 @@ export function useImageUpload(onUploaded: (storagePath: string) => void, option
       onUploaded(media.storagePath)
       progress.value = 100
       toasts.show(options?.successMessage || `Đã tải ảnh: ${file.name}`, 'success')
-    } catch (error: any) {
+    } catch (error: unknown) {
       toasts.show(extractApiError(error, 'Tải ảnh thất bại'), 'error')
     } finally {
       uploading.value = false

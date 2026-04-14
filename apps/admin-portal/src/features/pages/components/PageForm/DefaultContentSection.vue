@@ -1,7 +1,7 @@
 <template>
   <div class="space-y-4">
     <div class="flex items-center justify-between gap-3">
-      <label class="cms-form-label mb-0">Nội dung</label>
+      <FormLabel>Nội dung</FormLabel>
       <Button type="button" variant="secondary" :disabled="uploading" @click="emit('trigger-image-upload')">
         {{ uploading ? `Đang tải ${uploadProgress}%` : 'Tải ảnh vào nội dung' }}
       </Button>
@@ -47,16 +47,22 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from 'vue'
-import { QuillEditor } from '@vueup/vue-quill'
+import { computed, defineAsyncComponent, ref } from 'vue'
+import FormLabel from '@/components/shared/FormLabel.vue'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Textarea } from '@/components/ui/textarea'
+import type { QuillEditorComponent, QuillToolbar } from '@/types/api'
+
+const QuillEditor = defineAsyncComponent(async () => {
+  await import('@vueup/vue-quill/dist/vue-quill.snow.css')
+  return (await import('@vueup/vue-quill')).QuillEditor
+})
 
 const props = defineProps<{
   content: string
   editorMode: 'visual' | 'html'
-  toolbar: any
+  toolbar: QuillToolbar
   uploading: boolean
   uploadProgress: number
 }>()
@@ -67,7 +73,7 @@ const emit = defineEmits<{
   (e: 'trigger-image-upload'): void
 }>()
 
-const quillRef = ref<any>(null)
+const quillRef = ref<QuillEditorComponent | null>(null)
 
 const contentProxy = computed({
   get: () => props.content,
