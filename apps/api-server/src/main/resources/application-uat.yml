@@ -1,0 +1,33 @@
+spring:
+  config:
+    activate:
+      on-profile: uat
+  datasource:
+    url: ${DB_URL:jdbc:mysql://mysql:3306/hanoi_survey_uat?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Ho_Chi_Minh}
+    username: ${DB_USERNAME:hanoi_survey}
+    password: ${DB_PASSWORD:ChangeMe123!}
+  jpa:
+    show-sql: ${JPA_SHOW_SQL:false}
+
+server:
+  forward-headers-strategy: framework
+
+springdoc:
+  api-docs:
+    enabled: ${SPRINGDOC_ENABLED:true}
+  swagger-ui:
+    enabled: ${SPRINGDOC_ENABLED:true}
+
+logging:
+  level:
+    root: INFO
+    com.hanoisurvey.api: ${APP_LOG_LEVEL:INFO}
+    org.springframework.web: INFO
+    org.hibernate.SQL: ${HIBERNATE_SQL_LOG_LEVEL:OFF}
+
+app:
+  upload-dir: ${APP_UPLOAD_DIR:/var/opt/hanoi-survey/uploads}
+  upload-public-prefix: ${APP_UPLOAD_PUBLIC_PREFIX:uploads}
+  cors-allowed-origins: ${APP_CORS_ALLOWED_ORIGINS:http://localhost:5173,http://localhost:5174}
+  jwt:
+    secret: ${JWT_SECRET}

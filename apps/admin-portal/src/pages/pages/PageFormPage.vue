@@ -3,362 +3,37 @@
     <PageHeader :title="isEdit ? 'Chỉnh sửa trang' : 'Tạo trang mới'" :description="isEdit ? 'Cập nhật nội dung trang tĩnh' : 'Thêm trang tĩnh mới vào hệ thống'" />
     <AlertBox v-if="error" :message="error" type="error" class="mt-4" />
     <form @submit.prevent="handleSubmit" class="cms-card mt-6 p-6">
-      <div class="cms-form-row">
-        <div class="cms-form-group">
-          <label class="cms-form-label">Tiêu đề <span class="required">*</span></label>
-          <input v-model="form.title" class="cms-form-control" placeholder="Nhập tiêu đề trang" required />
-        </div>
-        <div class="cms-form-group">
-          <label class="cms-form-label">Slug</label>
-          <input v-model="form.slug" class="cms-form-control" placeholder="vd: gioi-thieu" />
-        </div>
-      </div>
-
-      <div class="cms-form-group">
-        <label class="cms-form-label">Tóm tắt</label>
-        <textarea v-model="form.summary" class="cms-form-control" placeholder="Mô tả ngắn gọn" />
-      </div>
-
-      <div class="cms-form-row">
-        <div class="cms-form-group">
-          <label class="cms-form-label">Template</label>
-          <select v-model="form.templateCode" class="cms-form-control">
-            <option value="default">Mặc định</option>
-            <option value="home_landing">Trang chủ</option>
-            <option value="about_company">Giới thiệu công ty</option>
-          </select>
-        </div>
-        <div class="cms-form-group">
-          <label class="cms-form-label">Trạng thái</label>
-          <select v-model="form.status" class="cms-form-control">
-            <option value="DRAFT">Nháp</option>
-            <option value="PUBLISHED">Đã xuất bản</option>
-            <option value="ARCHIVED">Lưu trữ</option>
-          </select>
-        </div>
-      </div>
+      <PageMetaSection :form="form" @title-input="onTitleChange" @slug-input="slugManuallyEdited = true" @generate-slug="generateSlug" />
 
       <div v-if="form.templateCode === 'default'" class="cms-form-group">
-        <div class="flex items-center justify-between gap-3 mb-2">
-          <label class="cms-form-label mb-0">Nội dung</label>
-          <div class="flex items-center gap-3">
-            <button type="button" class="cms-btn cms-btn-secondary" :disabled="uploadingDefaultImage" @click="openDefaultImagePicker">
-              {{ uploadingDefaultImage ? 'Đang tải ảnh...' : 'Tải ảnh vào nội dung' }}
-            </button>
-          </div>
-        </div>
-        <div class="flex items-center gap-2">
-          <button type="button" class="editor-tab-btn" :class="{ active: defaultEditorMode === 'visual' }" @click="defaultEditorMode = 'visual'">Soạn thảo</button>
-          <button type="button" class="editor-tab-btn" :class="{ active: defaultEditorMode === 'html' }" @click="defaultEditorMode = 'html'">HTML</button>
-        </div>
-        <div class="overflow-hidden rounded-xl border border-slate-300 bg-white shadow-sm intro-quill-wrap mt-2">
-          <QuillEditor
-            v-if="defaultEditorMode === 'visual'"
-            v-model:content="form.content"
-            content-type="html"
-            theme="snow"
-            :toolbar="defaultQuillToolbar"
-            placeholder="Nhập nội dung chi tiết..."
-            class="intro-quill-editor"
-            ref="defaultQuillRef"
-          />
-          <div v-else class="p-4">
-            <textarea
-              v-model="form.content"
-              class="cms-form-control font-mono text-sm"
-              rows="14"
-              placeholder="<p>Nhập nội dung chi tiết...</p>"
-            />
-          </div>
-        </div>
-        <div class="mt-3 rounded-xl border border-slate-200 bg-slate-50 p-4">
-          <div class="text-xs font-medium uppercase tracking-[0.18em] text-slate-500">Xem trước</div>
-          <div class="prose prose-slate mt-3 max-w-none text-sm" v-html="form.content"></div>
-        </div>
-              <input ref="defaultImageInputRef" type="file" accept=".png,.jpg,.jpeg" class="hidden" @change="handleDefaultImageSelected" />
+        <DefaultContentSection
+          ref="defaultContentSectionRef"
+          v-model:content="form.content"
+          v-model:editor-mode="defaultEditorMode"
+          :toolbar="defaultQuillToolbar"
+          :uploading="uploadingDefaultImage"
+          :upload-progress="defaultImageUploadProgress"
+          @trigger-image-upload="openDefaultImagePicker"
+        />
+        <input ref="defaultImageInputRef" type="file" accept=".png,.jpg,.jpeg" class="hidden" @change="handleDefaultImageSelected" />
       </div>
 
-      <div v-else-if="form.templateCode === 'home_landing'" class="space-y-6">
-        <details open class="cms-collapsible rounded-xl border border-gray-200 p-4">
-          <summary class="flex items-center justify-between gap-3">
-            <h2 class="text-base font-semibold text-slate-900">Hero</h2>
-            <svg class="collapse-icon h-5 w-5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
-          </summary>
-          <div class="mt-4 grid gap-4 md:grid-cols-2">
-            <div class="cms-form-group md:col-span-2">
-              <label class="cms-form-label">Tiêu đề</label>
-              <input v-model="homeContent.hero.title" class="cms-form-control" placeholder="Khảo sát chính xác - Nền móng vững chắc" />
-              <div class="mt-1 text-xs text-slate-500">Dùng <code>[ ]</code> để tô nổi bật, ví dụ: <code>Dữ liệu [tin cậy] - nền móng [vững bền]</code></div>
-            </div>
-            <div class="cms-form-group md:col-span-2">
-              <label class="cms-form-label">Phụ đề</label>
-              <input v-model="homeContent.hero.subtitle" class="cms-form-control" placeholder="Ha Noi Construction Survey Consultant J.S.C" />
-            </div>
-            <div class="cms-form-group md:col-span-2">
-              <label class="cms-form-label">Ảnh nền</label>
-              <div class="relative">
-                <input v-model="homeContent.hero.backgroundImagePath" class="cms-form-control pr-36" placeholder="media/home-hero.jpg" />
-                <button type="button" class="input-action-btn" :disabled="uploadingHomeHeroImage" @click="homeHeroImageInputRef?.click()">
-                  {{ uploadingHomeHeroImage ? 'Đang tải...' : 'Từ máy tính' }}
-                </button>
-              </div>
-              <input ref="homeHeroImageInputRef" type="file" accept=".png,.jpg,.jpeg" class="hidden" @change="handleHomeHeroImageSelected" />
-            </div>
-          </div>
-
-          <div class="mt-4">
-            <div class="flex items-center justify-between gap-3">
-              <h3 class="text-sm font-semibold text-slate-800">Badge dịch vụ</h3>
-              <button type="button" class="cms-btn cms-btn-secondary" @click="homeContent.hero.badges.push(createHomeBadgeItem())">+ Thêm badge</button>
-            </div>
-            <div class="mt-3 space-y-3">
-              <div v-for="(item, index) in homeContent.hero.badges" :key="`hero-badge-${index}`" class="rounded-lg border border-gray-200 p-3">
-                <div class="flex items-center justify-between gap-3">
-                  <div class="text-sm font-medium text-slate-700">Badge {{ index + 1 }}</div>
-                  <button type="button" class="cms-act-btn delete" @click="removeArrayItem(homeContent.hero.badges, index)">&#10005;</button>
-                </div>
-                <div class="mt-3 grid gap-4 md:grid-cols-2">
-                  <div class="cms-form-group">
-                    <label class="cms-form-label">Nhãn</label>
-                    <input v-model="item.label" class="cms-form-control" placeholder="Địa hình" />
-                  </div>
-                  <div class="cms-form-group">
-                    <label class="cms-form-label">Icon</label>
-                    <input v-model="item.iconKey" class="cms-form-control" placeholder="fas fa-map-marked-alt hoặc map-pinned" />
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div class="mt-4 grid gap-4 md:grid-cols-2">
-            <div class="cms-form-group">
-              <label class="cms-form-label">Nút chính - nhãn</label>
-              <input v-model="homeContent.hero.primaryCtaLabel" class="cms-form-control" placeholder="Xem dự án" />
-            </div>
-            <div class="cms-form-group">
-              <label class="cms-form-label">Nút chính - URL</label>
-              <input v-model="homeContent.hero.primaryCtaUrl" class="cms-form-control" placeholder="/du-an" />
-            </div>
-            <div class="cms-form-group">
-              <label class="cms-form-label">Nút phụ - nhãn</label>
-              <input v-model="homeContent.hero.secondaryCtaLabel" class="cms-form-control" placeholder="Liên hệ" />
-            </div>
-            <div class="cms-form-group">
-              <label class="cms-form-label">Nút phụ - URL</label>
-              <input v-model="homeContent.hero.secondaryCtaUrl" class="cms-form-control" placeholder="/lien-he" />
-            </div>
-          </div>
-        </details>
-
-        <details open class="cms-collapsible rounded-xl border border-gray-200 p-4">
-          <summary class="flex items-center justify-between gap-3">
-            <h2 class="text-base font-semibold text-slate-900">Số liệu nổi bật</h2>
-            <svg class="collapse-icon h-5 w-5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
-          </summary>
-          <div class="mt-4 flex justify-end">
-            <button type="button" class="cms-btn cms-btn-secondary" @click="homeContent.stats.items.push(createHomeStatItem())">+ Thêm số liệu</button>
-          </div>
-          <div class="mt-4 space-y-3">
-            <div v-for="(item, index) in homeContent.stats.items" :key="`stat-${index}`" class="rounded-lg border border-gray-200 p-3">
-              <div class="flex items-center justify-between gap-3">
-                <div class="text-sm font-medium text-slate-700">Số liệu {{ index + 1 }}</div>
-                <button type="button" class="cms-act-btn delete" @click="removeAnyArrayItem(homeContent.stats.items, index)">&#10005;</button>
-              </div>
-              <div class="mt-3 grid gap-4 md:grid-cols-2">
-                <div class="cms-form-group">
-                  <label class="cms-form-label">Giá trị</label>
-                  <input v-model="item.value" class="cms-form-control" placeholder="10+" />
-                </div>
-                <div class="cms-form-group">
-                  <label class="cms-form-label">Nhãn</label>
-                  <input v-model="item.label" class="cms-form-control" placeholder="Năm kinh nghiệm" />
-                </div>
-              </div>
-            </div>
-          </div>
-        </details>
-
-        <details open class="cms-collapsible rounded-xl border border-gray-200 p-4">
-          <summary class="flex items-center justify-between gap-3">
-            <h2 class="text-base font-semibold text-slate-900">Về chúng tôi</h2>
-            <svg class="collapse-icon h-5 w-5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
-          </summary>
-          <div class="mt-4 grid gap-4 md:grid-cols-2">
-            <div class="cms-form-group">
-              <label class="cms-form-label">Eyebrow</label>
-              <input v-model="homeContent.aboutSection.eyebrow" class="cms-form-control" placeholder="Về chúng tôi" />
-            </div>
-            <div class="cms-form-group">
-              <label class="cms-form-label">Ảnh minh họa</label>
-              <div class="relative">
-                <input v-model="homeContent.aboutSection.imagePath" class="cms-form-control pr-36" placeholder="media/home-about.jpg" />
-                <button type="button" class="input-action-btn" :disabled="uploadingHomeAboutImage" @click="homeAboutImageInputRef?.click()">
-                  {{ uploadingHomeAboutImage ? 'Đang tải...' : 'Từ máy tính' }}
-                </button>
-              </div>
-              <input ref="homeAboutImageInputRef" type="file" accept=".png,.jpg,.jpeg" class="hidden" @change="handleHomeAboutImageSelected" />
-            </div>
-            <div class="cms-form-group md:col-span-2">
-              <label class="cms-form-label">Tiêu đề</label>
-              <input v-model="homeContent.aboutSection.title" class="cms-form-control" placeholder="Đơn vị khảo sát xây dựng tập trung vào độ chính xác và tiến độ thực địa" />
-            </div>
-            <div class="cms-form-group md:col-span-2">
-              <label class="cms-form-label">Mô tả</label>
-              <textarea v-model="homeContent.aboutSection.description" class="cms-form-control" rows="4" placeholder="Mô tả ngắn về doanh nghiệp" />
-            </div>
-            <div class="cms-form-group">
-              <label class="cms-form-label">Nhãn nút</label>
-              <input v-model="homeContent.aboutSection.buttonLabel" class="cms-form-control" placeholder="Xem hồ sơ năng lực" />
-            </div>
-            <div class="cms-form-group">
-              <label class="cms-form-label">URL nút</label>
-              <input v-model="homeContent.aboutSection.buttonUrl" class="cms-form-control" placeholder="/gioi-thieu" />
-            </div>
-          </div>
-
-          <div class="mt-4">
-            <div class="flex items-center justify-between gap-3">
-              <h3 class="text-sm font-semibold text-slate-800">Điểm nhấn</h3>
-              <button type="button" class="cms-btn cms-btn-secondary" @click="homeContent.aboutSection.highlights.push('')">+ Thêm ý</button>
-            </div>
-            <div class="mt-3 space-y-3">
-              <div v-for="(item, index) in homeContent.aboutSection.highlights" :key="`about-highlight-${index}`" class="rounded-lg border border-gray-200 p-3">
-                <div class="flex items-center justify-between gap-3">
-                  <div class="text-sm font-medium text-slate-700">Ý {{ index + 1 }}</div>
-                  <button type="button" class="cms-act-btn delete" @click="removeAnyArrayItem(homeContent.aboutSection.highlights, index)">&#10005;</button>
-                </div>
-                <textarea v-model="homeContent.aboutSection.highlights[index]" class="cms-form-control mt-3" rows="3" placeholder="Nội dung điểm nhấn" />
-              </div>
-            </div>
-          </div>
-        </details>
-
-        <details open class="cms-collapsible rounded-xl border border-gray-200 p-4">
-          <summary class="flex items-center justify-between gap-3">
-            <h2 class="text-base font-semibold text-slate-900">Khối dịch vụ</h2>
-            <svg class="collapse-icon h-5 w-5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
-          </summary>
-          <div class="mt-4 grid gap-4 md:grid-cols-2">
-            <div class="cms-form-group"><label class="cms-form-label">Eyebrow</label><input v-model="homeContent.servicesSection.eyebrow" class="cms-form-control" placeholder="Lĩnh vực" /></div>
-            <div class="cms-form-group">
-              <label class="cms-form-label">Chế độ hiển thị</label>
-              <select v-model="homeContent.servicesSection.mode" class="cms-form-control">
-                <option value="latest">Mới nhất theo số lượng</option>
-                <option value="manual">Chọn thủ công</option>
-              </select>
-            </div>
-            <div class="cms-form-group md:col-span-2"><label class="cms-form-label">Tiêu đề</label><input v-model="homeContent.servicesSection.title" class="cms-form-control" placeholder="Các Dịch Vụ Chính" /></div>
-            <div class="cms-form-group md:col-span-2"><label class="cms-form-label">Mô tả</label><textarea v-model="homeContent.servicesSection.description" class="cms-form-control" rows="3" placeholder="Mô tả ngắn section dịch vụ" /></div>
-          </div>
-
-          <div v-if="homeContent.servicesSection.mode === 'latest'" class="mt-4 cms-form-group" style="max-width: 20rem;">
-            <label class="cms-form-label">Số lượng hiển thị</label>
-            <input v-model.number="homeContent.servicesSection.limit" type="number" min="1" class="cms-form-control" />
-          </div>
-
-          <div v-else class="mt-4">
-            <div class="flex items-center justify-between gap-3">
-              <h3 class="text-sm font-semibold text-slate-800">Dịch vụ được chọn</h3>
-              <button type="button" class="cms-btn cms-btn-secondary" @click="homeContent.servicesSection.selectedItems.push(createSelectedServiceItem())">+ Thêm dịch vụ</button>
-            </div>
-            <div class="mt-3 space-y-3">
-              <div v-for="(item, index) in homeContent.servicesSection.selectedItems" :key="`selected-service-${index}`" class="rounded-lg border border-gray-200 p-3">
-                <div class="flex items-center justify-between gap-3">
-                  <div class="text-sm font-medium text-slate-700">Dịch vụ {{ index + 1 }}</div>
-                  <button type="button" class="cms-act-btn delete" @click="removeAnyArrayItem(homeContent.servicesSection.selectedItems, index)">&#10005;</button>
-                </div>
-                <div class="mt-3 grid gap-4 md:grid-cols-2">
-                  <div class="cms-form-group">
-                    <label class="cms-form-label">Chọn dịch vụ</label>
-                    <select v-model.number="item.serviceId" class="cms-form-control">
-                      <option :value="null">-- Chọn dịch vụ --</option>
-                      <option v-for="service in availableServices" :key="service.id" :value="service.id">{{ service.title }}</option>
-                    </select>
-                  </div>
-                  <div class="cms-form-group">
-                    <label class="cms-form-label">Icon</label>
-                    <input v-model="item.icon" class="cms-form-control" placeholder="fas fa-map-marked-alt hoặc map-pinned" />
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </details>
-
-        <details open class="cms-collapsible rounded-xl border border-gray-200 p-4">
-          <summary class="flex items-center justify-between gap-3">
-            <h2 class="text-base font-semibold text-slate-900">Khối dự án</h2>
-            <svg class="collapse-icon h-5 w-5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
-          </summary>
-          <div class="mt-4 grid gap-4 md:grid-cols-2">
-            <div class="cms-form-group"><label class="cms-form-label">Eyebrow</label><input v-model="homeContent.projectsSection.eyebrow" class="cms-form-control" placeholder="Dự án" /></div>
-            <div class="cms-form-group">
-              <label class="cms-form-label">Chế độ hiển thị</label>
-              <select v-model="homeContent.projectsSection.mode" class="cms-form-control">
-                <option value="latest">Mới nhất theo số lượng</option>
-                <option value="manual">Chọn thủ công</option>
-              </select>
-            </div>
-            <div class="cms-form-group md:col-span-2"><label class="cms-form-label">Tiêu đề</label><input v-model="homeContent.projectsSection.title" class="cms-form-control" placeholder="Dự Án Tiêu Biểu" /></div>
-            <div class="cms-form-group md:col-span-2"><label class="cms-form-label">Mô tả</label><textarea v-model="homeContent.projectsSection.description" class="cms-form-control" rows="3" placeholder="Mô tả ngắn section dự án" /></div>
-          </div>
-
-          <div v-if="homeContent.projectsSection.mode === 'latest'" class="mt-4 cms-form-group" style="max-width: 20rem;">
-            <label class="cms-form-label">Số lượng hiển thị</label>
-            <input v-model.number="homeContent.projectsSection.limit" type="number" min="1" class="cms-form-control" />
-          </div>
-
-          <div v-else class="mt-4">
-            <div class="flex items-center justify-between gap-3">
-              <h3 class="text-sm font-semibold text-slate-800">Dự án được chọn</h3>
-              <button type="button" class="cms-btn cms-btn-secondary" @click="homeContent.projectsSection.selectedItems.push(createSelectedProjectItem())">+ Thêm dự án</button>
-            </div>
-            <div class="mt-3 space-y-3">
-              <div v-for="(item, index) in homeContent.projectsSection.selectedItems" :key="`selected-project-${index}`" class="rounded-lg border border-gray-200 p-3">
-                <div class="flex items-center justify-between gap-3">
-                  <div class="text-sm font-medium text-slate-700">Dự án {{ index + 1 }}</div>
-                  <button type="button" class="cms-act-btn delete" @click="removeAnyArrayItem(homeContent.projectsSection.selectedItems, index)">&#10005;</button>
-                </div>
-                <div class="mt-3 cms-form-group">
-                  <label class="cms-form-label">Chọn dự án</label>
-                  <select v-model.number="item.projectId" class="cms-form-control">
-                    <option :value="null">-- Chọn dự án --</option>
-                    <option v-for="project in availableProjects" :key="project.id" :value="project.id">{{ project.title }}</option>
-                  </select>
-                </div>
-              </div>
-            </div>
-          </div>
-        </details>
-
-        <details open class="cms-collapsible rounded-xl border border-gray-200 p-4">
-          <summary class="flex items-center justify-between gap-3">
-            <h2 class="text-base font-semibold text-slate-900">CTA cuối trang</h2>
-            <svg class="collapse-icon h-5 w-5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
-          </summary>
-          <div class="mt-4 flex justify-end">
-            <label class="flex items-center gap-2 text-sm text-slate-700">
-              <input v-model="homeContent.finalCta.showPhoneButton" type="checkbox" />
-              Hiện nút gọi điện
-            </label>
-          </div>
-          <div class="mt-4 grid gap-4 md:grid-cols-2">
-            <div class="cms-form-group md:col-span-2"><label class="cms-form-label">Eyebrow</label><input v-model="homeContent.finalCta.eyebrow" class="cms-form-control" placeholder="Tư vấn nhanh ngoài hiện trường" /></div>
-            <div class="cms-form-group md:col-span-2"><label class="cms-form-label">Tiêu đề</label><input v-model="homeContent.finalCta.title" class="cms-form-control" placeholder="Sẵn sàng khảo sát cho dự án mới?" /></div>
-            <div class="cms-form-group md:col-span-2"><label class="cms-form-label">Mô tả</label><textarea v-model="homeContent.finalCta.description" class="cms-form-control" rows="3" placeholder="Mô tả CTA cuối trang" /></div>
-            <div class="cms-form-group"><label class="cms-form-label">Nút chính - nhãn</label><input v-model="homeContent.finalCta.primaryButtonLabel" class="cms-form-control" placeholder="Xem dự án" /></div>
-            <div class="cms-form-group"><label class="cms-form-label">Nút chính - URL</label><input v-model="homeContent.finalCta.primaryButtonUrl" class="cms-form-control" placeholder="/du-an" /></div>
-            <div class="cms-form-group"><label class="cms-form-label">Nút phụ - nhãn</label><input v-model="homeContent.finalCta.secondaryButtonLabel" class="cms-form-control" placeholder="Liên hệ" /></div>
-            <div class="cms-form-group"><label class="cms-form-label">Nút phụ - URL</label><input v-model="homeContent.finalCta.secondaryButtonUrl" class="cms-form-control" placeholder="/lien-he" /></div>
-          </div>
-        </details>
-
-        <section class="rounded-xl border border-dashed border-gray-300 bg-gray-50 p-4">
-          <div class="text-sm font-medium text-slate-700">Preview contentJson</div>
-          <textarea :value="serializedHomeContent" class="cms-form-control mt-3 font-mono text-xs" rows="12" readonly />
-        </section>
-      </div>
+      <template v-else-if="form.templateCode === 'home_landing'">
+        <HomeLandingSection
+          :home-content="homeContent"
+          :available-services="availableServices"
+          :available-projects="availableProjects"
+          :serialized-home-content="serializedHomeContent"
+          :uploading-home-hero-image="uploadingHomeHeroImage"
+          :home-hero-upload-progress="homeHeroUploadProgress"
+          :uploading-home-about-image="uploadingHomeAboutImage"
+          :home-about-upload-progress="homeAboutUploadProgress"
+          @pick-home-hero="homeHeroImageInputRef?.click()"
+          @pick-home-about="homeAboutImageInputRef?.click()"
+        />
+        <input ref="homeHeroImageInputRef" type="file" accept=".png,.jpg,.jpeg" class="hidden" @change="handleHomeHeroImageSelected" />
+        <input ref="homeAboutImageInputRef" type="file" accept=".png,.jpg,.jpeg" class="hidden" @change="handleHomeAboutImageSelected" />
+      </template>
 
       <div v-else class="space-y-6">
         <section class="rounded-xl border border-gray-200 p-4">
@@ -367,7 +42,7 @@
             <div class="flex items-center gap-3">
               <span class="text-xs text-slate-500">Quản lý phần xuất hiện đầu tiên của trang giới thiệu</span>
               <button type="button" class="cms-btn cms-btn-secondary" :disabled="uploadingIntroImage" @click="openIntroImagePicker">
-                {{ uploadingIntroImage ? 'Đang tải ảnh...' : 'Tải ảnh vào nội dung' }}
+                {{ uploadingIntroImage ? `Đang tải ${introImageUploadProgress}%` : 'Tải ảnh vào nội dung' }}
               </button>
             </div>
           </div>
@@ -381,7 +56,7 @@
               <div class="relative">
                 <input v-model="aboutContent.intro.imagePath" class="cms-form-control pr-36" placeholder="media/about-intro.jpg" />
                 <button type="button" class="input-action-btn" :disabled="uploadingIntroCoverImage" @click="introCoverImageInputRef?.click()">
-                  {{ uploadingIntroCoverImage ? 'Đang tải...' : 'Từ máy tính' }}
+                  {{ uploadingIntroCoverImage ? `Đang tải ${introCoverUploadProgress}%` : 'Chọn ảnh' }}
                 </button>
               </div>
               <input ref="introCoverImageInputRef" type="file" accept=".png,.jpg,.jpeg" class="hidden" @change="handleIntroCoverImageSelected" />
@@ -531,7 +206,7 @@
               <div class="relative">
                 <input v-model="aboutContent.organization.chartImagePath" class="cms-form-control pr-36" placeholder="media/org-chart.png" />
                 <button type="button" class="input-action-btn" :disabled="uploadingOrgChartImage" @click="orgChartImageInputRef?.click()">
-                  {{ uploadingOrgChartImage ? 'Đang tải...' : 'Từ máy tính' }}
+                  {{ uploadingOrgChartImage ? `Đang tải ${orgChartUploadProgress}%` : 'Chọn ảnh' }}
                 </button>
               </div>
               <input ref="orgChartImageInputRef" type="file" accept=".png,.jpg,.jpeg" class="hidden" @change="handleOrgChartImageSelected" />
@@ -577,7 +252,7 @@
               <div class="relative">
                 <input v-model="aboutContent.capability.imagePath" class="cms-form-control pr-36" placeholder="media/capability.jpg" />
                 <button type="button" class="input-action-btn" :disabled="uploadingCapabilityImage" @click="capabilityImageInputRef?.click()">
-                  {{ uploadingCapabilityImage ? 'Đang tải...' : 'Từ máy tính' }}
+                  {{ uploadingCapabilityImage ? `Đang tải ${capabilityImageUploadProgress}%` : 'Chọn ảnh' }}
                 </button>
               </div>
               <input ref="capabilityImageInputRef" type="file" accept=".png,.jpg,.jpeg" class="hidden" @change="handleCapabilityImageSelected" />
@@ -606,7 +281,7 @@
                   <div class="absolute right-1 top-1 flex gap-2">
                     <a v-if="item.pdfFilePath" :href="resolveUploadedMediaUrl(item.pdfFilePath)" target="_blank" rel="noopener noreferrer" class="input-mini-action-btn">Xem</a>
                     <button type="button" class="input-mini-action-btn" :disabled="uploadingCapabilityItemIndex === index" @click="openCapabilityItemPdfPicker(index)">
-                      {{ uploadingCapabilityItemIndex === index ? 'Đang tải...' : 'Từ máy tính' }}
+                      {{ uploadingCapabilityItemIndex === index ? `Đang tải ${capabilityItemUploadProgress}%` : 'Chọn PDF' }}
                     </button>
                   </div>
                 </div>
@@ -636,7 +311,11 @@ import { QuillEditor } from '@vueup/vue-quill'
 import { useRoute, useRouter } from 'vue-router'
 import PageHeader from '@/components/shared/PageHeader.vue'
 import AlertBox from '@/components/shared/AlertBox.vue'
+import DefaultContentSection from '@/features/pages/components/PageForm/DefaultContentSection.vue'
+import HomeLandingSection from '@/features/pages/components/PageForm/HomeLandingSection.vue'
+import PageMetaSection from '@/features/pages/components/PageForm/PageMetaSection.vue'
 import { mediaApi } from '@/lib/api'
+import { useToastsStore } from '@/stores/toasts'
 import { usePagesStore } from '@/stores/pages'
 import { useProjectsStore } from '@/stores/projects'
 import { useServicesStore } from '@/stores/services'
@@ -645,45 +324,53 @@ import type {
   AboutPageContent,
   AboutPageTimelineItem,
   AboutPageValueItem,
-  HomeHeroBadgeItem,
   HomePageContent,
-  HomeSelectedProjectItem,
-  HomeSelectedServiceItem,
-  HomeStatItem,
   PagePayload,
   ProjectEntity,
   ServiceEntity,
 } from '@/types'
+import { extractApiError, validateSelectedFile } from '@/utils/files'
+import { toSlug } from '@/utils/slug'
 
 const route = useRoute()
 const router = useRouter()
 const store = usePagesStore()
 const servicesStore = useServicesStore()
 const projectsStore = useProjectsStore()
+const toasts = useToastsStore()
 const saving = ref(false)
 const error = ref('')
+const slugManuallyEdited = ref(false)
 const introEditorMode = ref<'visual' | 'html'>('visual')
 const uploadingIntroCoverImage = ref(false)
+const introCoverUploadProgress = ref(0)
 const introCoverImageInputRef = ref<HTMLInputElement | null>(null)
 const uploadingIntroImage = ref(false)
+const introImageUploadProgress = ref(0)
 const introImageInputRef = ref<HTMLInputElement | null>(null)
 const introQuillRef = ref<any>(null)
 const uploadingOrgChartImage = ref(false)
+const orgChartUploadProgress = ref(0)
 const orgChartImageInputRef = ref<HTMLInputElement | null>(null)
 const uploadingCapabilityImage = ref(false)
+const capabilityImageUploadProgress = ref(0)
 const capabilityImageInputRef = ref<HTMLInputElement | null>(null)
 const uploadingHomeHeroImage = ref(false)
+const homeHeroUploadProgress = ref(0)
 const homeHeroImageInputRef = ref<HTMLInputElement | null>(null)
 const uploadingHomeAboutImage = ref(false)
+const homeAboutUploadProgress = ref(0)
 const homeAboutImageInputRef = ref<HTMLInputElement | null>(null)
 const uploadingCapabilityItemIndex = ref<number | null>(null)
 const capabilityItemPdfInputRef = ref<HTMLInputElement | null>(null)
 const capabilityItemUploadIndex = ref<number | null>(null)
+const capabilityItemUploadProgress = ref(0)
 
 const defaultEditorMode = ref<'visual' | 'html'>('visual')
 const uploadingDefaultImage = ref(false)
+const defaultImageUploadProgress = ref(0)
 const defaultImageInputRef = ref<HTMLInputElement | null>(null)
-const defaultQuillRef = ref<any>(null)
+const defaultContentSectionRef = ref<{ insertImage: (url: string) => void } | null>(null)
 
 function createQuillToolbar(imageHandler: () => void) {
   return {
@@ -751,10 +438,35 @@ onMounted(async () => {
     if (entity.templateCode === 'home_landing') {
       Object.assign(homeContent, parseHomeContent(entity.contentJson))
     }
+    slugManuallyEdited.value = true
   }
 })
 
+function generateSlug() {
+  form.slug = toSlug(form.title)
+  slugManuallyEdited.value = false
+}
+
+function onTitleChange() {
+  if (!slugManuallyEdited.value && !isEdit.value) {
+    form.slug = toSlug(form.title)
+  }
+}
+
 async function handleSubmit() {
+  if (!form.title.trim()) {
+    error.value = 'Tiêu đề không được để trống'
+    toasts.show(error.value, 'error')
+    return
+  }
+
+  form.slug = (form.slug || toSlug(form.title)).trim()
+  if (!form.slug) {
+    error.value = 'Slug không hợp lệ'
+    toasts.show(error.value, 'error')
+    return
+  }
+
   saving.value = true
   error.value = ''
   try {
@@ -773,9 +485,11 @@ async function handleSubmit() {
     } else {
       await store.create(payload)
     }
+    toasts.show(isEdit.value ? 'Cập nhật trang thành công' : 'Tạo trang thành công', 'success')
     router.push('/pages')
   } catch (e: any) {
-    error.value = e.response?.data?.error?.message || 'Thao tác thất bại'
+    error.value = extractApiError(e)
+    toasts.show(error.value, 'error')
   } finally {
     saving.value = false
   }
@@ -791,22 +505,6 @@ function createTimelineItem(): AboutPageTimelineItem {
 
 function createCapabilityItem(): AboutCapabilityItem {
   return { title: '', pdfFilePath: '', buttonLabel: 'Xem PDF' }
-}
-
-function createHomeBadgeItem(): HomeHeroBadgeItem {
-  return { label: '', iconKey: 'terrain' }
-}
-
-function createHomeStatItem(): HomeStatItem {
-  return { value: '', label: '' }
-}
-
-function createSelectedServiceItem(): HomeSelectedServiceItem {
-  return { serviceId: null, icon: '' }
-}
-
-function createSelectedProjectItem(): HomeSelectedProjectItem {
-  return { projectId: null }
 }
 
 function createEmptyHomeContent(): HomePageContent {
@@ -1174,7 +872,7 @@ function openIntroImagePicker() {
 }
 
 async function handleIntroCoverImageSelected(event: Event) {
-  const storagePath = await uploadImageFromInput(event, uploadingIntroCoverImage, 'Tải ảnh mở đầu thất bại')
+  const storagePath = await uploadImageFromInput(event, uploadingIntroCoverImage, 'Tải ảnh mở đầu thất bại', introCoverUploadProgress)
   if (storagePath) {
     aboutContent.intro.imagePath = storagePath
   }
@@ -1184,43 +882,60 @@ async function handleIntroImageSelected(event: Event) {
   const input = event.target as HTMLInputElement | null
   const file = input?.files?.[0]
   if (!file) return
+  const validationError = validateSelectedFile(file, 'image')
+  if (validationError) {
+    error.value = validationError
+    toasts.show(validationError, 'error')
+    if (input) input.value = ''
+    return
+  }
 
   uploadingIntroImage.value = true
+  introImageUploadProgress.value = 0
   error.value = ''
   try {
-    const media = await mediaApi.upload(file, file.name)
+    const media = await mediaApi.upload(file, file.name, {
+      onUploadProgress(progressEvent) {
+        if (!progressEvent.total) return
+        introImageUploadProgress.value = Math.max(1, Math.round((progressEvent.loaded / progressEvent.total) * 100))
+      },
+    })
     insertImageToIntro(resolveUploadedMediaUrl(media.storagePath))
+    introImageUploadProgress.value = 100
+    toasts.show(`Đã tải ảnh: ${file.name}`, 'success')
   } catch (e: any) {
-    error.value = e.response?.data?.error?.message || 'Tải ảnh vào nội dung thất bại'
+    error.value = extractApiError(e, 'Tải ảnh vào nội dung thất bại')
+    toasts.show(error.value, 'error')
   } finally {
     uploadingIntroImage.value = false
+    window.setTimeout(() => { introImageUploadProgress.value = 0 }, 400)
     if (input) input.value = ''
   }
 }
 
 async function handleOrgChartImageSelected(event: Event) {
-  const storagePath = await uploadImageFromInput(event, uploadingOrgChartImage, 'Tải ảnh sơ đồ thất bại')
+  const storagePath = await uploadImageFromInput(event, uploadingOrgChartImage, 'Tải ảnh sơ đồ thất bại', orgChartUploadProgress)
   if (storagePath) {
     aboutContent.organization.chartImagePath = storagePath
   }
 }
 
 async function handleCapabilityImageSelected(event: Event) {
-  const storagePath = await uploadFileFromInput(event, uploadingCapabilityImage, 'Tải ảnh hồ sơ năng lực thất bại')
+  const storagePath = await uploadFileFromInput(event, uploadingCapabilityImage, 'Tải ảnh hồ sơ năng lực thất bại', capabilityImageUploadProgress)
   if (storagePath) {
     aboutContent.capability.imagePath = storagePath
   }
 }
 
 async function handleHomeHeroImageSelected(event: Event) {
-  const storagePath = await uploadImageFromInput(event, uploadingHomeHeroImage, 'Tải ảnh hero trang chủ thất bại')
+  const storagePath = await uploadImageFromInput(event, uploadingHomeHeroImage, 'Tải ảnh hero trang chủ thất bại', homeHeroUploadProgress)
   if (storagePath) {
     homeContent.hero.backgroundImagePath = storagePath
   }
 }
 
 async function handleHomeAboutImageSelected(event: Event) {
-  const storagePath = await uploadImageFromInput(event, uploadingHomeAboutImage, 'Tải ảnh phần giới thiệu thất bại')
+  const storagePath = await uploadImageFromInput(event, uploadingHomeAboutImage, 'Tải ảnh phần giới thiệu thất bại', homeAboutUploadProgress)
   if (storagePath) {
     homeContent.aboutSection.imagePath = storagePath
   }
@@ -1244,7 +959,7 @@ async function handleCapabilityItemPdfSelected(event: Event) {
     },
   }
 
-  const storagePath = await uploadFileFromInput(event, loadingProxy, 'Tải file PDF thất bại')
+  const storagePath = await uploadFileFromInput(event, loadingProxy, 'Tải file PDF thất bại', capabilityItemUploadProgress)
   if (storagePath && aboutContent.capability.items[targetIndex]) {
     aboutContent.capability.items[targetIndex].pdfFilePath = storagePath
   }
@@ -1276,50 +991,79 @@ async function handleDefaultImageSelected(event: Event) {
   const input = event.target as HTMLInputElement | null
   const file = input?.files?.[0]
   if (!file) return
+  const validationError = validateSelectedFile(file, 'image')
+  if (validationError) {
+    error.value = validationError
+    toasts.show(validationError, 'error')
+    if (input) input.value = ''
+    return
+  }
 
   uploadingDefaultImage.value = true
+  defaultImageUploadProgress.value = 0
   error.value = ''
   try {
-    const media = await mediaApi.upload(file, file.name)
+    const media = await mediaApi.upload(file, file.name, {
+      onUploadProgress(progressEvent) {
+        if (!progressEvent.total) return
+        defaultImageUploadProgress.value = Math.max(1, Math.round((progressEvent.loaded / progressEvent.total) * 100))
+      },
+    })
     insertImageToDefault(resolveUploadedMediaUrl(media.storagePath))
+    defaultImageUploadProgress.value = 100
+    toasts.show(`Đã tải ảnh: ${file.name}`, 'success')
   } catch (e: any) {
-    error.value = e.response?.data?.error?.message || 'Tải ảnh vào nội dung thất bại'
+    error.value = extractApiError(e, 'Tải ảnh vào nội dung thất bại')
+    toasts.show(error.value, 'error')
   } finally {
     uploadingDefaultImage.value = false
+    window.setTimeout(() => { defaultImageUploadProgress.value = 0 }, 400)
     if (input) input.value = ''
   }
 }
 
 function insertImageToDefault(url: string) {
-  const quill = defaultQuillRef.value?.getQuill?.()
-  if (!quill) return
-
-  const selection = quill.getSelection(true)
-  const index = selection?.index ?? quill.getLength()
-  quill.insertEmbed(index, 'image', url, 'user')
-  quill.setSelection(index + 1, 0, 'user')
-  form.content = quill.root.innerHTML || ''
+  defaultContentSectionRef.value?.insertImage(url)
 }
 
-async function uploadImageFromInput(event: Event, loadingState: { value: boolean }, fallbackMessage: string) {
-  return uploadFileFromInput(event, loadingState, fallbackMessage)
+async function uploadImageFromInput(event: Event, loadingState: { value: boolean }, fallbackMessage: string, progressState?: { value: number }) {
+  return uploadFileFromInput(event, loadingState, fallbackMessage, progressState)
 }
 
-async function uploadFileFromInput(event: Event, loadingState: { value: boolean }, fallbackMessage: string) {
+async function uploadFileFromInput(event: Event, loadingState: { value: boolean }, fallbackMessage: string, progressState?: { value: number }) {
   const input = event.target as HTMLInputElement | null
   const file = input?.files?.[0]
   if (!file) return ''
 
+  const fileKind: 'pdf' | 'image' = /pdf/i.test(file.type) || file.name.toLowerCase().endsWith('.pdf') ? 'pdf' : 'image'
+  const validationError = validateSelectedFile(file, fileKind)
+  if (validationError) {
+    error.value = validationError
+    toasts.show(validationError, 'error')
+    if (input) input.value = ''
+    return ''
+  }
+
   loadingState.value = true
+  if (progressState) progressState.value = 0
   error.value = ''
   try {
-    const media = await mediaApi.upload(file, file.name)
+    const media = await mediaApi.upload(file, file.name, {
+      onUploadProgress(progressEvent) {
+        if (!progressState || !progressEvent.total) return
+        progressState.value = Math.max(1, Math.round((progressEvent.loaded / progressEvent.total) * 100))
+      },
+    })
+    if (progressState) progressState.value = 100
+    toasts.show(`Đã tải file: ${file.name}`, 'success')
     return media.storagePath
   } catch (e: any) {
-    error.value = e.response?.data?.error?.message || fallbackMessage
+    error.value = extractApiError(e, fallbackMessage)
+    toasts.show(error.value, 'error')
     return ''
   } finally {
     loadingState.value = false
+    if (progressState) window.setTimeout(() => { progressState.value = 0 }, 400)
     if (input) input.value = ''
   }
 }

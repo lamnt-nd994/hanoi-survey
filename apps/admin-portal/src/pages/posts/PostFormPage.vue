@@ -19,8 +19,8 @@
         <div class="cms-form-group">
           <label class="cms-form-label">Slug</label>
           <div class="flex gap-2">
-            <input v-model="form.slug" class="cms-form-control flex-1" placeholder="vd: bai-viet-mau" />
-            <button v-if="!slugManuallyEdited" type="button" @click="generateSlug" class="cms-btn cms-btn-secondary cms-btn-sm whitespace-nowrap" style="height:38px">Tự tạo</button>
+            <input v-model="form.slug" @input="slugManuallyEdited = true" class="cms-form-control flex-1" placeholder="vd: bai-viet-mau" />
+            <button type="button" @click="generateSlug" class="cms-btn cms-btn-secondary cms-btn-sm whitespace-nowrap" style="height:38px">Tự tạo</button>
           </div>
         </div>
       </div>
@@ -29,7 +29,7 @@
         <div class="flex items-start gap-2">
           <input v-model="form.coverImagePath" class="cms-form-control" placeholder="Đường dẫn ảnh bìa" />
           <button type="button" class="cms-btn cms-btn-secondary flex-shrink-0" :disabled="coverUpload.uploading.value" @click="coverUpload.openPicker()">
-            {{ coverUpload.uploading.value ? '...' : 'Upload' }}
+            {{ coverUpload.uploading.value ? `${coverUpload.progress.value || 0}%` : 'Chọn ảnh' }}
           </button>
         </div>
         <input :ref="(el: any) => { coverUpload.fileInputRef.value = el }" type="file" accept="image/*" class="hidden" @change="coverUpload.handleFileSelected" />
@@ -73,9 +73,12 @@ import { QuillEditor } from '@vueup/vue-quill'
 import '@vueup/vue-quill/dist/vue-quill.snow.css'
 import PageHeader from '@/components/shared/PageHeader.vue'
 import AlertBox from '@/components/shared/AlertBox.vue'
+import { useToastsStore } from '@/stores/toasts'
 import { usePostsStore } from '@/stores/posts'
 import { useImageUpload } from '@/composables/useImageUpload'
 import type { PostPayload } from '@/types'
+import { extractApiError } from '@/utils/files'
+import { toSlug } from '@/utils/slug'
 
 const route = useRoute()
 const router = useRouter()
@@ -85,8 +88,9 @@ const error = ref('')
 const pageLoading = ref(false)
 const slugManuallyEdited = ref(false)
 const isEdit = computed(() => !!route.params.id)
+const toasts = useToastsStore()
 
-const coverUpload = useImageUpload((path) => { form.coverImagePath = path })
+const coverUpload = useImageUpload((path) => { form.coverImagePath = path }, { successMessage: 'Đã tải ảnh tiêu đề' })
 
 const quillToolbar = [
   [{ header: [1, 2, 3, false] }],
@@ -107,16 +111,6 @@ function mediaUrl(path: string) {
   return `${baseUrl}/${path.replace(/^\/+/, '')}`
 }
 
-function toSlug(text: string): string {
-  return text
-    .toLowerCase()
-    .trim()
-    .replace(/[\s\-.]+/g, '-')
-    .replace(/[^\w\-u00c0-\u024f\u1e00-\u1eff]+/g, '')
-    .replace(/-+/g, '-')
-    .replace(/^-+|-+$/g, '')
-}
-
 function generateSlug() {
   form.slug = toSlug(form.title)
   slugManuallyEdited.value = false
@@ -134,7 +128,7 @@ function extractError(err: any): string {
     return resp.error.details.map((d: any) => `${d.field}: ${d.message}`).join('; ')
   }
   if (resp?.error?.message) return resp.error.message
-  return err?.message || 'Thao tác thất bại'
+  return extractApiError(err)
 }
 
 function toPayload(entity: any): PostPayload {
@@ -167,18 +161,20 @@ onMounted(async () => {
 })
 
 async function handleSubmit() {
-  if (form.categoryId <= 0) { error.value = 'Vui lòng chọn danh mục bài viết'; return }
-  if (!form.title.trim()) { error.value = 'Tiêu đề không được để trống'; return }
-  if (!form.slug.trim()) { error.value = 'Slug không được để trống'; return }
+  if (form.categoryId <= 0) { error.value = 'Vui lòng chọn danh mục bài viết'; toasts.show(error.value, 'error'); return }
+  if (!form.title.trim()) { error.value = 'Tiêu đề không được để trống'; toasts.show(error.value, 'error'); return }
+  if (!form.slug.trim()) { error.value = 'Slug không được để trống'; toasts.show(error.value, 'error'); return }
 
   saving.value = true
   error.value = ''
   try {
     if (isEdit.value) await store.update(Number(route.params.id), toPayload(form))
     else await store.create(toPayload(form))
+    toasts.show(isEdit.value ? 'Cập nhật bài viết thành công' : 'Tạo bài viết thành công', 'success')
     router.push('/posts')
   } catch (e: any) {
     error.value = extractError(e)
+    toasts.show(error.value, 'error')
   } finally {
     saving.value = false
   }

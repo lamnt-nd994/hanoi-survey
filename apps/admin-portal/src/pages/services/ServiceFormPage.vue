@@ -6,11 +6,14 @@
       <div class="cms-form-row">
         <div class="cms-form-group">
           <label class="cms-form-label">Tên dịch vụ <span class="required">*</span></label>
-          <input v-model="form.title" class="cms-form-control" placeholder="Nhập tên dịch vụ" required />
+          <input v-model="form.title" @input="onTitleChange" class="cms-form-control" placeholder="Nhập tên dịch vụ" required />
         </div>
         <div class="cms-form-group">
           <label class="cms-form-label">Slug</label>
-          <input v-model="form.slug" class="cms-form-control" placeholder="vd: khao-sat-duc-dat" />
+          <div class="flex gap-2">
+            <input v-model="form.slug" @input="slugManuallyEdited = true" class="cms-form-control" placeholder="vd: khao-sat-duc-dat" />
+            <button type="button" class="cms-btn cms-btn-secondary cms-btn-sm whitespace-nowrap" style="height:38px" @click="generateSlug">Tự tạo</button>
+          </div>
         </div>
       </div>
 
@@ -24,7 +27,7 @@
         <div class="flex items-start gap-2">
           <input v-model="form.coverImagePath" class="cms-form-control" placeholder="Đường dẫn ảnh bìa" />
           <button type="button" class="cms-btn cms-btn-secondary flex-shrink-0" :disabled="coverUpload.uploading.value" @click="coverUpload.openPicker()">
-            {{ coverUpload.uploading.value ? '...' : 'Upload' }}
+            {{ coverUpload.uploading.value ? `${coverUpload.progress.value || 0}%` : 'Chọn ảnh' }}
           </button>
         </div>
         <input :ref="(el: any) => { coverUpload.fileInputRef.value = el }" type="file" accept="image/*" class="hidden" @change="coverUpload.handleFileSelected" />
@@ -35,7 +38,7 @@
         <div class="mb-3 flex items-center justify-between gap-3">
           <label class="cms-form-label mb-0">Thư viện ảnh</label>
           <button type="button" class="cms-btn cms-btn-secondary flex-shrink-0" :disabled="galleryUpload.uploading.value" @click="galleryUpload.openPicker()">
-            {{ galleryUpload.uploading.value ? 'Đang tải...' : '+ Thêm ảnh' }}
+            {{ galleryUpload.uploading.value ? `Đang tải ${galleryUpload.progress.value || 0}%` : '+ Thêm ảnh' }}
           </button>
         </div>
         <input :ref="(el: any) => { galleryUpload.fileInputRef.value = el }" type="file" accept="image/*" multiple class="hidden" @change="handleGalleryUpload" />
@@ -109,7 +112,7 @@
                 <div class="absolute right-1 top-1 flex gap-2">
                   <a v-if="item.filePath" :href="mediaUrl(item.filePath)" target="_blank" rel="noopener noreferrer" class="input-mini-action-btn">Xem</a>
                   <button type="button" class="input-mini-action-btn" :disabled="documentUploadBusy && activeDocumentInputIndex === index" @click="openDocumentPicker(index)">
-                    {{ documentUploadBusy && activeDocumentInputIndex === index ? 'Đang tải...' : 'Từ máy tính' }}
+                    {{ documentUploadBusy && activeDocumentInputIndex === index ? `Đang tải ${documentUploadProgress}%` : 'Chọn PDF' }}
                   </button>
                 </div>
               </div>
@@ -128,7 +131,7 @@
         <div class="mb-2 flex items-center justify-between gap-3">
           <label class="cms-form-label mb-0">Nội dung</label>
           <button type="button" class="cms-btn cms-btn-secondary" :disabled="contentImageUpload.uploading.value" @click="contentImageUpload.openPicker()">
-            {{ contentImageUpload.uploading.value ? 'Đang tải ảnh...' : 'Tải ảnh vào nội dung' }}
+            {{ contentImageUpload.uploading.value ? `Đang tải ${contentImageUpload.progress.value || 0}%` : 'Tải ảnh vào nội dung' }}
           </button>
         </div>
         <div class="flex items-center gap-2">
@@ -191,14 +194,19 @@ import AlertBox from '@/components/shared/AlertBox.vue'
 import PageHeader from '@/components/shared/PageHeader.vue'
 import { useImageUpload } from '@/composables/useImageUpload'
 import { mediaApi } from '@/lib/api'
+import { useToastsStore } from '@/stores/toasts'
 import { useServicesStore } from '@/stores/services'
 import type { ServiceDocumentPayload, ServiceImagePayload, ServicePayload } from '@/types'
+import { extractApiError, validateSelectedFile } from '@/utils/files'
+import { toSlug } from '@/utils/slug'
 
 const route = useRoute()
 const router = useRouter()
 const store = useServicesStore()
 const saving = ref(false)
 const error = ref('')
+const slugManuallyEdited = ref(false)
+const toasts = useToastsStore()
 const isEdit = computed(() => !!route.params.id)
 const form = reactive<ServicePayload>({
   title: '',
@@ -213,15 +221,16 @@ const form = reactive<ServicePayload>({
   status: 'DRAFT',
 })
 
-const coverUpload = useImageUpload((path) => { form.coverImagePath = path })
-const galleryUpload = useImageUpload(() => {})
+const coverUpload = useImageUpload((path) => { form.coverImagePath = path }, { successMessage: 'Đã tải ảnh bìa' })
+const galleryUpload = useImageUpload(() => {}, { successMessage: 'Đã tải ảnh thư viện' })
 const contentEditorMode = ref<'visual' | 'html'>('visual')
 const contentQuillRef = ref<any>(null)
-const contentImageUpload = useImageUpload(() => {})
+const contentImageUpload = useImageUpload(() => {}, { successMessage: 'Đã tải ảnh nội dung' })
 const isUserTyping = ref(false)
 const documentPdfInputRef = ref<HTMLInputElement | null>(null)
 const activeDocumentInputIndex = ref<number | null>(null)
 const documentUploadBusy = ref(false)
+const documentUploadProgress = ref(0)
 function createDocument(): ServiceDocumentPayload {
   return {
     title: '',
@@ -336,6 +345,13 @@ async function handleContentImageSelected(event: Event) {
   const input = event.target as HTMLInputElement | null
   const file = input?.files?.[0]
   if (!file) return
+  const validationError = validateSelectedFile(file, 'image')
+  if (validationError) {
+    error.value = validationError
+    toasts.show(validationError, 'error')
+    if (input) input.value = ''
+    return
+  }
   contentImageUpload.uploading.value = true
   error.value = ''
   try {
@@ -346,8 +362,10 @@ async function handleContentImageSelected(event: Event) {
       const baseUrl = (import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080').replace(/\/$/, '')
       return `${baseUrl}/${p.replace(/^\/+/, '')}`
     })())
+    toasts.show(`Đã tải ảnh: ${file.name}`, 'success')
   } catch (e: any) {
-    error.value = e.response?.data?.error?.message || 'Tải ảnh thất bại'
+    error.value = extractApiError(e, 'Tải ảnh thất bại')
+    toasts.show(error.value, 'error')
   } finally {
     contentImageUpload.uploading.value = false
     if (input) input.value = ''
@@ -364,18 +382,36 @@ async function handleDocumentSelected(event: Event) {
     return
   }
 
+  const validationError = validateSelectedFile(file, 'pdf')
+  if (validationError) {
+    error.value = validationError
+    toasts.show(validationError, 'error')
+    activeDocumentInputIndex.value = null
+    if (input) input.value = ''
+    return
+  }
+
   documentUploadBusy.value = true
+  documentUploadProgress.value = 0
   error.value = ''
   try {
-    const media = await mediaApi.upload(file, file.name)
+    const media = await mediaApi.upload(file, file.name, {
+      onUploadProgress(progressEvent) {
+        if (!progressEvent.total) return
+        documentUploadProgress.value = Math.max(1, Math.round((progressEvent.loaded / progressEvent.total) * 100))
+      },
+    })
     form.documents[targetIndex].filePath = media.storagePath
     if (!form.documents[targetIndex].title.trim()) {
       form.documents[targetIndex].title = file.name.replace(/\.pdf$/i, '')
     }
+    toasts.show(`Đã tải PDF: ${file.name}`, 'success')
   } catch (e: any) {
-    error.value = e.response?.data?.error?.message || 'Tải PDF thất bại'
+    error.value = extractApiError(e, 'Tải PDF thất bại')
+    toasts.show(error.value, 'error')
   } finally {
     documentUploadBusy.value = false
+    window.setTimeout(() => { documentUploadProgress.value = 0 }, 400)
     activeDocumentInputIndex.value = null
     if (input) input.value = ''
   }
@@ -390,6 +426,8 @@ async function handleGalleryUpload(event: Event) {
   error.value = ''
   try {
     for (const file of Array.from(files)) {
+      const validationError = validateSelectedFile(file, 'image')
+      if (validationError) throw new Error(validationError)
       const media = await mediaApi.upload(file, file.name)
       form.images.push({
         ...createImage(media.storagePath),
@@ -397,8 +435,10 @@ async function handleGalleryUpload(event: Event) {
       })
     }
     normalizeImageOrders()
+    toasts.show(`Đã tải ${files.length} ảnh`, 'success')
   } catch (e: any) {
-    error.value = e.response?.data?.error?.message || 'Tải ảnh thư viện thất bại'
+    error.value = extractApiError(e, 'Tải ảnh thư viện thất bại')
+    toasts.show(error.value, 'error')
   } finally {
     galleryUpload.uploading.value = false
     if (input) input.value = ''
@@ -412,19 +452,21 @@ function mediaUrl(path: string) {
   return `${baseUrl}/${path.replace(/^\/+/, '')}`
 }
 
-function slugify(value: string) {
-  return value
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-+|-+$/g, '')
+function generateSlug() {
+  form.slug = toSlug(form.title)
+  slugManuallyEdited.value = false
+}
+
+function onTitleChange() {
+  if (!slugManuallyEdited.value && !isEdit.value) {
+    form.slug = toSlug(form.title)
+  }
 }
 
 function buildPayload(): ServicePayload {
   return {
     title: form.title.trim(),
-    slug: (form.slug || slugify(form.title)).trim(),
+    slug: (form.slug || toSlug(form.title)).trim(),
     overview: form.overview?.trim() || '',
     content: form.content || '',
     icon: form.icon?.trim() || '',
@@ -454,7 +496,7 @@ function extractErrorMessage(e: any) {
   if (Array.isArray(fieldErrors) && fieldErrors.length) {
     return fieldErrors.map((item: { field?: string, message?: string }) => `${item.field || 'field'}: ${item.message || 'Không hợp lệ'}`).join('; ')
   }
-  return e.response?.data?.error?.message || 'Thao tác thất bại'
+  return extractApiError(e)
 }
 
 function parseGalleryJson(value: string | null | undefined): ServiceImagePayload[] {
@@ -499,6 +541,7 @@ onMounted(async () => {
     })
     normalizeDocumentOrders()
     normalizeImageOrders()
+    slugManuallyEdited.value = true
   }
 })
 
@@ -507,11 +550,13 @@ async function handleSubmit() {
 
   if (!payload.title) {
     error.value = 'Tên dịch vụ là bắt buộc'
+    toasts.show(error.value, 'error')
     return
   }
 
   if (!payload.slug) {
     error.value = 'Slug không hợp lệ. Vui lòng nhập tên dịch vụ hoặc slug.'
+    toasts.show(error.value, 'error')
     return
   }
 
@@ -529,9 +574,11 @@ async function handleSubmit() {
   try {
     if (isEdit.value) await store.update(Number(route.params.id), payload)
     else await store.create(payload)
+    toasts.show(isEdit.value ? 'Cập nhật dịch vụ thành công' : 'Tạo dịch vụ thành công', 'success')
     router.push('/services')
   } catch (e: any) {
     error.value = extractErrorMessage(e)
+    toasts.show(error.value, 'error')
   } finally {
     saving.value = false
   }

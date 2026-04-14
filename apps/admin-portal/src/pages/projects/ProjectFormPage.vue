@@ -13,11 +13,14 @@
       <div class="cms-form-row">
         <div class="cms-form-group">
           <label class="cms-form-label">Tên dự án <span class="required">*</span></label>
-          <input v-model="form.title" class="cms-form-control" required />
+          <input v-model="form.title" @input="onTitleChange" class="cms-form-control" required />
         </div>
         <div class="cms-form-group">
           <label class="cms-form-label">Slug</label>
-          <input v-model="form.slug" class="cms-form-control" placeholder="vd: du-an-abc" />
+          <div class="flex gap-2">
+            <input v-model="form.slug" @input="slugManuallyEdited = true" class="cms-form-control" placeholder="vd: du-an-abc" />
+            <button type="button" class="cms-btn cms-btn-secondary cms-btn-sm whitespace-nowrap" style="height:38px" @click="generateSlug">Tự tạo</button>
+          </div>
         </div>
       </div>
       <div class="cms-form-row">
@@ -40,7 +43,7 @@
           <div class="flex items-start gap-2">
             <input v-model="form.coverImagePath" class="cms-form-control" placeholder="Đường dẫn ảnh bìa" />
             <button type="button" class="cms-btn cms-btn-secondary flex-shrink-0" :disabled="coverUpload.uploading.value" @click="coverUpload.openPicker()">
-              {{ coverUpload.uploading.value ? '...' : 'Upload' }}
+              {{ coverUpload.uploading.value ? `${coverUpload.progress.value || 0}%` : 'Chọn ảnh' }}
             </button>
           </div>
           <input :ref="(el: any) => { coverUpload.fileInputRef.value = el }" type="file" accept="image/*" class="hidden" @change="coverUpload.handleFileSelected" />
@@ -51,7 +54,7 @@
         <label class="cms-form-label">Thư viện ảnh</label>
         <div class="flex items-start gap-2">
           <button type="button" class="cms-btn cms-btn-secondary flex-shrink-0" :disabled="galleryUpload.uploading.value" @click="galleryUpload.openPicker()">
-            {{ galleryUpload.uploading.value ? 'Đang tải...' : '+ Thêm ảnh' }}
+            {{ galleryUpload.uploading.value ? `Đang tải ${galleryUpload.progress.value || 0}%` : '+ Thêm ảnh' }}
           </button>
           <input :ref="(el: any) => { galleryUpload.fileInputRef.value = el }" type="file" accept="image/*" multiple class="hidden" @change="handleGalleryUpload" />
         </div>
@@ -87,21 +90,26 @@ import { ref, reactive, computed, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import PageHeader from '@/components/shared/PageHeader.vue'
 import AlertBox from '@/components/shared/AlertBox.vue'
+import { useToastsStore } from '@/stores/toasts'
 import { useProjectsStore } from '@/stores/projects'
 import { useImageUpload } from '@/composables/useImageUpload'
 import { mediaApi } from '@/lib/api'
 import type { ProjectPayload } from '@/types'
+import { extractApiError, validateSelectedFile } from '@/utils/files'
+import { toSlug } from '@/utils/slug'
 
 const route = useRoute()
 const router = useRouter()
 const store = useProjectsStore()
 const saving = ref(false)
 const error = ref('')
+const slugManuallyEdited = ref(false)
 const isEdit = computed(() => !!route.params.id)
 const form = reactive<ProjectPayload>({ categoryId: 0, title: '', slug: '', clientName: '', location: '', startedAt: null, completedAt: null, scaleText: '', coverImagePath: '', galleryJson: '', content: '', status: 'DRAFT' })
+const toasts = useToastsStore()
 
-const coverUpload = useImageUpload((path) => { form.coverImagePath = path })
-const galleryUpload = useImageUpload(() => {})
+const coverUpload = useImageUpload((path) => { form.coverImagePath = path }, { successMessage: 'Đã tải ảnh bìa dự án' })
+const galleryUpload = useImageUpload(() => {}, { successMessage: 'Đã tải ảnh thư viện dự án' })
 
 const galleryPaths = ref<string[]>([])
 
@@ -120,9 +128,16 @@ async function handleGalleryUpload(event: Event) {
   galleryUpload.uploading.value = true
   try {
     for (const file of Array.from(files)) {
+      const validationError = validateSelectedFile(file, 'image')
+      if (validationError) throw new Error(validationError)
       const media = await mediaApi.upload(file, file.name)
       galleryPaths.value.push(media.storagePath)
     }
+    toasts.show(`Đã tải ${files.length} ảnh`, 'success')
+  } catch (uploadError: any) {
+    const message = extractApiError(uploadError, 'Tải ảnh thư viện thất bại')
+    error.value = message
+    toasts.show(message, 'error')
   } finally {
     galleryUpload.uploading.value = false
     if (input) input.value = ''
@@ -141,16 +156,43 @@ onMounted(async () => {
   if (route.params.id) {
     const entity = await store.getById(Number(route.params.id))
     Object.assign(form, entity)
+    slugManuallyEdited.value = true
   }
 })
 
+function generateSlug() {
+  form.slug = toSlug(form.title)
+  slugManuallyEdited.value = false
+}
+
+function onTitleChange() {
+  if (!slugManuallyEdited.value && !isEdit.value) {
+    form.slug = toSlug(form.title)
+  }
+}
+
 async function handleSubmit() {
+  if (!form.title.trim()) {
+    error.value = 'Tên dự án không được để trống'
+    toasts.show(error.value, 'error')
+    return
+  }
+  form.slug = (form.slug || toSlug(form.title)).trim()
+  if (!form.slug) {
+    error.value = 'Slug không hợp lệ'
+    toasts.show(error.value, 'error')
+    return
+  }
   saving.value = true; error.value = ''
   try {
     if (isEdit.value) await store.update(Number(route.params.id), form)
     else await store.create(form)
+    toasts.show(isEdit.value ? 'Cập nhật dự án thành công' : 'Tạo dự án thành công', 'success')
     router.push('/projects')
-  } catch (e: any) { error.value = e.response?.data?.error?.message || 'Thao tác thất bại' }
+  } catch (e: any) {
+    error.value = extractApiError(e)
+    toasts.show(error.value, 'error')
+  }
   finally { saving.value = false }
 }
 </script>

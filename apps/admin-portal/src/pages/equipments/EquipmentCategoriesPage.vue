@@ -57,11 +57,14 @@
         <form class="mt-5 space-y-4" @submit.prevent="handleCategorySubmit">
           <div>
             <label class="cms-form-label">Tên danh mục <span class="required">*</span></label>
-            <input v-model="categoryForm.name" class="cms-form-control" placeholder="Nhập tên danh mục" required />
+            <input v-model="categoryForm.name" @input="onNameChange" class="cms-form-control" placeholder="Nhập tên danh mục" required />
           </div>
           <div>
             <label class="cms-form-label">Slug</label>
-            <input v-model="categoryForm.slug" class="cms-form-control" placeholder="tu-dong-tao-neu-bo-trong" />
+            <div class="flex gap-2">
+              <input v-model="categoryForm.slug" @input="slugManuallyEdited = true" class="cms-form-control" placeholder="tu-dong-tao-neu-bo-trong" />
+              <button type="button" class="cms-btn cms-btn-secondary cms-btn-sm whitespace-nowrap" style="height:38px" @click="generateSlug">Tự tạo</button>
+            </div>
           </div>
           <div>
             <label class="cms-form-label">Icon</label>
@@ -93,15 +96,27 @@
 import { onMounted, reactive, ref } from 'vue'
 import PageHeader from '@/components/shared/PageHeader.vue'
 import { useEquipmentsStore } from '@/stores/equipments'
+import { useToastsStore } from '@/stores/toasts'
 import type { Category, CategoryPayload } from '@/types'
+import { extractApiError } from '@/utils/files'
+import { toSlug } from '@/utils/slug'
 
 const store = useEquipmentsStore()
 const categorySaving = ref(false)
 const categoryError = ref('')
+const slugManuallyEdited = ref(false)
+const toasts = useToastsStore()
 const categoryForm = reactive<{ id: number | null } & CategoryPayload>({ id: null, name: '', slug: '', parentId: null, icon: '', sortOrder: 0, active: true })
 
-function slugify(value: string) {
-  return value.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '')
+function generateSlug() {
+  categoryForm.slug = toSlug(categoryForm.name)
+  slugManuallyEdited.value = false
+}
+
+function onNameChange() {
+  if (!slugManuallyEdited.value && !categoryForm.id) {
+    categoryForm.slug = toSlug(categoryForm.name)
+  }
 }
 
 function resetCategoryForm() {
@@ -113,6 +128,7 @@ function resetCategoryForm() {
   categoryForm.sortOrder = 0
   categoryForm.active = true
   categoryError.value = ''
+  slugManuallyEdited.value = false
 }
 
 function startEditCategory(category: Category) {
@@ -124,12 +140,13 @@ function startEditCategory(category: Category) {
   categoryForm.sortOrder = category.sortOrder
   categoryForm.active = category.active
   categoryError.value = ''
+  slugManuallyEdited.value = true
 }
 
 function buildCategoryPayload(): CategoryPayload {
   return {
     name: categoryForm.name.trim(),
-    slug: (categoryForm.slug || slugify(categoryForm.name)).trim(),
+    slug: (categoryForm.slug || toSlug(categoryForm.name)).trim(),
     parentId: null,
     icon: categoryForm.icon?.trim() || '',
     sortOrder: Number.isFinite(categoryForm.sortOrder) ? categoryForm.sortOrder : 0,
@@ -140,21 +157,31 @@ function buildCategoryPayload(): CategoryPayload {
 function extractErrorMessage(error: any) {
   const details = error.response?.data?.error?.details
   if (Array.isArray(details) && details.length) return details.map((item: { field?: string, message?: string }) => `${item.field || 'field'}: ${item.message || 'Không hợp lệ'}`).join('; ')
-  return error.response?.data?.error?.message || 'Thao tác thất bại'
+  return extractApiError(error)
 }
 
 async function handleCategorySubmit() {
   const payload = buildCategoryPayload()
-  if (!payload.name) return void (categoryError.value = 'Tên danh mục là bắt buộc')
-  if (!payload.slug) return void (categoryError.value = 'Slug không hợp lệ')
+  if (!payload.name) {
+    categoryError.value = 'Tên danh mục là bắt buộc'
+    toasts.show(categoryError.value, 'error')
+    return
+  }
+  if (!payload.slug) {
+    categoryError.value = 'Slug không hợp lệ'
+    toasts.show(categoryError.value, 'error')
+    return
+  }
   categorySaving.value = true
   categoryError.value = ''
   try {
     if (categoryForm.id) await store.updateCategory(categoryForm.id, payload)
     else await store.createCategory(payload)
+    toasts.show(categoryForm.id ? 'Cập nhật danh mục thiết bị thành công' : 'Tạo danh mục thiết bị thành công', 'success')
     resetCategoryForm()
   } catch (error: any) {
     categoryError.value = extractErrorMessage(error)
+    toasts.show(categoryError.value, 'error')
   } finally {
     categorySaving.value = false
   }
@@ -165,9 +192,11 @@ async function handleDeleteCategory(id: number) {
   categoryError.value = ''
   try {
     await store.removeCategory(id)
+    toasts.show('Xóa danh mục thiết bị thành công', 'success')
     if (categoryForm.id === id) resetCategoryForm()
   } catch (error: any) {
     categoryError.value = extractErrorMessage(error)
+    toasts.show(categoryError.value, 'error')
   }
 }
 

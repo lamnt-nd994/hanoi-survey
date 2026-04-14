@@ -13,11 +13,14 @@
         </div>
         <div class="cms-form-group">
           <label class="cms-form-label">Tên thiết bị <span class="required">*</span></label>
-          <input v-model="form.name" class="cms-form-control" required />
+          <input v-model="form.name" @input="onNameChange" class="cms-form-control" required />
         </div>
         <div class="cms-form-group">
           <label class="cms-form-label">Slug</label>
-          <input v-model="form.slug" class="cms-form-control" />
+          <div class="flex gap-2">
+            <input v-model="form.slug" @input="slugManuallyEdited = true" class="cms-form-control" />
+            <button type="button" class="cms-btn cms-btn-secondary cms-btn-sm whitespace-nowrap" style="height:38px" @click="generateSlug">Tự tạo</button>
+          </div>
         </div>
       </div>
       <div class="cms-form-row">
@@ -53,7 +56,7 @@
         <div class="flex items-start gap-2">
           <input v-model="form.coverImagePath" class="cms-form-control" placeholder="Đường dẫn ảnh bìa" />
           <button type="button" class="cms-btn cms-btn-secondary flex-shrink-0" :disabled="coverUpload.uploading.value" @click="coverUpload.openPicker()">
-            {{ coverUpload.uploading.value ? '...' : 'Upload' }}
+            {{ coverUpload.uploading.value ? `${coverUpload.progress.value || 0}%` : 'Chọn ảnh' }}
           </button>
         </div>
         <input :ref="(el: any) => { coverUpload.fileInputRef.value = el }" type="file" accept="image/*" class="hidden" @change="coverUpload.handleFileSelected" />
@@ -84,19 +87,24 @@ import { ref, reactive, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import PageHeader from '@/components/shared/PageHeader.vue'
 import AlertBox from '@/components/shared/AlertBox.vue'
+import { useToastsStore } from '@/stores/toasts'
 import { useEquipmentsStore } from '@/stores/equipments'
 import { useImageUpload } from '@/composables/useImageUpload'
 import type { EquipmentPayload } from '@/types'
+import { toSlug } from '@/utils/slug'
+import { extractApiError } from '@/utils/files'
 
 const route = useRoute()
 const router = useRouter()
 const store = useEquipmentsStore()
 const saving = ref(false)
 const error = ref('')
+const slugManuallyEdited = ref(false)
 const isEdit = computed(() => !!route.params.id)
 const form = reactive<EquipmentPayload>({ categoryId: 0, name: '', slug: '', model: '', manufacturer: '', origin: '', unit: '', quantity: null, productionYear: null, description: '', coverImagePath: '', status: 'DRAFT' })
+const toasts = useToastsStore()
 
-const coverUpload = useImageUpload((path) => { form.coverImagePath = path })
+const coverUpload = useImageUpload((path) => { form.coverImagePath = path }, { successMessage: 'Đã tải ảnh bìa thiết bị' })
 
 function mediaUrl(path: string) {
   if (!path) return ''
@@ -110,20 +118,43 @@ onMounted(async () => {
   if (route.params.id) {
     const entity = await store.getById(Number(route.params.id))
     Object.assign(form, entity)
+    slugManuallyEdited.value = true
   }
 })
+
+function generateSlug() {
+  form.slug = toSlug(form.name)
+  slugManuallyEdited.value = false
+}
+
+function onNameChange() {
+  if (!slugManuallyEdited.value && !isEdit.value) {
+    form.slug = toSlug(form.name)
+  }
+}
 
 async function handleSubmit() {
   if (!form.categoryId) {
     error.value = 'Vui lòng chọn danh mục thiết bị'
+    toasts.show(error.value, 'error')
+    return
+  }
+  if (!form.name.trim()) {
+    error.value = 'Tên thiết bị không được để trống'
+    toasts.show(error.value, 'error')
+    return
+  }
+  if (!(form.slug || toSlug(form.name)).trim()) {
+    error.value = 'Slug không hợp lệ'
+    toasts.show(error.value, 'error')
     return
   }
   saving.value = true; error.value = ''
   try {
     const payload: EquipmentPayload = {
       categoryId: form.categoryId,
-      name: form.name,
-      slug: form.slug,
+      name: form.name.trim(),
+      slug: (form.slug || toSlug(form.name)).trim(),
       model: form.model,
       manufacturer: form.manufacturer,
       origin: form.origin,
@@ -136,8 +167,12 @@ async function handleSubmit() {
     }
     if (isEdit.value) await store.update(Number(route.params.id), payload)
     else await store.create(payload)
+    toasts.show(isEdit.value ? 'Cập nhật thiết bị thành công' : 'Tạo thiết bị thành công', 'success')
     router.push('/equipments')
-  } catch (e: any) { error.value = e.response?.data?.error?.message || 'Thao tác thất bại' }
+  } catch (e: any) {
+    error.value = extractApiError(e)
+    toasts.show(error.value, 'error')
+  }
   finally { saving.value = false }
 }
 </script>
