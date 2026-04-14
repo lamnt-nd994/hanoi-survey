@@ -2,11 +2,11 @@
   <div>
     <section class="container-shell py-16 md:py-14">
       <div v-if="loading" class="grid gap-6">
-        <div class="panel h-40 animate-pulse bg-neutral-100"></div>
-        <div class="panel h-64 animate-pulse bg-neutral-100"></div>
+        <Skeleton class="h-40 rounded-2xl" />
+        <Skeleton class="h-64 rounded-2xl" />
       </div>
 
-      <div v-else-if="error" class="panel p-8 text-rose-600">{{ error }}</div>
+      <Card v-else-if="error" class="p-8 text-rose-600">{{ error }}</Card>
 
       <div v-else-if="detail">
         <article v-if="type === 'project'" class="space-y-10">
@@ -14,6 +14,11 @@
             <img
               :src="resolveMediaUrl(detail.coverImagePath)"
               :alt="detail.title"
+              width="1200"
+              height="720"
+              loading="eager"
+              fetchpriority="high"
+              decoding="async"
               class="h-[22rem] w-full object-cover md:h-[30rem]"
             />
           </div>
@@ -29,7 +34,7 @@
           </div>
 
           <div class="grid gap-8 lg:grid-cols-[0.72fr_1.28fr]">
-            <aside class="panel p-6">
+            <Card as="aside" class="p-6">
               <div class="eyebrow">Thông tin dự án</div>
               <div class="mt-5 space-y-4">
                 <div v-for="item in projectMetadata" :key="item.label" class="rounded-2xl border border-neutral-200 bg-neutral-50 px-4 py-4">
@@ -37,13 +42,13 @@
                   <div class="mt-2 text-base font-semibold text-primary-navy">{{ item.value }}</div>
                 </div>
               </div>
-            </aside>
+            </Card>
 
-            <div class="panel p-6 md:p-8">
+            <Card class="p-6 md:p-8">
               <div class="prose prose-slate max-w-none">
                 <div class="text-base leading-8 text-neutral-700" v-html="bodyText"></div>
               </div>
-            </div>
+            </Card>
           </div>
 
           <section v-if="projectGalleryImages.length" class="space-y-5">
@@ -60,69 +65,82 @@
                 class="overflow-hidden rounded-[1.75rem] border border-neutral-200 bg-white shadow-sm transition-transform duration-300 hover:-translate-y-1"
                 @click="openProjectLightbox(index)"
               >
-                <img :src="resolveMediaUrl(image)" :alt="`${detail.title} ${index + 1}`" class="h-64 w-full object-cover transition-transform duration-500 hover:scale-105" />
+                <img :src="resolveMediaUrl(image)" :alt="`${detail.title} ${index + 1}`" width="480" height="256" loading="lazy" decoding="async" class="h-64 w-full object-cover transition-transform duration-500 hover:scale-105" />
               </button>
             </div>
           </section>
         </article>
 
-        <div v-if="isProjectLightboxOpen" class="fixed inset-0 z-[70] flex items-center justify-center bg-slate-950/90 px-4 py-6" @click.self="closeProjectLightbox">
-          <button type="button" class="absolute right-4 top-4 flex h-11 w-11 items-center justify-center rounded-full border border-white/20 bg-white/10 text-white transition hover:bg-white/20 md:right-8 md:top-8" @click="closeProjectLightbox">
+        <Dialog v-if="isProjectLightboxOpen" :open="isProjectLightboxOpen" @update:open="handleLightboxOpenChange">
+          <DialogContent class="max-w-6xl px-0 py-0" aria-describedby="project-lightbox-description">
+          <DialogTitle class="sr-only">{{ detail.title }} gallery</DialogTitle>
+          <p id="project-lightbox-description" class="sr-only">Project image gallery lightbox.</p>
+          <Button type="button" variant="ghost" size="icon" class="absolute right-0 top-[-3.25rem] border border-white/20 bg-white/10 text-white hover:bg-white/20" @click="closeProjectLightbox">
             <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
             </svg>
-          </button>
+          </Button>
 
-          <button
+          <Button
             v-if="projectGalleryImages.length > 1"
             type="button"
-            class="absolute left-3 top-1/2 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full border border-white/20 bg-white/10 text-white transition hover:bg-white/20 md:left-6"
+            variant="ghost"
+            size="icon"
+            class="absolute left-3 top-1/2 -translate-y-1/2 border border-white/20 bg-white/10 text-white hover:bg-white/20 md:left-6"
             @click.stop="showPrevProjectImage"
           >
             <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
             </svg>
-          </button>
+          </Button>
 
           <div class="w-full max-w-6xl">
             <img
               :src="currentProjectLightboxImage"
               :alt="`${detail.title} ${activeProjectImageIndex + 1}`"
+              width="1200"
+              height="800"
+              loading="lazy"
+              decoding="async"
               class="max-h-[82vh] w-full rounded-[1.75rem] object-contain"
             />
             <div class="mt-4 text-center text-sm text-white/75">
               Anh {{ activeProjectImageIndex + 1 }} / {{ projectGalleryImages.length }}
             </div>
             <div v-if="projectGalleryImages.length > 1" class="mt-4 flex flex-wrap justify-center gap-3">
-              <button
+              <Button
                 v-for="(image, index) in projectGalleryImages"
                 :key="`thumb-${image}-${index}`"
                 type="button"
-                class="overflow-hidden rounded-2xl border-2 transition-all"
+                variant="ghost"
+                class="h-auto min-h-0 min-w-0 overflow-hidden rounded-2xl border-2 p-0 transition-all"
                 :class="index === activeProjectImageIndex ? 'border-white shadow-lg shadow-white/10' : 'border-white/10 opacity-70 hover:opacity-100'"
                 @click.stop="activeProjectImageIndex = index"
               >
-                <img :src="resolveMediaUrl(image)" :alt="`${detail.title} thumbnail ${index + 1}`" class="h-16 w-24 object-cover md:h-20 md:w-32" />
-              </button>
+                <img :src="resolveMediaUrl(image)" :alt="`${detail.title} thumbnail ${index + 1}`" width="128" height="80" loading="lazy" decoding="async" class="h-16 w-24 object-cover md:h-20 md:w-32" />
+              </Button>
             </div>
           </div>
 
-          <button
+          <Button
             v-if="projectGalleryImages.length > 1"
             type="button"
-            class="absolute right-3 top-1/2 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full border border-white/20 bg-white/10 text-white transition hover:bg-white/20 md:right-6"
+            variant="ghost"
+            size="icon"
+            class="absolute right-3 top-1/2 -translate-y-1/2 border border-white/20 bg-white/10 text-white hover:bg-white/20 md:right-6"
             @click.stop="showNextProjectImage"
           >
             <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
             </svg>
-          </button>
-        </div>
+          </Button>
+          </DialogContent>
+        </Dialog>
 
-        <article v-else-if="type === 'equipment' && isEquipmentCategory" class="space-y-10">
-          <div v-if="categoryEquipments.length === 0" class="panel p-8 text-center text-neutral-500">
+        <article v-if="type === 'equipment' && isEquipmentCategory" class="space-y-10">
+          <Card v-if="categoryEquipments.length === 0" class="p-8 text-center text-neutral-500">
             Chưa có thiết bị trong danh mục này.
-          </div>
+          </Card>
           <div v-else class="overflow-x-auto rounded-xl border border-neutral-200 bg-white shadow-sm">
             <table class="w-full text-left text-sm">
               <thead>
@@ -147,6 +165,10 @@
                       v-if="item.coverImagePath"
                       :src="resolveMediaUrl(item.coverImagePath)"
                       :alt="item.name"
+                      width="80"
+                      height="56"
+                      loading="lazy"
+                      decoding="async"
                       class="mx-auto h-14 w-20 rounded-lg border border-neutral-200 object-cover"
                       @error="($event) => ($event.target as HTMLImageElement).style.display = 'none'"
                     />
@@ -158,7 +180,7 @@
           </div>
         </article>
 
-        <article v-else>
+        <article v-else-if="type !== 'project'">
           <section v-if="type === 'service' && serviceDocuments.length" class="mb-12 space-y-5">
             <h2 class="font-heading text-2xl font-bold uppercase text-primary-navy">* TÀI LIỆU-QUYẾT ĐỊNH</h2>
 
@@ -185,7 +207,7 @@
                 :key="`${image}-${index}`"
                 class="overflow-hidden rounded-lg border border-neutral-100 bg-white"
               >
-                <img :src="resolveMediaUrl(image)" :alt="`${detail?.title || 'service'} ${index + 1}`" class="h-64 w-full object-cover" />
+                <img :src="resolveMediaUrl(image)" :alt="`${detail?.title || 'service'} ${index + 1}`" width="480" height="256" loading="lazy" decoding="async" class="h-64 w-full object-cover" />
               </div>
             </div>
           </section>
@@ -207,14 +229,52 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
-import { fetchEquipmentDetail, fetchEquipmentCategories, fetchPageBySlug, fetchPostDetail, fetchProjectDetail, fetchServiceDetail } from '../lib/api'
+import { Button } from '../components/ui/button'
+import { Card } from '../components/ui/card'
+import { Dialog, DialogContent, DialogTitle } from '../components/ui/dialog'
+import { Skeleton } from '../components/ui/skeleton'
+import { fetchEquipmentDetail, fetchEquipmentCategories, fetchEquipments, fetchPageBySlug, fetchPostDetail, fetchProjectDetail, fetchServiceDetail } from '../lib/api'
 import { resolveMediaUrl } from '../lib/media'
-import type { Equipment, ServiceDocument, ServiceImage } from '../types/content'
+import type { Equipment, EquipmentCategory, ServiceDocument, ServiceImage } from '../types/content'
+
+type EquipmentCategoryDetail = Pick<EquipmentCategory, 'id' | 'name' | 'slug'>
+interface PublicDetail extends Partial<EquipmentCategoryDetail> {
+  id?: number
+  categoryId?: number | null
+  categoryName?: string | null
+  title?: string
+  name?: string
+  slug?: string
+  overview?: string
+  description?: string
+  excerpt?: string
+  content?: string
+  coverImagePath?: string | null
+  galleryJson?: string | null
+  documents?: ServiceDocument[]
+  images?: ServiceImage[]
+  clientName?: string | null
+  location?: string | null
+  startedAt?: string | null
+  completedAt?: string | null
+  model?: string | null
+  manufacturer?: string | null
+  origin?: string | null
+  unit?: string | null
+  quantity?: number | null
+  productionYear?: number | null
+  contentJson?: string | null
+}
+type GalleryItem = string | {
+  path?: string
+  url?: string
+  filePath?: string
+}
 
 const route = useRoute()
 const loading = ref(true)
 const error = ref('')
-const detail = ref<any>(null)
+const detail = ref<PublicDetail | null>(null)
 const isProjectLightboxOpen = ref(false)
 const activeProjectImageIndex = ref(0)
 
@@ -230,16 +290,20 @@ function parseGalleryPaths(gallery: unknown) {
   try {
     const parsed = JSON.parse(gallery)
     if (!Array.isArray(parsed)) return []
-    return parsed
+    return (parsed as GalleryItem[])
       .map((item) => {
         if (typeof item === 'string') return item
-        if (item && typeof item === 'object') return (item as any).path || (item as any).url || (item as any).filePath || ''
+        if (isGalleryObject(item)) return item.path || item.url || item.filePath || ''
         return ''
       })
       .filter(Boolean)
   } catch {
     return gallery.split('\n').map(item => item.trim()).filter(Boolean)
   }
+}
+
+function isGalleryObject(item: GalleryItem): item is Exclude<GalleryItem, string> {
+  return typeof item === 'object' && item !== null
 }
 
 function hasRenderableContent(value: unknown) {
@@ -336,12 +400,11 @@ async function loadDetail() {
     else if (type.value === 'post') detail.value = await fetchPostDetail(slug.value)
      else if (type.value === 'equipment') {
        const categories = await fetchEquipmentCategories()
-       const category = categories.find((c: any) => c.slug === slug.value)
+       const category = categories.find((item) => item.slug === slug.value)
 
        if (category) {
          isEquipmentCategory.value = true
          detail.value = { name: category.name }
-         const { fetchEquipments } = await import('../lib/api')
          const all = await fetchEquipments({ categorySlug: slug.value, size: 100 })
          categoryEquipments.value = all.filter((item) => item.categoryId === category.id)
        } else {
@@ -365,6 +428,14 @@ function openProjectLightbox(index: number) {
 function closeProjectLightbox() {
   isProjectLightboxOpen.value = false
   activeProjectImageIndex.value = 0
+}
+
+function handleLightboxOpenChange(open: boolean) {
+  if (!open) {
+    closeProjectLightbox()
+    return
+  }
+  isProjectLightboxOpen.value = true
 }
 
 function showPrevProjectImage() {

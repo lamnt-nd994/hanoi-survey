@@ -212,6 +212,7 @@ import { useAuthStore } from '@/stores/auth'
 import { useSettingsStore } from '@/stores/settings'
 import { useMediaStore } from '@/stores/media'
 import { useImageUpload } from '@/composables/useImageUpload'
+import { extractApiError } from '@/utils/files'
 import type { SiteSettings } from '@/types'
 
 const store = useSettingsStore()
@@ -373,8 +374,8 @@ async function handleUpdateProfile() {
       email: profileForm.email.trim(),
     })
     flash('Đã cập nhật thông tin người dùng')
-  } catch (error: any) {
-    flash(error?.response?.data?.error?.message || 'Không thể cập nhật thông tin người dùng', 'error')
+  } catch (error: unknown) {
+    flash(extractApiError(error, 'Không thể cập nhật thông tin người dùng'), 'error')
   } finally {
     profileSaving.value = false
   }
@@ -400,8 +401,8 @@ async function handleChangePassword() {
     passwordForm.newPassword = ''
     passwordForm.confirmPassword = ''
     flash('Đổi mật khẩu thành công')
-  } catch (error: any) {
-    flash(error?.response?.data?.error?.message || 'Không thể đổi mật khẩu', 'error')
+  } catch (error: unknown) {
+    flash(extractApiError(error, 'Không thể đổi mật khẩu'), 'error')
   } finally {
     passwordSaving.value = false
   }

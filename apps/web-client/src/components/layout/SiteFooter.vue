@@ -4,7 +4,7 @@
       <div>
         <div class="flex items-center gap-3">
           <div v-if="logoPath" class="flex h-16 w-[11rem] items-center justify-center">
-            <img :src="resolveMediaUrl(logoPath)" :alt="siteName" class="max-h-12 w-full object-contain" />
+            <img :src="resolveMediaUrl(logoPath)" :alt="siteName" width="176" height="48" loading="lazy" decoding="async" class="max-h-12 w-full object-contain" />
           </div>
           <div v-else class="flex h-12 w-12 items-center justify-center rounded-2xl bg-accent-green text-sm font-bold text-white">
             HS

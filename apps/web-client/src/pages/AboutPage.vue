@@ -2,10 +2,10 @@
   <div>
     <section class="container-shell py-16 md:py-20">
       <div v-if="loadingState" class="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
-        <div v-for="index in 6" :key="index" class="panel h-40 animate-pulse bg-neutral-100"></div>
+        <Skeleton v-for="index in 6" :key="index" class="h-40 rounded-2xl" />
       </div>
 
-      <div v-else-if="errorMessage" class="panel p-8 text-rose-600">{{ errorMessage }}</div>
+      <Card v-else-if="errorMessage" class="p-8 text-rose-600">{{ errorMessage }}</Card>
 
       <template v-else>
         <section class="py-2 md:py-4">
@@ -28,6 +28,11 @@
                   v-if="introImagePath"
                   :src="resolveMediaUrl(introImagePath)"
                   :alt="introTitle"
+                  width="720"
+                  height="470"
+                  loading="eager"
+                  fetchpriority="high"
+                  decoding="async"
                   class="h-[320px] w-full object-cover md:h-[430px] lg:h-[470px]"
                 />
                 <div v-else class="flex h-[320px] items-center justify-center bg-[linear-gradient(135deg,#214c79_0%,#3f6a94_55%,#d8e0e8_55%,#eef3f7_100%)] px-10 text-center text-white md:h-[430px] lg:h-[470px]">
@@ -47,13 +52,13 @@
             <div class="mx-auto mt-4 h-1 w-20 rounded-full bg-accent-green"></div>
           </div>
           <div class="mt-10 grid gap-6 md:grid-cols-3">
-            <article v-for="(item, index) in valueItems" :key="`${item.title}-${index}`" class="panel border-t-4 border-primary-navy p-8 text-center shadow-sm">
+            <Card v-for="(item, index) in valueItems" :key="`${item.title}-${index}`" as="article" class="border-t-4 border-primary-navy p-8 text-center shadow-sm">
               <div class="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-accent-green/10 text-accent-green">
                 <span class="block h-8 w-8" v-html="resolveValueIcon(item.icon)"></span>
               </div>
               <h3 class="mt-6 font-heading text-2xl font-bold text-primary-navy">{{ item.title }}</h3>
               <p class="mt-4 text-sm leading-7 text-neutral-600">{{ item.description }}</p>
-            </article>
+            </Card>
           </div>
         </section>
 
@@ -71,26 +76,26 @@
                 class="relative md:grid md:grid-cols-2 md:gap-10"
               >
                 <div v-if="index % 2 === 0" class="md:pr-10">
-                  <article class="panel p-6 md:text-right">
+                  <Card as="article" class="p-6 md:text-right">
                     <div class="text-sm font-semibold uppercase tracking-[0.2em] text-accent-green">{{ item.year }}</div>
                     <h3 class="mt-3 font-heading text-2xl font-bold text-primary-navy">{{ item.title }}</h3>
                     <p class="mt-3 text-sm leading-7 text-neutral-600">{{ item.description }}</p>
-                  </article>
+                  </Card>
                 </div>
                 <div class="hidden md:block"></div>
                 <div class="absolute left-1/2 top-8 hidden h-5 w-5 -translate-x-1/2 rounded-full border-4 border-accent-green bg-white md:block"></div>
                 <div v-if="index % 2 === 1" class="md:col-start-2 md:pl-10">
-                  <article class="panel p-6">
+                  <Card as="article" class="p-6">
                     <div class="text-sm font-semibold uppercase tracking-[0.2em] text-accent-green">{{ item.year }}</div>
                     <h3 class="mt-3 font-heading text-2xl font-bold text-primary-navy">{{ item.title }}</h3>
                     <p class="mt-3 text-sm leading-7 text-neutral-600">{{ item.description }}</p>
-                  </article>
+                  </Card>
                 </div>
-                <article v-if="isMobile" class="panel mt-4 p-6 md:hidden">
+                <Card v-if="isMobile" as="article" class="mt-4 p-6 md:hidden">
                   <div class="text-sm font-semibold uppercase tracking-[0.2em] text-accent-green">{{ item.year }}</div>
                   <h3 class="mt-3 font-heading text-2xl font-bold text-primary-navy">{{ item.title }}</h3>
                   <p class="mt-3 text-sm leading-7 text-neutral-600">{{ item.description }}</p>
-                </article>
+                </Card>
               </div>
             </div>
           </div>
@@ -102,18 +107,22 @@
             <div class="mx-auto mt-4 h-1 w-20 rounded-full bg-accent-green"></div>
           </div>
           <div class="mt-10 grid gap-8 lg:grid-cols-[1.1fr_0.9fr] lg:items-center">
-            <div class="panel p-4">
+            <Card class="p-4">
               <img
                 v-if="aboutData.organization.chartImagePath"
                 :src="resolveMediaUrl(aboutData.organization.chartImagePath)"
                 :alt="aboutData.organization.chartCaption || aboutData.organization.heading"
+                width="720"
+                height="480"
+                loading="lazy"
+                decoding="async"
                 class="h-full w-full rounded-2xl border border-neutral-200 object-cover"
               />
               <div v-else class="flex min-h-72 items-center justify-center rounded-2xl border border-dashed border-neutral-300 bg-white text-center text-sm text-neutral-400">
                 Chưa có ảnh sơ đồ tổ chức
               </div>
               <p class="mt-4 text-center text-sm italic text-neutral-500">{{ aboutData.organization.chartCaption }}</p>
-            </div>
+            </Card>
             <div>
               <h3 class="font-heading text-3xl font-bold text-primary-navy">{{ aboutData.organization.heading }}</h3>
               <p class="mt-4 text-base leading-8 text-neutral-600">{{ aboutData.organization.description }}</p>
@@ -161,6 +170,10 @@
                 v-if="aboutData.capability.imagePath"
                 :src="resolveMediaUrl(aboutData.capability.imagePath)"
                 :alt="aboutData.capability.heading || aboutData.capability.sectionTitle"
+                width="720"
+                height="480"
+                loading="lazy"
+                decoding="async"
                 class="h-full w-full rounded-2xl border border-neutral-200 object-cover"
               />
               <div v-else class="flex min-h-72 items-center justify-center rounded-2xl border border-dashed border-neutral-300 bg-white text-center text-sm text-neutral-400">
@@ -179,6 +192,8 @@ import { computed, onMounted } from 'vue'
 import { storeToRefs } from 'pinia'
 import { usePublicContentStore } from '../stores/publicContent'
 import { resolveMediaUrl } from '../lib/media'
+import { Card } from '../components/ui/card'
+import { Skeleton } from '../components/ui/skeleton'
 import type { AboutCapabilityItem, AboutPageContent, AboutPageTimelineItem, AboutPageValueItem } from '../types/content'
 
 const publicContentStore = usePublicContentStore()

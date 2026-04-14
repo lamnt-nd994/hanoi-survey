@@ -1,6 +1,15 @@
 <template>
   <section class="hero-section flex min-h-[600px] items-center py-10 text-white">
-    <img v-if="heroImagePath" :src="resolveMediaUrl(heroImagePath)" :alt="siteName" class="absolute inset-0 h-full w-full object-cover" />
+    <MediaImage
+      v-if="heroImagePath"
+      :src="heroImagePath"
+      :alt="siteName"
+      :width="1920"
+      :height="1080"
+      loading="eager"
+      fetch-priority="high"
+      class="absolute inset-0 h-full w-full object-cover"
+    />
     <div class="absolute inset-0 bg-gradient-to-b from-primary-navy/30 to-primary-navy/72" />
 
     <div class="container-shell relative">
@@ -45,7 +54,7 @@
 import { computed } from 'vue'
 import { storeToRefs } from 'pinia'
 import AppIcon from '../ui/AppIcon.vue'
-import { resolveMediaUrl } from '../../lib/media'
+import MediaImage from '../ui/MediaImage.vue'
 import { useSiteSettingsStore } from '../../stores/siteSettings'
 import type { HomeHeroBadgeItem } from '../../types/content'
 

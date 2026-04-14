@@ -9,7 +9,7 @@
           <router-link
             :to="getNavTo(item)"
             @click="emit('close')"
-            class="flex min-h-[44px] items-center rounded-xl px-4 py-3 text-base font-medium transition-all"
+            class="flex min-h-[44px] cursor-pointer items-center rounded-xl px-4 py-3 text-base font-medium transition-all"
             :class="isActiveNavRoute(item) ? 'bg-accent-green/10 text-accent-green' : 'text-neutral-700 hover:bg-neutral-100'"
           >
             {{ item.title }}
@@ -20,7 +20,7 @@
               :key="`${item.resolvedUrl}-${service.slug}`"
               :to="{ name: 'service-detail', params: { slug: service.slug } }"
               @click="emit('close')"
-              class="flex min-h-[40px] items-center rounded-xl px-3 py-2 text-sm transition-colors"
+              class="flex min-h-[40px] cursor-pointer items-center rounded-xl px-3 py-2 text-sm transition-colors"
               :class="isActiveServiceRoute(service.slug) ? 'bg-accent-green/10 text-accent-green' : 'text-neutral-600 hover:bg-neutral-100 hover:text-primary-navy'"
             >
               {{ service.title }}
@@ -33,7 +33,7 @@
               :key="`${item.resolvedUrl}-${category.slug}`"
               :to="getNavTo(item, category.slug)"
               @click="emit('close')"
-              class="flex min-h-[40px] items-center rounded-xl px-3 py-2 text-sm transition-colors"
+              class="flex min-h-[40px] cursor-pointer items-center rounded-xl px-3 py-2 text-sm transition-colors"
               :class="isActiveCategoryRoute(getRouteName(item), category.slug) ? 'bg-accent-green/10 text-accent-green' : 'text-neutral-600 hover:bg-neutral-100 hover:text-primary-navy'"
             >
               {{ category.name }}
@@ -49,7 +49,7 @@
           :target="isExternalUrl(item.resolvedUrl) ? '_blank' : undefined"
           :rel="isExternalUrl(item.resolvedUrl) ? 'noopener noreferrer' : undefined"
           @click="emit('close')"
-          class="flex min-h-[44px] items-center rounded-xl px-4 py-3 text-base font-medium transition-all"
+          class="flex min-h-[44px] cursor-pointer items-center rounded-xl px-4 py-3 text-base font-medium transition-all"
           :class="isActiveNavRoute(item) ? 'bg-accent-green/10 text-accent-green' : 'text-neutral-700 hover:bg-neutral-100'"
         >
           {{ item.title }}
@@ -58,14 +58,14 @@
     </nav>
 
     <div class="mt-6 space-y-3">
-      <a v-if="phone" :href="`tel:${phone}`" class="btn-primary flex w-full items-center justify-center">
+      <Button v-if="phone" as="a" :href="`tel:${phone}`" class="flex w-full items-center justify-center">
         <AppIcon icon="phone" class="mr-2 h-5 w-5" />
         Gọi ngay: {{ phone }}
-      </a>
-      <a v-if="zaloUrl" :href="zaloUrl" target="_blank" rel="noopener noreferrer" class="btn-outline flex w-full items-center justify-center">
+      </Button>
+      <Button v-if="zaloUrl" as="a" :href="zaloUrl" target="_blank" rel="noopener noreferrer" variant="outline" class="flex w-full items-center justify-center">
         <AppIcon icon="zalo" class="mr-2 h-5 w-5" />
         Chat Zalo
-      </a>
+      </Button>
     </div>
   </div>
 </template>
@@ -74,6 +74,7 @@
 import type { RouteLocationRaw } from 'vue-router'
 import type { EquipmentCategory, PostCategory, ProjectCategory, PublicMenuItem, SurveyService } from '../../types/content'
 import AppIcon from '../ui/AppIcon.vue'
+import { Button } from '../ui/button'
 
 type NavCategory = ProjectCategory | PostCategory | EquipmentCategory
 

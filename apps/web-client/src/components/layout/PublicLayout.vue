@@ -80,6 +80,7 @@ const { siteName, companyNameEn, shortName, logoPath, footerText, mergedContactI
 const { mainMenuItems: navItems } = storeToRefs(publicMenusStore)
 const { services, projectCategories, postCategories, equipmentCategories } = storeToRefs(publicContentStore)
 const breadcrumbDetailLabel = ref('')
+const breadcrumbLabelCache = new Map<string, string>()
 
 const companyName = computed(() => companyNameEn.value || shortName.value || 'Hanoi Construction Survey Consultant Joint Stock Company')
 const shouldShowBreadcrumb = computed(() => route.name !== ROUTE_NAMES.home)
@@ -236,16 +237,24 @@ async function loadBreadcrumbDetailLabel() {
 
   const slug = typeof route.params.slug === 'string' ? route.params.slug : ''
   const category = typeof route.params.category === 'string' ? route.params.category : ''
+  const cacheKey = `${String(route.name || '')}:${slug || category}`
+  const cachedLabel = breadcrumbLabelCache.get(cacheKey)
+  if (cachedLabel) {
+    breadcrumbDetailLabel.value = cachedLabel
+    return
+  }
 
   if (route.name === ROUTE_NAMES.projectCategory) {
     const existing = projectCategories.value.find((item) => item.slug === category)
     breadcrumbDetailLabel.value = existing?.name || formatSlugLabel(category)
+    breadcrumbLabelCache.set(cacheKey, breadcrumbDetailLabel.value)
     return
   }
 
   if (route.name === ROUTE_NAMES.newsCategory) {
     const existing = postCategories.value.find((item) => item.slug === category)
     breadcrumbDetailLabel.value = existing?.name || formatSlugLabel(category)
+    breadcrumbLabelCache.set(cacheKey, breadcrumbDetailLabel.value)
     return
   }
 
@@ -255,30 +264,36 @@ async function loadBreadcrumbDetailLabel() {
     if (route.name === ROUTE_NAMES.serviceDetail) {
       const existing = services.value.find((item) => item.slug === slug)
       breadcrumbDetailLabel.value = existing?.title || (await fetchServiceDetail(slug)).title
+      breadcrumbLabelCache.set(cacheKey, breadcrumbDetailLabel.value)
       return
     }
 
     if (route.name === ROUTE_NAMES.projectDetail) {
       breadcrumbDetailLabel.value = (await fetchProjectDetail(slug)).title
+      breadcrumbLabelCache.set(cacheKey, breadcrumbDetailLabel.value)
       return
     }
 
     if (route.name === ROUTE_NAMES.newsDetail) {
       breadcrumbDetailLabel.value = (await fetchPostDetail(slug)).title
+      breadcrumbLabelCache.set(cacheKey, breadcrumbDetailLabel.value)
       return
     }
 
     if (route.name === ROUTE_NAMES.equipmentDetail) {
       const existingCategory = equipmentCategories.value.find((item) => item.slug === slug)
       breadcrumbDetailLabel.value = existingCategory?.name || (await fetchEquipmentDetail(slug)).name
+      breadcrumbLabelCache.set(cacheKey, breadcrumbDetailLabel.value)
       return
     }
 
     if (route.name === ROUTE_NAMES.page) {
       breadcrumbDetailLabel.value = (await fetchPageBySlug(slug)).title
+      breadcrumbLabelCache.set(cacheKey, breadcrumbDetailLabel.value)
     }
   } catch {
     breadcrumbDetailLabel.value = formatSlugLabel(slug)
+    breadcrumbLabelCache.set(cacheKey, breadcrumbDetailLabel.value)
   }
 }
 

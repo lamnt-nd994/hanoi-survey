@@ -2,13 +2,13 @@
   <div>
     <section class="container-shell py-16 md:py-20">
       <div v-if="loading" class="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
-        <div v-for="index in 6" :key="index" class="panel h-40 animate-pulse bg-neutral-100"></div>
+        <Skeleton v-for="index in 6" :key="index" class="h-40 rounded-2xl" />
       </div>
 
-      <div v-else-if="errorMessage" class="panel p-8 text-rose-600">{{ errorMessage }}</div>
+      <Card v-else-if="errorMessage" class="p-8 text-rose-600">{{ errorMessage }}</Card>
 
       <div v-else-if="currentRouteName === 'services'" class="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
-        <div v-for="(item, index) in serviceItems" :key="item.slug" class="service-card group p-6">
+        <Card v-for="(item, index) in serviceItems" :key="item.slug" class="group p-6 hover:border-accent-green/30 hover:shadow-glow">
           <div class="mb-4 flex items-start justify-between">
             <span class="flex h-12 w-12 items-center justify-center rounded-xl bg-accent-green text-xl font-bold text-white shadow-glow">
               {{ String(index + 1).padStart(2, '0') }}
@@ -21,22 +21,26 @@
             {{ item.title || item }}
           </router-link>
           <p class="mt-3 text-sm leading-7 text-neutral-600">{{ item.overview || 'Dịch vụ triển khai theo tiêu chuẩn hiện hành, phù hợp hồ sơ thiết kế, thi công và kiểm định.' }}</p>
-        </div>
+        </Card>
       </div>
 
-      <div v-else-if="[ROUTE_NAMES.projects, ROUTE_NAMES.projectCategory].includes(currentRouteName as any)" class="space-y-8">
+      <div v-else-if="isProjectRoute" class="space-y-8">
         <div class="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
         <router-link
           v-for="item in paginatedProjectItems"
           :key="item.slug"
           :to="item.slug ? { name: 'project-detail', params: { slug: item.slug } } : { name: 'projects' }"
-          class="project-card group flex h-full flex-col overflow-hidden border border-neutral-200 bg-white transition-all duration-300 hover:-translate-y-1 hover:border-accent-green/30 hover:shadow-2xl hover:shadow-primary-navy/10"
+          class="group flex h-full flex-col overflow-hidden rounded-2xl border border-neutral-200 bg-white shadow-[0_18px_45px_rgba(15,39,68,0.08)] transition-all duration-300 hover:-translate-y-1 hover:border-accent-green/30 hover:shadow-2xl hover:shadow-primary-navy/10"
         >
           <div class="relative h-56 overflow-hidden bg-gradient-to-br from-primary-navy to-primary-light">
             <img
               v-if="item.coverImagePath"
               :src="resolveMediaUrl(item.coverImagePath)"
               :alt="item.title"
+              width="420"
+              height="224"
+              loading="lazy"
+              decoding="async"
               class="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
               @error="handleImageError"
             />
@@ -86,19 +90,19 @@
         </div>
 
         <div v-if="projectTotalPages > 1" class="flex items-center justify-center gap-1 pt-2">
-          <button :disabled="safeProjectPage <= 1" @click="goToProjectPage(safeProjectPage - 1)" class="flex h-9 w-9 items-center justify-center rounded border border-neutral-200 text-neutral-500 transition-colors hover:border-primary-navy hover:text-primary-navy disabled:cursor-default disabled:opacity-30">&laquo;</button>
+          <Button :disabled="safeProjectPage <= 1" variant="secondary" size="icon" class="h-9 w-9 rounded border text-neutral-500 hover:border-primary-navy hover:text-primary-navy disabled:cursor-default disabled:opacity-30" @click="goToProjectPage(safeProjectPage - 1)">&laquo;</Button>
           <template v-for="p in projectVisiblePages" :key="`project-page-${p}`">
             <span v-if="p === '...'" class="flex h-9 w-9 items-center justify-center text-neutral-400">...</span>
-            <button v-else @click="goToProjectPage(p as number)" class="flex h-9 w-9 items-center justify-center rounded border text-sm transition-colors" :class="p === safeProjectPage ? 'border-primary-navy bg-primary-navy text-white' : 'border-neutral-200 text-neutral-600 hover:border-primary-navy hover:text-primary-navy'">{{ p }}</button>
+            <Button v-else variant="secondary" size="icon" class="h-9 w-9 rounded border text-sm" :class="p === safeProjectPage ? 'border-primary-navy bg-primary-navy text-white hover:bg-primary-navy' : 'border-neutral-200 text-neutral-600 hover:border-primary-navy hover:text-primary-navy'" @click="goToProjectPage(p as number)">{{ p }}</Button>
           </template>
-          <button :disabled="safeProjectPage >= projectTotalPages" @click="goToProjectPage(safeProjectPage + 1)" class="flex h-9 w-9 items-center justify-center rounded border border-neutral-200 text-neutral-500 transition-colors hover:border-primary-navy hover:text-primary-navy disabled:cursor-default disabled:opacity-30">&raquo;</button>
+          <Button :disabled="safeProjectPage >= projectTotalPages" variant="secondary" size="icon" class="h-9 w-9 rounded border text-neutral-500 hover:border-primary-navy hover:text-primary-navy disabled:cursor-default disabled:opacity-30" @click="goToProjectPage(safeProjectPage + 1)">&raquo;</Button>
         </div>
       </div>
 
-      <div v-else-if="[ROUTE_NAMES.news, ROUTE_NAMES.newsCategory].includes(currentRouteName as any)" class="space-y-8">
-        <div v-if="!postItems.length" class="panel p-8 text-center text-neutral-500">
+      <div v-else-if="isNewsRoute" class="space-y-8">
+        <Card v-if="!postItems.length" class="p-8 text-center text-neutral-500">
           Chưa có bài viết nào.
-        </div>
+        </Card>
 
         <template v-else>
           <router-link
@@ -111,6 +115,11 @@
                   v-if="postItems[0].coverImagePath"
                   :src="resolveMediaUrl(postItems[0].coverImagePath)"
                   :alt="postItems[0].title"
+                  width="320"
+                  height="240"
+                  loading="eager"
+                  fetchpriority="high"
+                  decoding="async"
                   class="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
                   @error="handleImageError"
                 />
@@ -137,6 +146,10 @@
                   v-if="item.coverImagePath"
                   :src="resolveMediaUrl(item.coverImagePath)"
                   :alt="item.title"
+                  width="96"
+                  height="64"
+                  loading="lazy"
+                  decoding="async"
                   class="absolute inset-0 h-full w-full object-cover"
                   @error="($event.target as HTMLImageElement).style.display = 'none'"
                 />
@@ -157,12 +170,12 @@
           </div>
 
           <div v-if="postsMeta.totalPages > 1" class="flex items-center justify-center gap-1 pt-2">
-            <button :disabled="currentNewsPage <= 1" @click="goToNewsPage(currentNewsPage - 1)" class="flex h-9 w-9 items-center justify-center rounded border border-neutral-200 text-neutral-500 transition-colors hover:border-primary-navy hover:text-primary-navy disabled:cursor-default disabled:opacity-30">&laquo;</button>
+            <Button :disabled="currentNewsPage <= 1" variant="secondary" size="icon" class="h-9 w-9 rounded border text-neutral-500 hover:border-primary-navy hover:text-primary-navy disabled:cursor-default disabled:opacity-30" @click="goToNewsPage(currentNewsPage - 1)">&laquo;</Button>
             <template v-for="p in newsVisiblePages" :key="p">
               <span v-if="p === '...'" class="flex h-9 w-9 items-center justify-center text-neutral-400">...</span>
-              <button v-else @click="goToNewsPage(p as number)" class="flex h-9 w-9 items-center justify-center rounded border text-sm transition-colors" :class="p === currentNewsPage ? 'border-primary-navy bg-primary-navy text-white' : 'border-neutral-200 text-neutral-600 hover:border-primary-navy hover:text-primary-navy'">{{ p }}</button>
+              <Button v-else variant="secondary" size="icon" class="h-9 w-9 rounded border text-sm" :class="p === currentNewsPage ? 'border-primary-navy bg-primary-navy text-white hover:bg-primary-navy' : 'border-neutral-200 text-neutral-600 hover:border-primary-navy hover:text-primary-navy'" @click="goToNewsPage(p as number)">{{ p }}</Button>
             </template>
-            <button :disabled="currentNewsPage >= postsMeta.totalPages" @click="goToNewsPage(currentNewsPage + 1)" class="flex h-9 w-9 items-center justify-center rounded border border-neutral-200 text-neutral-500 transition-colors hover:border-primary-navy hover:text-primary-navy disabled:cursor-default disabled:opacity-30">&raquo;</button>
+            <Button :disabled="currentNewsPage >= postsMeta.totalPages" variant="secondary" size="icon" class="h-9 w-9 rounded border text-neutral-500 hover:border-primary-navy hover:text-primary-navy disabled:cursor-default disabled:opacity-30" @click="goToNewsPage(currentNewsPage + 1)">&raquo;</Button>
           </div>
         </template>
       </div>
@@ -173,7 +186,7 @@
             v-for="category in sortedEquipmentCategories"
             :key="category.id"
             :to="category.slug ? { name: 'equipment-detail', params: { slug: category.slug } } : { name: 'equipment' }"
-            class="stat-card group hover:border-accent-green/30"
+            class="group rounded-xl border border-neutral-200 bg-white p-6 shadow-[0_18px_45px_rgba(15,39,68,0.08)] transition-all hover:border-accent-green/30"
           >
             <div class="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-accent-green/10 text-accent-green transition-all group-hover:scale-110">
               <IconRenderer :icon="category.icon || 'settings-2'" class="h-8 w-8" />
@@ -263,7 +276,7 @@
       </div>
 
       <div v-else-if="introItems.length" class="grid gap-6 md:grid-cols-2 xl:grid-cols-4">
-        <article v-for="item in introItems" :key="item.title" class="stat-card group hover:border-accent-green/30">
+        <article v-for="item in introItems" :key="item.title" class="group rounded-xl border border-neutral-200 bg-white p-6 shadow-[0_18px_45px_rgba(15,39,68,0.08)] transition-all hover:border-accent-green/30">
           <div class="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-accent-green/10 text-accent-green transition-all group-hover:bg-accent-green group-hover:text-white">
             <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -274,9 +287,9 @@
         </article>
       </div>
 
-      <div v-else class="panel p-8 text-center text-neutral-500">
+      <Card v-else class="p-8 text-center text-neutral-500">
         Chưa có dữ liệu để hiển thị.
-      </div>
+      </Card>
     </section>
   </div>
 </template>
@@ -286,6 +299,9 @@ import { computed, ref, watch } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useRoute, useRouter } from 'vue-router'
 import IconRenderer from '../components/IconRenderer.vue'
+import { Button } from '../components/ui/button'
+import { Card } from '../components/ui/card'
+import { Skeleton } from '../components/ui/skeleton'
 import { resolveMediaUrl } from '../lib/media'
 import { usePublicContentStore } from '../stores/publicContent'
 import { useSiteSettingsStore } from '../stores/siteSettings'
@@ -331,6 +347,8 @@ const pageData: Record<string, StaticPageConfig> = {
 }
 
 const currentRouteName = computed(() => $route.name as string || ROUTE_NAMES.about)
+const isProjectRoute = computed(() => currentRouteName.value === ROUTE_NAMES.projects || currentRouteName.value === ROUTE_NAMES.projectCategory)
+const isNewsRoute = computed(() => currentRouteName.value === ROUTE_NAMES.news || currentRouteName.value === ROUTE_NAMES.newsCategory)
 const currentData = computed(() => pageData[currentRouteName.value] || pageData[ROUTE_NAMES.about])
 const selectedCategorySlug = computed(() => {
   const categoryParam = $route.params.category
@@ -347,7 +365,7 @@ const serviceItems = computed(() => {
   return publicContentStore.services
 })
 const projectItems = computed(() => {
-  if (![ROUTE_NAMES.projects, ROUTE_NAMES.projectCategory].includes(currentRouteName.value as any) || !selectedProjectCategory.value) return publicContentStore.projects
+  if (!isProjectRoute.value || !selectedProjectCategory.value) return publicContentStore.projects
   return publicContentStore.projects.filter((item) => item.categoryId === selectedProjectCategory.value?.id)
 })
 const projectPageSize = 8
@@ -522,10 +540,10 @@ async function loadRemoteItems() {
     } else if (currentRouteName.value === ROUTE_NAMES.services) {
       await publicContentStore.loadServices()
       errorMessage.value = publicContentStore.errors.services
-    } else if ([ROUTE_NAMES.projects, ROUTE_NAMES.projectCategory].includes(currentRouteName.value as any)) {
+    } else if (isProjectRoute.value) {
       await Promise.all([publicContentStore.loadProjectCategories(), publicContentStore.loadProjects()])
       errorMessage.value = publicContentStore.errors.projects || publicContentStore.errors.projectCategories
-    } else if ([ROUTE_NAMES.news, ROUTE_NAMES.newsCategory].includes(currentRouteName.value as any)) {
+    } else if (isNewsRoute.value) {
       await Promise.all([
         publicContentStore.loadPostCategories(),
         publicContentStore.loadPosts(currentNewsPage.value, true, selectedCategorySlug.value),

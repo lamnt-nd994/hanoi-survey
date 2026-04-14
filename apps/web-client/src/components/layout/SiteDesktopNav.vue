@@ -3,10 +3,10 @@
     <div class="container-shell">
       <nav class="flex items-center justify-center gap-2 py-3">
         <template v-for="item in navItems" :key="item.resolvedUrl">
-          <div v-if="hasDropdown(item)" class="group relative text-white">
+          <div v-if="hasDropdown(item)" class="group relative cursor-pointer text-white">
             <router-link
               :to="getNavTo(item)"
-              class="flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold text-white transition-all"
+              class="flex cursor-pointer items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold text-white transition-all"
               :class="isActiveNavRoute(item) ? 'bg-white/14 text-white' : 'text-white/90 hover:bg-white/10 hover:text-white'"
             >
               {{ item.title }}
@@ -20,7 +20,7 @@
                     v-for="service in services"
                     :key="service.id"
                     :to="{ name: 'service-detail', params: { slug: service.slug } }"
-                    class="flex min-h-[2.75rem] items-center justify-between gap-3 rounded-md px-3 py-2 text-sm leading-5 transition-colors"
+                    class="flex min-h-[2.75rem] cursor-pointer items-center justify-between gap-3 rounded-md px-3 py-2 text-sm leading-5 transition-colors"
                     :class="isActiveServiceRoute(service.slug) ? 'bg-neutral-100 text-primary-navy' : 'text-neutral-700 hover:bg-neutral-50 hover:text-primary-navy'"
                   >
                     <span>{{ service.title }}</span>
@@ -31,7 +31,7 @@
                     v-for="category in getCategories(item)"
                     :key="category.id"
                     :to="getNavTo(item, category.slug)"
-                    class="flex min-h-[2.5rem] items-center justify-between gap-3 rounded-md px-3 py-2 text-sm leading-5 transition-colors"
+                    class="flex min-h-[2.5rem] cursor-pointer items-center justify-between gap-3 rounded-md px-3 py-2 text-sm leading-5 transition-colors"
                     :class="isActiveCategoryRoute(getRouteName(item), category.slug) ? 'bg-neutral-100 text-primary-navy' : 'text-neutral-700 hover:bg-neutral-50 hover:text-primary-navy'"
                   >
                     <span>{{ category.name }}</span>
@@ -51,7 +51,7 @@
             :href="isExternalUrl(item.resolvedUrl) ? item.resolvedUrl : undefined"
             :target="isExternalUrl(item.resolvedUrl) ? '_blank' : undefined"
             :rel="isExternalUrl(item.resolvedUrl) ? 'noopener noreferrer' : undefined"
-            class="rounded-full px-4 py-2 text-sm font-semibold text-white transition-all"
+            class="cursor-pointer rounded-full px-4 py-2 text-sm font-semibold text-white transition-all"
             :class="isActiveNavRoute(item) ? 'bg-white/14 text-white' : 'text-white/90 hover:bg-white/10 hover:text-white'"
           >
             {{ item.title }}

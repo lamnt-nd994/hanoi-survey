@@ -6,8 +6,8 @@
       <div class="carousel-wrapper mt-20">
         <div class="carousel-track" :style="trackStyle">
           <div v-for="(project, index) in projectItems" :key="project.slug || index" class="carousel-slide">
-            <div class="project-card group relative h-[320px] overflow-hidden rounded-xl" @mouseenter="hoveredIndex = index" @mouseleave="hoveredIndex = null">
-              <img v-if="project.coverImagePath" :src="resolveMediaUrl(project.coverImagePath)" :alt="project.title" class="h-full w-full object-cover" @error="handleImageError" />
+            <Card class="group relative h-[320px] overflow-hidden rounded-xl p-0" @mouseenter="hoveredIndex = index" @mouseleave="hoveredIndex = null">
+              <img v-if="project.coverImagePath" :src="resolveMediaUrl(project.coverImagePath)" :alt="project.title" width="420" height="320" loading="lazy" decoding="async" class="h-full w-full object-cover" @error="handleImageError" />
               <div v-else class="h-full w-full bg-gradient-to-br from-primary-navy to-primary-light" />
               <div class="absolute inset-0 bg-gradient-to-t from-primary-navy/70 via-primary-navy/20 to-transparent" />
               <div class="project-overlay absolute inset-0 z-20 flex flex-col items-center justify-center gap-4 bg-[linear-gradient(to_top,rgba(0,51,102,0.96)_0%,rgba(0,51,102,0.72)_42%,transparent_100%)] p-6 text-white transition-opacity duration-300" :class="hoveredIndex === index ? 'opacity-100' : 'opacity-0'">
@@ -19,29 +19,31 @@
                   <AppIcon icon="chevronRight" class="ml-2 h-4 w-4" />
                 </router-link>
               </div>
-            </div>
+            </Card>
           </div>
         </div>
 
-        <button v-if="shouldShowControls" class="carousel-btn carousel-prev" @click="prev" aria-label="Previous">
+        <Button v-if="shouldShowControls" variant="secondary" size="icon" class="absolute left-4 top-1/2 z-10 h-12 w-12 -translate-y-1/2 rounded-full border border-gray-300 bg-white text-primary-navy shadow-lg hover:border-accent-green hover:bg-accent-green hover:text-white" @click="prev" aria-label="Previous">
           <AppIcon icon="chevronLeft" class="h-6 w-6" />
-        </button>
-        <button v-if="shouldShowControls" class="carousel-btn carousel-next" @click="next" aria-label="Next">
+        </Button>
+        <Button v-if="shouldShowControls" variant="secondary" size="icon" class="absolute right-4 top-1/2 z-10 h-12 w-12 -translate-y-1/2 rounded-full border border-gray-300 bg-white text-primary-navy shadow-lg hover:border-accent-green hover:bg-accent-green hover:text-white" @click="next" aria-label="Next">
           <AppIcon icon="chevronRight" class="h-6 w-6" />
-        </button>
+        </Button>
 
-        <div v-if="shouldShowControls" class="carousel-dots">
-          <button v-for="(_, index) in maxIndex" :key="index" class="carousel-dot" :class="{ active: currentIndex === index }" @click="goTo(index)" :aria-label="`Go to slide ${index + 1}`" />
+        <div v-if="shouldShowControls" class="mt-6 flex justify-center gap-3">
+          <Button v-for="(_, index) in maxIndex" :key="index" variant="ghost" class="h-3 min-h-0 min-w-0 rounded-full p-0 transition-all" :class="currentIndex === index ? 'w-8 bg-accent-green hover:bg-accent-green' : 'w-3 bg-gray-300 hover:bg-accent-green/70'" @click="goTo(index)" :aria-label="`Go to slide ${index + 1}`" />
         </div>
       </div>
 
-      <div v-if="!projectItems.length" class="panel mt-6 p-8 text-center text-neutral-500">Chưa có dữ liệu dự án từ hệ thống.</div>
+      <Card v-if="!projectItems.length" class="mt-6 p-8 text-center text-neutral-500">Chưa có dữ liệu dự án từ hệ thống.</Card>
     </div>
   </section>
 </template>
 
 <script setup lang="ts">
 import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
+import { Button } from '../ui/button'
+import { Card } from '../ui/card'
 import AppIcon from '../ui/AppIcon.vue'
 import SectionHeader from '../ui/SectionHeader.vue'
 import { resolveMediaUrl } from '../../lib/media'
