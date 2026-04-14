@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.util.unit.DataSize;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -20,7 +21,6 @@ import java.util.UUID;
 @Service
 public class MediaService {
 
-    private static final long MAX_SIZE = 10 * 1024 * 1024;
     private static final Set<String> SUPPORTED_DOCUMENT_CONTENT_TYPES = Set.of(
             "application/pdf",
             "application/msword",
@@ -35,15 +35,20 @@ public class MediaService {
     private final MediaFileRepositoryPort repository;
     private final Path uploadRoot;
     private final String uploadPublicPrefix;
+    private final long maxSizeBytes;
+    private final String maxSizeLabel;
 
     public MediaService(
             MediaFileRepositoryPort repository,
             @Value("${app.upload-dir}") String uploadDir,
-            @Value("${app.upload-public-prefix:uploads}") String uploadPublicPrefix
+            @Value("${app.upload-public-prefix:uploads}") String uploadPublicPrefix,
+            @Value("${app.media-max-size:128MB}") DataSize maxSize
     ) {
         this.repository = repository;
         this.uploadRoot = Paths.get(uploadDir).toAbsolutePath().normalize();
         this.uploadPublicPrefix = normalizePublicPrefix(uploadPublicPrefix);
+        this.maxSizeBytes = maxSize.toBytes();
+        this.maxSizeLabel = maxSize.toMegabytes() + "MB";
     }
 
     public List<MediaFile> all() {
@@ -94,8 +99,8 @@ public class MediaService {
         if (file.isEmpty()) {
             throw new IllegalArgumentException("Tệp upload rỗng");
         }
-        if (file.getSize() > MAX_SIZE) {
-            throw new IllegalArgumentException("Tệp vượt quá 10MB");
+        if (file.getSize() > maxSizeBytes) {
+            throw new IllegalArgumentException("Tệp vượt quá " + maxSizeLabel);
         }
         String contentType = file.getContentType();
         if (contentType == null || (!contentType.startsWith("image/") && !SUPPORTED_DOCUMENT_CONTENT_TYPES.contains(contentType))) {
