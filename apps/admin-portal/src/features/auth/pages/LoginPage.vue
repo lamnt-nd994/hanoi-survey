@@ -11,11 +11,11 @@
         <p class="mt-1 text-xs text-gray-400 mb-6">Nhập thông tin tài khoản để truy cập</p>
         <FormField>
           <FormLabel>Tên đăng nhập</FormLabel>
-          <Input v-model="username" placeholder="Nhập tên đăng nhập" />
+          <Input v-model="username" placeholder="Nhập tên đăng nhập" autocomplete="username" />
         </FormField>
         <FormField>
           <FormLabel>Mật khẩu</FormLabel>
-          <Input v-model="password" type="password" placeholder="Nhập mật khẩu" />
+          <Input v-model="password" type="password" placeholder="Nhập mật khẩu" autocomplete="current-password" />
         </FormField>
         <div v-if="error" class="mb-4 rounded-md border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-700">{{ error }}</div>
         <Button type="submit" :disabled="loading" class="mt-2 w-full py-2.5">
@@ -39,8 +39,8 @@ import type { ApiErrorLike } from '@/types/api'
 
 const router = useRouter()
 const authStore = useAuthStore()
-const username = ref('admin')
-const password = ref('Admin@123')
+const username = ref('')
+const password = ref('')
 const error = ref('')
 const loading = ref(false)
 

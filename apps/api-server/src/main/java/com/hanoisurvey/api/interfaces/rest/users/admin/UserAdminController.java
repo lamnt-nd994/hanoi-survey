@@ -12,6 +12,8 @@ import com.hanoisurvey.api.interfaces.rest.users.dto.AdminRoleResponse;
 import com.hanoisurvey.api.interfaces.rest.users.dto.AdminRoleUpsertRequest;
 import com.hanoisurvey.api.interfaces.rest.users.dto.AdminUserResponse;
 import com.hanoisurvey.api.interfaces.rest.users.dto.AdminUserUpsertRequest;
+import com.hanoisurvey.api.interfaces.rest.users.dto.ChangeMyPasswordRequest;
+import com.hanoisurvey.api.interfaces.rest.users.dto.UpdateMyProfileRequest;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -106,6 +108,25 @@ public class UserAdminController {
         Long currentUserId = authService.me() == null ? null : authService.me().id();
         userManagementService.resetPassword(id, new AdminResetPasswordCommand(request.password()), currentUserId);
         return ApiResponse.ok("Password reset");
+    }
+
+    @PutMapping("/users/me")
+    public ApiResponse<AdminUserResponse> updateMyProfile(@Valid @RequestBody UpdateMyProfileRequest request) {
+        Long currentUserId = authService.me() == null ? null : authService.me().id();
+        if (currentUserId == null) {
+            throw new IllegalArgumentException("Không tìm thấy người dùng đang đăng nhập");
+        }
+        return ApiResponse.ok(AdminUserResponse.from(userManagementService.updateOwnProfile(currentUserId, request.fullName(), request.email())));
+    }
+
+    @PostMapping("/users/change-password")
+    public ApiResponse<String> changeMyPassword(@Valid @RequestBody ChangeMyPasswordRequest request) {
+        Long currentUserId = authService.me() == null ? null : authService.me().id();
+        if (currentUserId == null) {
+            throw new IllegalArgumentException("Không tìm thấy người dùng đang đăng nhập");
+        }
+        userManagementService.changeOwnPassword(currentUserId, request.currentPassword(), request.newPassword());
+        return ApiResponse.ok("Password changed");
     }
 
     private AdminUserCommand toCommand(AdminUserUpsertRequest request) {

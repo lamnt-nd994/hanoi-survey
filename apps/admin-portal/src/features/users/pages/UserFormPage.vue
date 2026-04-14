@@ -22,9 +22,9 @@
             <Input v-model="form.email" type="email" placeholder="admin@hanoisurvey.vn" />
           </FormField>
 
-          <FormField>
-            <FormLabel>{{ isEdit ? 'Mật khẩu mới' : 'Mật khẩu' }} <span v-if="!isEdit" class="text-rose-600">*</span></FormLabel>
-            <Input v-model="form.password" type="password" :placeholder="isEdit ? 'Để trống nếu không đổi' : 'Nhập mật khẩu đăng nhập'" :required="!isEdit" />
+          <FormField v-if="!isEdit">
+            <FormLabel>Mật khẩu <span class="text-rose-600">*</span></FormLabel>
+            <Input v-model="form.password" type="password" placeholder="Nhập mật khẩu đăng nhập" required />
           </FormField>
         </div>
 

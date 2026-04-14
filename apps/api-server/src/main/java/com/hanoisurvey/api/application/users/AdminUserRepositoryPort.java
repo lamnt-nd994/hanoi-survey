@@ -18,6 +18,8 @@ public interface AdminUserRepositoryPort {
 
     boolean existsByUsernameAndIdNot(String username, Long id);
 
+    Optional<String> getPasswordHashById(Long id);
+
     AdminUser save(AdminUser user, Set<Long> roleIds, String passwordHash);
 
     void deleteById(Long id);

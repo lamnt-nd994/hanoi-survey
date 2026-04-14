@@ -11,19 +11,10 @@
           <option v-for="cat in store.categories" :key="cat.id" :value="cat.id">{{ cat.name }}</option>
         </Select>
       </FormField>
-      <div class="grid gap-5 md:grid-cols-2">
-        <FormField>
-          <FormLabel>Tên dự án <span class="text-rose-600">*</span></FormLabel>
-          <Input v-model="form.title" required @input="onTitleChange" />
-        </FormField>
-        <FormField>
-          <FormLabel>Slug</FormLabel>
-          <div class="flex gap-2">
-            <Input v-model="form.slug" placeholder="vd: du-an-abc" @input="slugManuallyEdited = true" />
-            <Button type="button" variant="secondary" size="sm" class="h-10 whitespace-nowrap" @click="generateSlug">Tự tạo</Button>
-          </div>
-        </FormField>
-      </div>
+      <FormField>
+        <FormLabel>Tên dự án <span class="text-rose-600">*</span></FormLabel>
+        <Input v-model="form.title" required @input="onTitleChange" />
+      </FormField>
       <div class="grid gap-5 md:grid-cols-2">
         <FormField>
           <FormLabel>Khách hàng</FormLabel>

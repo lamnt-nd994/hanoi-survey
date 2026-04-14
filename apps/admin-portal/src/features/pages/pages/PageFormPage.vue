@@ -4,7 +4,7 @@
     <AlertBox v-if="error" :message="error" type="error" class="mt-4" />
     <DataCard class="p-6">
       <form class="space-y-6" @submit.prevent="handleSubmit">
-      <PageMetaSection :form="form" @title-input="onTitleChange" @slug-input="slugManuallyEdited = true" @generate-slug="generateSlug" />
+      <PageMetaSection :form="form" @title-input="onTitleChange" />
 
       <FormField v-if="form.templateCode === 'default'">
         <DefaultContentSection

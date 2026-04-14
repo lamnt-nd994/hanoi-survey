@@ -87,7 +87,7 @@
       </div>
       <div class="space-y-3">
         <div v-for="(item, index) in aboutContent.coreValues.items" :key="`value-${index}`" class="rounded-lg border border-gray-200 p-3">
-          <div class="flex items-center justify-between gap-3"><div class="text-sm font-medium text-slate-700">Mục {{ index + 1 }}</div><ActionButton variant="destructive" @click="removeItem(aboutContent.coreValues.items, index)">&#10005;</ActionButton></div>
+          <div class="flex items-center justify-between gap-3"><div class="text-sm font-medium text-slate-700">Mục {{ index + 1 }}</div><ActionButton variant="destructive" @click="removeItem(aboutContent.coreValues.items, index)"><Trash2 class="h-4 w-4" /></ActionButton></div>
           <div class="mt-3 grid gap-4 md:grid-cols-2">
             <div class="space-y-2"><label class="text-sm font-medium leading-none text-slate-700">Tiêu đề</label><Input v-model="item.title" placeholder="Sứ Mệnh" /></div>
             <div class="space-y-2"><label class="text-sm font-medium leading-none text-slate-700">Icon key</label><Input v-model="item.icon" placeholder="bullseye, eye, gem" /></div>
@@ -107,7 +107,7 @@
       <div class="mt-4 space-y-2"><label class="text-sm font-medium leading-none text-slate-700">Tiêu đề section</label><Input v-model="aboutContent.timeline.sectionTitle" placeholder="Quá Trình Phát Triển" /></div>
       <div class="space-y-3">
         <div v-for="(item, index) in aboutContent.timeline.items" :key="`timeline-${index}`" class="rounded-lg border border-gray-200 p-3">
-          <div class="flex items-center justify-between gap-3"><div class="text-sm font-medium text-slate-700">Mốc {{ index + 1 }}</div><ActionButton variant="destructive" @click="removeItem(aboutContent.timeline.items, index)">&#10005;</ActionButton></div>
+          <div class="flex items-center justify-between gap-3"><div class="text-sm font-medium text-slate-700">Mốc {{ index + 1 }}</div><ActionButton variant="destructive" @click="removeItem(aboutContent.timeline.items, index)"><Trash2 class="h-4 w-4" /></ActionButton></div>
           <div class="mt-3 grid gap-4 md:grid-cols-2">
             <div class="space-y-2"><label class="text-sm font-medium leading-none text-slate-700">Năm / giai đoạn</label><Input v-model="item.year" placeholder="2013" /></div>
             <div class="space-y-2"><label class="text-sm font-medium leading-none text-slate-700">Thứ tự</label><Input v-model.number="item.sortOrder" type="number" min="1" /></div>
@@ -142,7 +142,7 @@
       </div>
       <div class="space-y-3">
         <div v-for="(department, index) in aboutContent.organization.departments" :key="`department-${index}`" class="rounded-lg border border-gray-200 p-3">
-          <div class="flex items-center justify-between gap-3"><div class="text-sm font-medium text-slate-700">Bộ phận {{ index + 1 }}</div><ActionButton variant="destructive" @click="removeItem(aboutContent.organization.departments, index)">&#10005;</ActionButton></div>
+          <div class="flex items-center justify-between gap-3"><div class="text-sm font-medium text-slate-700">Bộ phận {{ index + 1 }}</div><ActionButton variant="destructive" @click="removeItem(aboutContent.organization.departments, index)"><Trash2 class="h-4 w-4" /></ActionButton></div>
           <Input v-model="aboutContent.organization.departments[index]" class="mt-3" placeholder="Tên bộ phận" />
         </div>
       </div>
@@ -171,7 +171,7 @@
       </div>
       <div class="space-y-3">
         <div v-for="(item, index) in aboutContent.capability.items" :key="`capability-${index}`" class="rounded-lg border border-gray-200 p-3">
-          <div class="flex items-center justify-between gap-3"><div class="text-sm font-medium text-slate-700">Mục {{ index + 1 }}</div><ActionButton variant="destructive" @click="removeItem(aboutContent.capability.items, index)">&#10005;</ActionButton></div>
+          <div class="flex items-center justify-between gap-3"><div class="text-sm font-medium text-slate-700">Mục {{ index + 1 }}</div><ActionButton variant="destructive" @click="removeItem(aboutContent.capability.items, index)"><Trash2 class="h-4 w-4" /></ActionButton></div>
           <div class="mt-3 grid gap-4 md:grid-cols-2">
             <div class="space-y-2"><label class="text-sm font-medium leading-none text-slate-700">Tên tài liệu</label><Input v-model="item.title" placeholder="Ví dụ: Chứng chỉ năng lực hoạt động khảo sát xây dựng" /></div>
             <div class="space-y-2"><label class="text-sm font-medium leading-none text-slate-700">Nhãn nút</label><Input v-model="item.buttonLabel" placeholder="Xem PDF" /></div>
@@ -202,6 +202,7 @@
 
 <script setup lang="ts">
 import { computed, defineAsyncComponent, ref } from 'vue'
+import { Trash2 } from 'lucide-vue-next'
 import ActionButton from '@/components/shared/ActionButton.vue'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'

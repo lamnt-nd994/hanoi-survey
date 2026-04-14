@@ -65,7 +65,7 @@
               <TableCell>
                 <div class="flex justify-end gap-2">
                   <ActionButton class="text-blue-600" title="Sửa" @click="editMenuItem(item)">✎</ActionButton>
-                  <ActionButton variant="destructive" title="Xóa" @click="handleDeleteItem(item.id)">×</ActionButton>
+                  <ActionButton variant="destructive" title="Xóa" @click="handleDeleteItem(item.id)"><Trash2 class="h-4 w-4" /></ActionButton>
                 </div>
               </TableCell>
             </TableRow>
@@ -178,6 +178,7 @@
 
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from 'vue'
+import { Trash2 } from 'lucide-vue-next'
 import ActionButton from '@/components/shared/ActionButton.vue'
 import AlertBox from '@/components/shared/AlertBox.vue'
 import DataCard from '@/components/shared/DataCard.vue'

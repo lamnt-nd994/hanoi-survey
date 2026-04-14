@@ -13,7 +13,7 @@ import { settingsRoutes } from '@/features/settings/routes'
 import { usersRoutes } from '@/features/users/routes'
 
 const adminChildRoutes: RouteRecordRaw[] = [
-  { path: '', redirect: '/dashboard' },
+  { path: '', redirect: '/company-info' },
   ...dashboardRoutes,
   ...pagesRoutes,
   ...postsRoutes,

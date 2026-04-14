@@ -5,7 +5,7 @@ export const equipmentsRoutes: RouteRecordRaw[] = [
     path: 'equipments',
     name: 'equipments',
     component: () => import('@/features/equipments/pages/EquipmentsListPage.vue'),
-    meta: { title: 'Thiết bị', section: 'equipments', requiresAuth: true, layout: 'admin' },
+    meta: { title: 'Quản lý thiết bị', section: 'equipments', requiresAuth: true, layout: 'admin' },
   },
   {
     path: 'equipments/categories',

@@ -12,19 +12,10 @@
           <option v-for="cat in store.categories" :key="cat.id" :value="cat.id">{{ cat.name }}</option>
         </Select>
       </FormField>
-      <div class="grid gap-5 md:grid-cols-2">
-        <FormField>
-          <FormLabel>Tiêu đề <span class="text-rose-600">*</span></FormLabel>
-          <Input v-model="form.title" placeholder="Nhập tiêu đề" required @input="onTitleChange" />
-        </FormField>
-        <FormField>
-          <FormLabel>Slug</FormLabel>
-          <div class="flex gap-2">
-            <Input v-model="form.slug" class="flex-1" placeholder="vd: bai-viet-mau" @input="slugManuallyEdited = true" />
-            <Button type="button" variant="secondary" size="sm" class="h-10 whitespace-nowrap" @click="generateSlug">Tự tạo</Button>
-          </div>
-        </FormField>
-      </div>
+      <FormField>
+        <FormLabel>Tiêu đề <span class="text-rose-600">*</span></FormLabel>
+        <Input v-model="form.title" placeholder="Nhập tiêu đề" required @input="onTitleChange" />
+      </FormField>
       <FormField>
         <FormLabel>Ảnh tiêu đề</FormLabel>
         <div class="flex items-start gap-2">

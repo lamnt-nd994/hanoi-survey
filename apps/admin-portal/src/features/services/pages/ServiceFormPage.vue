@@ -4,19 +4,10 @@
     <AlertBox v-if="error" :message="error" type="error" class="mt-4" />
     <DataCard class="p-6">
       <form class="space-y-5" @submit.prevent="handleSubmit">
-      <div class="grid gap-5 md:grid-cols-2">
-        <FormField>
-          <FormLabel>Tên dịch vụ <span class="text-rose-600">*</span></FormLabel>
-          <Input v-model="form.title" placeholder="Nhập tên dịch vụ" required @input="onTitleChange" />
-        </FormField>
-        <FormField>
-          <FormLabel>Slug</FormLabel>
-          <div class="flex gap-2">
-            <Input v-model="form.slug" placeholder="vd: khao-sat-duc-dat" @input="slugManuallyEdited = true" />
-            <Button type="button" variant="secondary" size="sm" class="h-10 whitespace-nowrap" @click="generateSlug">Tự tạo</Button>
-          </div>
-        </FormField>
-      </div>
+      <FormField>
+        <FormLabel>Tên dịch vụ <span class="text-rose-600">*</span></FormLabel>
+        <Input v-model="form.title" placeholder="Nhập tên dịch vụ" required @input="onTitleChange" />
+      </FormField>
 
       <FormField>
         <FormLabel>Icon / URL</FormLabel>
@@ -53,7 +44,7 @@
               <div class="flex gap-2">
                 <ActionButton :disabled="index === 0" @click="moveImage(index, -1)">↑</ActionButton>
                 <ActionButton :disabled="index === form.images.length - 1" @click="moveImage(index, 1)">↓</ActionButton>
-                <ActionButton variant="destructive" @click="removeImage(index)">×</ActionButton>
+                <ActionButton variant="destructive" @click="removeImage(index)"><Trash2 class="h-4 w-4" /></ActionButton>
               </div>
             </div>
             <div class="mt-3 space-y-3">
@@ -91,7 +82,7 @@
               <div class="flex gap-2">
                 <ActionButton :disabled="index === 0" @click="moveDocument(index, -1)">↑</ActionButton>
                 <ActionButton :disabled="index === form.documents.length - 1" @click="moveDocument(index, 1)">↓</ActionButton>
-                <ActionButton variant="destructive" @click="removeDocument(index)">×</ActionButton>
+                <ActionButton variant="destructive" @click="removeDocument(index)"><Trash2 class="h-4 w-4" /></ActionButton>
               </div>
             </div>
 
@@ -190,6 +181,7 @@
 
 <script setup lang="ts">
 import { computed, defineAsyncComponent, onMounted, reactive, ref, watch } from 'vue'
+import { Trash2 } from 'lucide-vue-next'
 import { useRoute, useRouter } from 'vue-router'
 import ActionButton from '@/components/shared/ActionButton.vue'
 import AlertBox from '@/components/shared/AlertBox.vue'

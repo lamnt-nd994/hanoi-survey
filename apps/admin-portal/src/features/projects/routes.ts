@@ -5,7 +5,7 @@ export const projectsRoutes: RouteRecordRaw[] = [
     path: 'projects',
     name: 'projects',
     component: () => import('@/features/projects/pages/ProjectsListPage.vue'),
-    meta: { title: 'Dự án', section: 'projects', requiresAuth: true, layout: 'admin' },
+    meta: { title: 'Quản lý dự án', section: 'projects', requiresAuth: true, layout: 'admin' },
   },
   {
     path: 'projects/categories',

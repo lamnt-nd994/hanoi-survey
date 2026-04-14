@@ -5,7 +5,7 @@ export const servicesRoutes: RouteRecordRaw[] = [
     path: 'services',
     name: 'services',
     component: () => import('@/features/services/pages/ServicesListPage.vue'),
-    meta: { title: 'Dịch vụ', section: 'services', requiresAuth: true, layout: 'admin' },
+    meta: { title: 'Quản lý dịch vụ', section: 'services', requiresAuth: true, layout: 'admin' },
   },
   {
     path: 'services/create',

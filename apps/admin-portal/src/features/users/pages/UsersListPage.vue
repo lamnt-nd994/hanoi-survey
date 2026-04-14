@@ -64,7 +64,7 @@
               <div class="flex gap-1">
                 <ActionButton title="Reset mật khẩu" class="text-slate-400 hover:text-slate-900" @click="handleResetPassword(row.id)">&#128274;</ActionButton>
                 <ActionButton as="router-link" :to="`/users/${row.id}/edit`" title="Sửa" class="text-slate-400 hover:text-sky-600">&#9998;</ActionButton>
-                <ActionButton title="Xóa" class="text-slate-400 hover:text-rose-600" @click="handleDelete(row.id)">&#10005;</ActionButton>
+                <ActionButton title="Xóa" class="text-slate-400 hover:text-rose-600" @click="handleDelete(row.id)"><Trash2 class="h-4 w-4" /></ActionButton>
               </div>
             </TableCell>
           </TableRow>
@@ -91,6 +91,7 @@
 
 <script setup lang="ts">
 import { computed, onMounted, reactive } from 'vue'
+import { Trash2 } from 'lucide-vue-next'
 import ActionButton from '@/components/shared/ActionButton.vue'
 import DataCard from '@/components/shared/DataCard.vue'
 import PageHeader from '@/components/shared/PageHeader.vue'

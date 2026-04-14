@@ -5,7 +5,7 @@
     <AlertBox v-if="store.loading" message="Đang tải dữ liệu..." />
     <AlertBox v-if="alert" :message="alert" :type="alertType" />
 
-    <div class="mt-6 space-y-6">
+    <div v-if="isCompanyInfoPage" class="mt-6 space-y-6">
       <DataCard class="p-6">
         <div class="mb-5">
           <h2 class="text-base font-semibold text-slate-900">Thông tin chung</h2>
@@ -144,12 +144,58 @@
       </div>
     </div>
 
+    <div v-else class="mt-6 space-y-6">
+      <DataCard class="p-6">
+        <div class="mb-5">
+          <h2 class="text-base font-semibold text-slate-900">Tài khoản của tôi</h2>
+          <p class="mt-1 text-sm text-slate-500">Cập nhật họ tên và email của tài khoản đang đăng nhập.</p>
+        </div>
+        <div class="grid gap-4 md:grid-cols-2">
+          <FormField>
+            <FormLabel>Họ tên <span class="text-rose-600">*</span></FormLabel>
+            <Input v-model="profileForm.fullName" placeholder="Nguyễn Văn A" />
+          </FormField>
+          <FormField>
+            <FormLabel>Email</FormLabel>
+            <Input v-model="profileForm.email" type="email" placeholder="admin@hanoisurvey.vn" />
+          </FormField>
+        </div>
+        <div class="mt-5 flex justify-end">
+          <Button :disabled="profileSaving" @click="handleUpdateProfile">{{ profileSaving ? 'Đang lưu...' : 'Cập nhật thông tin người dùng' }}</Button>
+        </div>
+      </DataCard>
+
+      <DataCard class="p-6">
+        <div class="mb-5">
+          <h2 class="text-base font-semibold text-slate-900">Đổi mật khẩu</h2>
+          <p class="mt-1 text-sm text-slate-500">Nhập mật khẩu hiện tại và mật khẩu mới cho tài khoản của bạn.</p>
+        </div>
+        <div class="grid gap-4 md:grid-cols-3">
+          <FormField>
+            <FormLabel>Mật khẩu hiện tại <span class="text-rose-600">*</span></FormLabel>
+            <Input v-model="passwordForm.currentPassword" type="password" autocomplete="current-password" />
+          </FormField>
+          <FormField>
+            <FormLabel>Mật khẩu mới <span class="text-rose-600">*</span></FormLabel>
+            <Input v-model="passwordForm.newPassword" type="password" autocomplete="new-password" />
+          </FormField>
+          <FormField>
+            <FormLabel>Xác nhận mật khẩu mới <span class="text-rose-600">*</span></FormLabel>
+            <Input v-model="passwordForm.confirmPassword" type="password" autocomplete="new-password" />
+          </FormField>
+        </div>
+        <div class="mt-5 flex justify-end">
+          <Button :disabled="passwordSaving" @click="handleChangePassword">{{ passwordSaving ? 'Đang lưu...' : 'Đổi mật khẩu' }}</Button>
+        </div>
+      </DataCard>
+    </div>
+
     <MediaPickerModal :open="picker.open" :items="mediaStore.items" :loading="mediaStore.loading" @close="closeMediaPicker" @select="handleMediaSelected" />
   </PageShell>
 </template>
 
 <script setup lang="ts">
-import { onMounted, reactive, ref, watch } from 'vue'
+import { computed, onMounted, reactive, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import AlertBox from '@/components/shared/AlertBox.vue'
 import DataCard from '@/components/shared/DataCard.vue'
@@ -162,6 +208,7 @@ import PageShell from '@/components/shared/PageShell.vue'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
+import { useAuthStore } from '@/stores/auth'
 import { useSettingsStore } from '@/stores/settings'
 import { useMediaStore } from '@/stores/media'
 import { useImageUpload } from '@/composables/useImageUpload'
@@ -169,14 +216,18 @@ import type { SiteSettings } from '@/types'
 
 const store = useSettingsStore()
 const mediaStore = useMediaStore()
+const authStore = useAuthStore()
 const route = useRoute()
 const alert = ref('')
 const alertType = ref<'success' | 'error'>('success')
 const saving = ref(false)
-const pageTitle = route.path === '/company-info' || route.path === '/contacts' ? 'Thông tin công ty' : 'Cài đặt website'
-const pageDescription = route.path === '/company-info' || route.path === '/contacts'
+const profileSaving = ref(false)
+const passwordSaving = ref(false)
+const isCompanyInfoPage = computed(() => route.path === '/company-info' || route.path === '/contacts')
+const pageTitle = computed(() => isCompanyInfoPage.value ? 'Thông tin công ty' : 'Cài đặt website')
+const pageDescription = computed(() => isCompanyInfoPage.value
   ? 'Cấu hình toàn bộ thông tin công ty hiển thị trên website.'
-  : 'Cấu hình thông tin hiển thị trên website'
+  : 'Cập nhật hồ sơ cá nhân và đổi mật khẩu tài khoản CMS')
 
 const form = reactive<SiteSettings>({
   id: undefined,
@@ -210,6 +261,8 @@ const form = reactive<SiteSettings>({
 })
 
 const picker = reactive<{ open: boolean, field: keyof SiteSettings | '' }>({ open: false, field: '' })
+const profileForm = reactive({ fullName: '', email: '' })
+const passwordForm = reactive({ currentPassword: '', newPassword: '', confirmPassword: '' })
 
 const fieldUploaders = {
   logo: useImageUpload((path) => { form.logoPath = path }),
@@ -262,6 +315,12 @@ watch(() => store.settings, (val) => {
   })
 }, { immediate: true })
 
+watch(() => authStore.user, (val) => {
+  if (!val) return
+  profileForm.fullName = val.fullName || ''
+  profileForm.email = val.email || ''
+}, { immediate: true })
+
 function flash(msg: string, type: 'success' | 'error' = 'success') {
   alert.value = msg
   alertType.value = type
@@ -301,7 +360,57 @@ async function handleSave() {
   }
 }
 
+async function handleUpdateProfile() {
+  if (!profileForm.fullName.trim()) {
+    flash('Họ tên không được để trống', 'error')
+    return
+  }
+
+  profileSaving.value = true
+  try {
+    await authStore.updateMyProfile({
+      fullName: profileForm.fullName.trim(),
+      email: profileForm.email.trim(),
+    })
+    flash('Đã cập nhật thông tin người dùng')
+  } catch (error: any) {
+    flash(error?.response?.data?.error?.message || 'Không thể cập nhật thông tin người dùng', 'error')
+  } finally {
+    profileSaving.value = false
+  }
+}
+
+async function handleChangePassword() {
+  if (!passwordForm.currentPassword.trim() || !passwordForm.newPassword.trim() || !passwordForm.confirmPassword.trim()) {
+    flash('Vui lòng nhập đầy đủ thông tin đổi mật khẩu', 'error')
+    return
+  }
+  if (passwordForm.newPassword !== passwordForm.confirmPassword) {
+    flash('Xác nhận mật khẩu không khớp', 'error')
+    return
+  }
+
+  passwordSaving.value = true
+  try {
+    await authStore.changeMyPassword({
+      currentPassword: passwordForm.currentPassword,
+      newPassword: passwordForm.newPassword,
+    })
+    passwordForm.currentPassword = ''
+    passwordForm.newPassword = ''
+    passwordForm.confirmPassword = ''
+    flash('Đổi mật khẩu thành công')
+  } catch (error: any) {
+    flash(error?.response?.data?.error?.message || 'Không thể đổi mật khẩu', 'error')
+  } finally {
+    passwordSaving.value = false
+  }
+}
+
 onMounted(() => {
   store.fetch()
+  if (!authStore.user) {
+    void authStore.fetchUser()
+  }
 })
 </script>

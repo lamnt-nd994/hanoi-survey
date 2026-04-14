@@ -72,6 +72,11 @@ public class AdminUserRepositoryAdapter implements AdminUserRepositoryPort {
     }
 
     @Override
+    public Optional<String> getPasswordHashById(Long id) {
+        return userRepository.findById(id).map(UserEntity::getPasswordHash);
+    }
+
+    @Override
     public AdminUser save(AdminUser user, Set<Long> roleIds, String passwordHash) {
         UserEntity entity = user.id() == null ? new UserEntity() : userRepository.findById(user.id()).orElseGet(UserEntity::new);
         entity.setId(user.id());

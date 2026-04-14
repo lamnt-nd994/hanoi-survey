@@ -4,7 +4,7 @@
     <AlertBox v-if="error" :message="error" type="error" class="mt-4" />
     <DataCard class="p-6">
       <form class="space-y-5" @submit.prevent="handleSubmit">
-      <div class="grid gap-5 md:grid-cols-3">
+      <div class="grid gap-5 md:grid-cols-2">
         <FormField>
           <FormLabel>Danh mục thiết bị <span class="text-rose-600">*</span></FormLabel>
           <Select v-model.number="form.categoryId" required>
@@ -15,13 +15,6 @@
         <FormField>
           <FormLabel>Tên thiết bị <span class="text-rose-600">*</span></FormLabel>
           <Input v-model="form.name" required @input="onNameChange" />
-        </FormField>
-        <FormField>
-          <FormLabel>Slug</FormLabel>
-          <div class="flex gap-2">
-            <Input v-model="form.slug" @input="slugManuallyEdited = true" />
-            <Button type="button" variant="secondary" size="sm" class="h-10 whitespace-nowrap" @click="generateSlug">Tự tạo</Button>
-          </div>
         </FormField>
       </div>
       <div class="grid gap-5 md:grid-cols-3">

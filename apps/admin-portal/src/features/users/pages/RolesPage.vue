@@ -24,7 +24,7 @@
               <TableCell>
                 <div class="flex justify-end gap-2">
                   <Button type="button" variant="secondary" size="sm" :disabled="isLockedRole(role.code)" @click="startEdit(role)">Sửa</Button>
-                  <Button type="button" variant="outline" size="sm" :disabled="isLockedRole(role.code)" @click="handleDelete(role.id)">Xóa</Button>
+                  <Button type="button" variant="outline" size="icon" :disabled="isLockedRole(role.code)" @click="handleDelete(role.id)"><Trash2 class="h-4 w-4" /></Button>
                 </div>
               </TableCell>
             </TableRow>
@@ -74,6 +74,7 @@
 
 <script setup lang="ts">
 import { onMounted, reactive, ref } from 'vue'
+import { Trash2 } from 'lucide-vue-next'
 import DataCard from '@/components/shared/DataCard.vue'
 import FormField from '@/components/shared/FormField.vue'
 import FormLabel from '@/components/shared/FormLabel.vue'

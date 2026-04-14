@@ -27,7 +27,7 @@
             <TableCell>
               <div class="flex justify-end gap-2">
                 <ActionButton as="router-link" :to="`/pages/${row.id}/edit`" class="text-blue-600" title="Sửa">✎</ActionButton>
-                <ActionButton variant="destructive" title="Xóa" @click="handleDelete(row.id)">×</ActionButton>
+                <ActionButton variant="destructive" title="Xóa" @click="handleDelete(row.id)"><Trash2 class="h-4 w-4" /></ActionButton>
               </div>
             </TableCell>
           </TableRow>
@@ -42,6 +42,7 @@
 
 <script setup lang="ts">
 import { onMounted } from 'vue'
+import { Trash2 } from 'lucide-vue-next'
 import ActionButton from '@/components/shared/ActionButton.vue'
 import PageHeader from '@/components/shared/PageHeader.vue'
 import PageShell from '@/components/shared/PageShell.vue'

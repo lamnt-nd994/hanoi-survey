@@ -1,21 +1,16 @@
 <template>
   <div class="flex min-h-screen bg-slate-50 text-slate-900">
     <aside :class="sidebarClass">
-      <div :class="['flex h-16 shrink-0 items-center border-b border-slate-200 px-4', sidebarCollapsed ? 'justify-center' : 'gap-3']">
-        <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-slate-900 text-sm font-bold text-white">H</div>
-        <div v-if="!sidebarCollapsed" class="min-w-0">
-          <h1 class="text-sm font-bold leading-tight text-slate-900">Hanoi Survey</h1>
-          <span class="text-[10px] font-medium uppercase tracking-wider text-slate-400">Hệ thống CMS</span>
+        <div :class="['flex h-16 shrink-0 items-center border-b border-slate-200 px-4', sidebarCollapsed ? 'justify-center' : 'gap-3']">
+          <img v-if="companyLogoUrl" :src="companyLogoUrl" alt="Company logo" class="h-9 w-9 shrink-0 rounded-md object-contain" />
+          <div v-else class="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-slate-900 text-sm font-bold text-white">{{ companyInitial }}</div>
+          <div v-if="!sidebarCollapsed" class="min-w-0">
+            <h1 class="text-sm font-bold leading-tight text-slate-900">{{ companyShortName }}</h1>
+            <span class="text-[10px] font-medium uppercase tracking-wider text-slate-400">Hệ thống CMS</span>
+          </div>
         </div>
-      </div>
 
       <nav class="flex-1 space-y-1 overflow-y-auto px-2 py-3">
-        <div v-if="!sidebarCollapsed" class="px-3 pb-1 pt-4 text-[10px] font-semibold uppercase tracking-wider text-slate-400">Tổng quan</div>
-        <router-link to="/dashboard" :class="navItemClass(route.path === '/dashboard')">
-          <LayoutDashboard :class="iconClass" />
-          <span v-if="!sidebarCollapsed" class="min-w-0 flex-1 truncate">Trang chủ</span>
-        </router-link>
-
         <div v-if="!sidebarCollapsed" class="px-3 pb-1 pt-4 text-[10px] font-semibold uppercase tracking-wider text-slate-400">Nội dung</div>
         <router-link to="/pages" :class="navItemClass(route.path.startsWith('/pages'))">
           <FileText :class="iconClass" />
@@ -136,12 +131,14 @@
           </Button>
           <div class="flex items-center gap-1.5 text-sm">
             <span class="text-slate-400">CMS</span>
-            <ChevronRight class="h-4 w-4 text-slate-300" />
-            <span class="font-semibold text-slate-900">{{ pageTitle }}</span>
+            <template v-for="(item, index) in breadcrumbItems" :key="`${item.label}-${index}`">
+              <ChevronRight class="h-4 w-4 text-slate-300" />
+              <span :class="index === breadcrumbItems.length - 1 ? 'font-semibold text-slate-900' : 'text-slate-500'">{{ item.label }}</span>
+            </template>
           </div>
         </div>
-        <Button as="button" variant="secondary" size="sm" @click="authStore.logout(); $router.push('/login')">Đăng xuất</Button>
-      </header>
+          <Button as="button" variant="secondary" size="sm" @click="authStore.logout(); $router.push('/login')">Đăng xuất</Button>
+        </header>
       <main class="min-w-0 flex-1 overflow-y-auto p-6">
         <router-view />
       </main>
@@ -150,15 +147,18 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
-import { BriefcaseBusiness, Building2, ChevronDown, ChevronRight, Dot, FileText, FolderKanban, ImageIcon, LayoutDashboard, LogOut, Menu, Newspaper, PanelLeft, Settings, Users, Wrench } from 'lucide-vue-next'
+import { BriefcaseBusiness, Building2, ChevronDown, ChevronRight, Dot, FileText, FolderKanban, ImageIcon, LogOut, Menu, Newspaper, PanelLeft, Settings, Users, Wrench } from 'lucide-vue-next'
 import ToastViewport from '@/components/shared/ToastViewport.vue'
 import { Button } from '@/components/ui/button'
+import { resolveMediaUrl } from '@/lib/media'
 import { useAuthStore } from '@/stores/auth'
+import { useSettingsStore } from '@/stores/settings'
 
 const route = useRoute()
 const authStore = useAuthStore()
+const settingsStore = useSettingsStore()
 const sidebarCollapsed = ref(false)
 const mobileOpen = ref(false)
 const servicesMenuOpen = ref(route.path.startsWith('/services'))
@@ -180,6 +180,29 @@ const iconClass = computed(() => [
 const pageTitle = computed(() => {
   return (route.meta.title as string) || 'Quản trị'
 })
+const companyShortName = computed(() => settingsStore.settings?.shortName || 'Hanoi Survey')
+const companyLogoUrl = computed(() => settingsStore.settings?.logoPath ? resolveMediaUrl(settingsStore.settings.logoPath) : '')
+const companyInitial = computed(() => companyShortName.value.trim().charAt(0).toUpperCase() || 'H')
+const sectionLabelMap: Record<string, string> = {
+  dashboard: 'Trang chủ',
+  pages: 'Trang tĩnh',
+  posts: 'Bài viết',
+  services: 'Dịch vụ',
+  projects: 'Dự án',
+  equipments: 'Thiết bị',
+  menus: 'Menu',
+  settings: 'Cài đặt',
+  media: 'Thư viện Media',
+  users: 'Người dùng',
+}
+const breadcrumbItems = computed(() => {
+  const section = String(route.meta.section || '')
+  const parentLabel = sectionLabelMap[section]
+  const currentTitle = pageTitle.value
+  if (!parentLabel) return [{ label: currentTitle }]
+  if (currentTitle === parentLabel) return [{ label: parentLabel }]
+  return [{ label: parentLabel }, { label: currentTitle }]
+})
 
 const isServicesSection = computed(() => route.path.startsWith('/services'))
 const isUsersSection = computed(() => route.path.startsWith('/users'))
@@ -198,6 +221,12 @@ watch(() => route.path, (path) => {
   }
   if (path.startsWith('/equipments')) {
     equipmentsMenuOpen.value = true
+  }
+})
+
+onMounted(async () => {
+  if (!settingsStore.settings) {
+    await settingsStore.fetch()
   }
 })
 

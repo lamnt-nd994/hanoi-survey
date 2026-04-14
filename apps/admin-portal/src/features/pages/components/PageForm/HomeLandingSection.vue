@@ -37,7 +37,7 @@
           <div v-for="(item, index) in homeContent.hero.badges" :key="`hero-badge-${index}`" class="rounded-lg border border-gray-200 p-3">
             <div class="flex items-center justify-between gap-3">
               <div class="text-sm font-medium text-slate-700">Badge {{ index + 1 }}</div>
-              <ActionButton variant="destructive" @click="removeItem(homeContent.hero.badges, index)">&#10005;</ActionButton>
+              <ActionButton variant="destructive" @click="removeItem(homeContent.hero.badges, index)"><Trash2 class="h-4 w-4" /></ActionButton>
             </div>
             <div class="mt-3 grid gap-4 md:grid-cols-2">
               <div class="space-y-2">
@@ -77,7 +77,7 @@
         <div v-for="(item, index) in homeContent.stats.items" :key="`stat-${index}`" class="rounded-lg border border-gray-200 p-3">
           <div class="flex items-center justify-between gap-3">
             <div class="text-sm font-medium text-slate-700">Số liệu {{ index + 1 }}</div>
-            <ActionButton variant="destructive" @click="removeItem(homeContent.stats.items, index)">&#10005;</ActionButton>
+            <ActionButton variant="destructive" @click="removeItem(homeContent.stats.items, index)"><Trash2 class="h-4 w-4" /></ActionButton>
           </div>
           <div class="mt-3 grid gap-4 md:grid-cols-2">
             <FormField><FormLabel>Giá trị</FormLabel><Input v-model="item.value" placeholder="10+" /></FormField>
@@ -121,7 +121,7 @@
           <div v-for="(item, index) in homeContent.aboutSection.highlights" :key="`about-highlight-${index}`" class="rounded-lg border border-gray-200 p-3">
             <div class="flex items-center justify-between gap-3">
               <div class="text-sm font-medium text-slate-700">Ý {{ index + 1 }}</div>
-              <ActionButton variant="destructive" @click="removeItem(homeContent.aboutSection.highlights, index)">&#10005;</ActionButton>
+              <ActionButton variant="destructive" @click="removeItem(homeContent.aboutSection.highlights, index)"><Trash2 class="h-4 w-4" /></ActionButton>
             </div>
             <Textarea v-model="homeContent.aboutSection.highlights[index]" class="mt-3" rows="3" placeholder="Nội dung điểm nhấn" />
           </div>
@@ -149,7 +149,7 @@
         <div class="flex items-center justify-between gap-3"><h3 class="text-sm font-semibold text-slate-800">Dịch vụ được chọn</h3><Button type="button" variant="secondary" @click="homeContent.servicesSection.selectedItems.push(createSelectedServiceItem())">+ Thêm dịch vụ</Button></div>
         <div class="mt-3 space-y-3">
           <div v-for="(item, index) in homeContent.servicesSection.selectedItems" :key="`selected-service-${index}`" class="rounded-lg border border-gray-200 p-3">
-            <div class="flex items-center justify-between gap-3"><div class="text-sm font-medium text-slate-700">Dịch vụ {{ index + 1 }}</div><ActionButton variant="destructive" @click="removeItem(homeContent.servicesSection.selectedItems, index)">&#10005;</ActionButton></div>
+            <div class="flex items-center justify-between gap-3"><div class="text-sm font-medium text-slate-700">Dịch vụ {{ index + 1 }}</div><ActionButton variant="destructive" @click="removeItem(homeContent.servicesSection.selectedItems, index)"><Trash2 class="h-4 w-4" /></ActionButton></div>
             <div class="mt-3 grid gap-4 md:grid-cols-2">
               <div class="space-y-2"><label class="text-sm font-medium leading-none text-slate-700">Chọn dịch vụ</label><Select v-model.number="item.serviceId"><option :value="null">-- Chọn dịch vụ --</option><option v-for="service in availableServices" :key="service.id" :value="service.id">{{ service.title }}</option></Select></div>
               <FormField><FormLabel>Icon</FormLabel><Input v-model="item.icon" placeholder="fas fa-map-marked-alt hoặc map-pinned" /></FormField>
@@ -179,7 +179,7 @@
         <div class="flex items-center justify-between gap-3"><h3 class="text-sm font-semibold text-slate-800">Dự án được chọn</h3><Button type="button" variant="secondary" @click="homeContent.projectsSection.selectedItems.push(createSelectedProjectItem())">+ Thêm dự án</Button></div>
         <div class="mt-3 space-y-3">
           <div v-for="(item, index) in homeContent.projectsSection.selectedItems" :key="`selected-project-${index}`" class="rounded-lg border border-gray-200 p-3">
-            <div class="flex items-center justify-between gap-3"><div class="text-sm font-medium text-slate-700">Dự án {{ index + 1 }}</div><ActionButton variant="destructive" @click="removeItem(homeContent.projectsSection.selectedItems, index)">&#10005;</ActionButton></div>
+            <div class="flex items-center justify-between gap-3"><div class="text-sm font-medium text-slate-700">Dự án {{ index + 1 }}</div><ActionButton variant="destructive" @click="removeItem(homeContent.projectsSection.selectedItems, index)"><Trash2 class="h-4 w-4" /></ActionButton></div>
             <div class="mt-3 space-y-2"><label class="text-sm font-medium leading-none text-slate-700">Chọn dự án</label><Select v-model.number="item.projectId"><option :value="null">-- Chọn dự án --</option><option v-for="project in availableProjects" :key="project.id" :value="project.id">{{ project.title }}</option></Select></div>
           </div>
         </div>
@@ -222,6 +222,7 @@
 import ActionButton from '@/components/shared/ActionButton.vue'
 import FormField from '@/components/shared/FormField.vue'
 import FormLabel from '@/components/shared/FormLabel.vue'
+import { Trash2 } from 'lucide-vue-next'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'

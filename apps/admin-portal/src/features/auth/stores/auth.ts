@@ -39,5 +39,14 @@ export const useAuthStore = defineStore('auth', () => {
     clearStoredToken()
   }
 
-  return { user, loading, isLoggedIn, userInitial, userRoles, isSuperAdmin, login, fetchUser, logout }
+  async function updateMyProfile(payload: { fullName: string; email: string }) {
+    user.value = await authApi.updateMyProfile(payload)
+    return user.value
+  }
+
+  async function changeMyPassword(payload: { currentPassword: string; newPassword: string }) {
+    return await authApi.changeMyPassword(payload)
+  }
+
+  return { user, loading, isLoggedIn, userInitial, userRoles, isSuperAdmin, login, fetchUser, logout, updateMyProfile, changeMyPassword }
 })

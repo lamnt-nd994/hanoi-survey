@@ -28,7 +28,7 @@
               <TableCell>
                 <div class="flex justify-end gap-2">
                   <Button type="button" variant="secondary" size="sm" @click="startEditCategory(category)">Sửa</Button>
-                  <Button type="button" variant="outline" size="sm" @click="handleDeleteCategory(category.id)">Xóa</Button>
+                  <Button type="button" variant="outline" size="icon" @click="handleDeleteCategory(category.id)"><Trash2 class="h-4 w-4" /></Button>
                 </div>
               </TableCell>
             </TableRow>
@@ -43,7 +43,7 @@
         <div class="flex items-center justify-between gap-3">
           <div>
             <h3 class="text-base font-semibold text-slate-900">{{ categoryForm.id ? 'Cập nhật danh mục' : 'Tạo danh mục mới' }}</h3>
-            <p class="mt-1 text-sm text-slate-500">Slug sẽ tự sinh nếu bạn để trống.</p>
+            <p class="mt-1 text-sm text-slate-500">Slug được tự động tạo từ tên danh mục.</p>
           </div>
           <Button v-if="categoryForm.id" type="button" variant="ghost" size="sm" @click="resetCategoryForm">Tạo mới</Button>
         </div>
@@ -52,13 +52,6 @@
           <FormField>
             <FormLabel>Tên danh mục <span class="text-rose-600">*</span></FormLabel>
             <Input v-model="categoryForm.name" placeholder="Nhập tên danh mục" required @input="onNameChange" />
-          </FormField>
-          <FormField>
-            <FormLabel>Slug</FormLabel>
-            <div class="flex gap-2">
-              <Input v-model="categoryForm.slug" placeholder="tu-dong-tao-neu-bo-trong" @input="slugManuallyEdited = true" />
-              <Button type="button" variant="secondary" size="sm" class="h-10 whitespace-nowrap" @click="generateSlug">Tự tạo</Button>
-            </div>
           </FormField>
           <FormField>
             <FormLabel>Icon</FormLabel>
@@ -88,6 +81,7 @@
 
 <script setup lang="ts">
 import { onMounted, reactive, ref } from 'vue'
+import { Trash2 } from 'lucide-vue-next'
 import DataCard from '@/components/shared/DataCard.vue'
 import FormField from '@/components/shared/FormField.vue'
 import FormLabel from '@/components/shared/FormLabel.vue'

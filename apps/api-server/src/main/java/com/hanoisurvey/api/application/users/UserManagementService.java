@@ -5,6 +5,7 @@ import com.hanoisurvey.api.domain.users.AdminRole;
 import com.hanoisurvey.api.domain.users.AdminUser;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -123,6 +124,29 @@ public class UserManagementService {
         AdminUser user = userRepository.findById(id).orElseThrow(() -> new NotFoundException("Không tìm thấy người dùng"));
         String password = normalizeRequired(command.password(), "Mật khẩu mới là bắt buộc");
         userRepository.save(user, user.roles().stream().map(AdminRole::id).collect(java.util.stream.Collectors.toCollection(LinkedHashSet::new)), passwordEncoder.encode(password));
+    }
+
+    @Transactional
+    public AdminUser updateOwnProfile(Long id, String fullName, String email) {
+        AdminUser existing = userRepository.findById(id).orElseThrow(() -> new NotFoundException("Không tìm thấy người dùng"));
+        Set<Long> roleIds = existing.roles().stream().map(AdminRole::id).collect(java.util.stream.Collectors.toCollection(LinkedHashSet::new));
+        return userRepository.save(
+                new AdminUser(id, existing.username(), normalizeRequired(fullName, "Họ tên là bắt buộc"), normalizeNullable(email), existing.active(), Set.of(), existing.createdAt(), existing.updatedAt()),
+                roleIds,
+                null
+        );
+    }
+
+    @Transactional
+    public void changeOwnPassword(Long id, String currentPassword, String newPassword) {
+        AdminUser existing = userRepository.findById(id).orElseThrow(() -> new NotFoundException("Không tìm thấy người dùng"));
+        String current = normalizeRequired(currentPassword, "Mật khẩu hiện tại là bắt buộc");
+        String next = normalizeRequired(newPassword, "Mật khẩu mới là bắt buộc");
+        String currentHash = userRepository.getPasswordHashById(id).orElseThrow(() -> new NotFoundException("Không tìm thấy người dùng"));
+        if (!passwordEncoder.matches(current, currentHash)) {
+            throw new BadCredentialsException("Mật khẩu hiện tại không đúng");
+        }
+        userRepository.save(existing, existing.roles().stream().map(AdminRole::id).collect(java.util.stream.Collectors.toCollection(LinkedHashSet::new)), passwordEncoder.encode(next));
     }
 
     private Set<Long> validateRoleIds(Set<Long> roleIds) {
