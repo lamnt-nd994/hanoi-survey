@@ -7,7 +7,6 @@ import java.time.LocalDate;
 public record SiteSettingRequest(
         @NotBlank String siteName,
         String companyNameEn,
-        String companyTradeName,
         String shortName,
         String slogan,
         String logoPath,
@@ -27,7 +26,6 @@ public record SiteSettingRequest(
         String website,
         String representativeName,
         String representativeTitle,
-        String establishmentInfo,
         String address,
         String mapEmbed,
         String workingHours,

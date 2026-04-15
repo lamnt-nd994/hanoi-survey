@@ -380,7 +380,6 @@ export interface SiteSettings {
   id?: number
   siteName: string
   companyNameEn: string
-  companyTradeName: string
   shortName: string
   slogan: string
   logoPath: string
@@ -400,7 +399,6 @@ export interface SiteSettings {
   website: string
   representativeName: string
   representativeTitle: string
-  establishmentInfo: string
   address: string
   mapEmbed: string
   workingHours: string

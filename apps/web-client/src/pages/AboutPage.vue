@@ -55,7 +55,7 @@
                 <h3 class="text-sm font-semibold uppercase tracking-[0.18em] text-primary-navy">Tên nhà thầu</h3>
                 <div class="mt-4 space-y-3">
                   <p><span class="font-semibold text-neutral-900">Tên công ty:</span> {{ companySettings.siteName }}</p>
-                  <p v-if="companySettings.companyTradeName || companySettings.companyNameEn"><span class="font-semibold text-neutral-900">Tên giao dịch:</span> {{ companySettings.companyTradeName || companySettings.companyNameEn }}</p>
+                  <p v-if="companySettings.companyNameEn"><span class="font-semibold text-neutral-900">Tên công ty tiếng Anh:</span> {{ companySettings.companyNameEn }}</p>
                 </div>
               </div>
 
@@ -71,10 +71,6 @@
                 </div>
               </div>
 
-              <div v-if="companySettings.establishmentInfo">
-                <h3 class="text-sm font-semibold uppercase tracking-[0.18em] text-primary-navy">Nơi và năm thành lập</h3>
-                <p class="mt-4 whitespace-pre-line">{{ companySettings.establishmentInfo }}</p>
-              </div>
             </div>
           </div>
         </section>
@@ -236,7 +232,6 @@ const { introPage: page, loading, errors } = storeToRefs(publicContentStore)
 const companySettings = computed(() => siteSettingsStore.settings || {
   siteName: '',
   companyNameEn: '',
-  companyTradeName: '',
   officeAddress: '',
   phone: '',
   email: '',
@@ -244,7 +239,6 @@ const companySettings = computed(() => siteSettingsStore.settings || {
   website: '',
   representativeName: '',
   representativeTitle: '',
-  establishmentInfo: '',
 })
 
 const loadingState = computed(() => loading.value.introPage)

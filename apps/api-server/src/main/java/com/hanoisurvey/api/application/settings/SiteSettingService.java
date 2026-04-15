@@ -22,7 +22,6 @@ public class SiteSettingService {
                 current.id(),
                 command.siteName(),
                 command.companyNameEn(),
-                command.companyTradeName(),
                 command.shortName(),
                 command.slogan(),
                 command.logoPath(),
@@ -42,7 +41,6 @@ public class SiteSettingService {
                 command.website(),
                 command.representativeName(),
                 command.representativeTitle(),
-                command.establishmentInfo(),
                 command.address(),
                 command.mapEmbed(),
                 command.workingHours(),
@@ -59,7 +57,6 @@ public class SiteSettingService {
                 null, // id
                 "Hanoi Survey", // siteName
                 null, // companyNameEn
-                null, // companyTradeName
                 null, // shortName
                 null, // slogan
                 null, // logoPath
@@ -79,7 +76,6 @@ public class SiteSettingService {
                 null, // website
                 null, // representativeName
                 null, // representativeTitle
-                null, // establishmentInfo
                 null, // address
                 null, // mapEmbed
                 null, // workingHours

@@ -21,14 +21,10 @@
             <Input v-model="form.companyNameEn" placeholder="Company name in English" />
           </FormField>
           <FormField>
-            <FormLabel>Tên giao dịch</FormLabel>
-            <Input v-model="form.companyTradeName" placeholder="VIETDELTA CONSULTANCY JOINT STOCK COMPANY" />
-          </FormField>
-          <FormField>
             <FormLabel>Tên ngắn</FormLabel>
             <Input v-model="form.shortName" placeholder="VD: Hanoi Survey" />
           </FormField>
-          <FormField class="md:col-span-2">
+          <FormField>
             <FormLabel>Slogan</FormLabel>
             <Input v-model="form.slogan" placeholder="Thông điệp thương hiệu" />
           </FormField>
@@ -106,11 +102,11 @@
             <FormLabel>Website</FormLabel>
             <Input v-model="form.website" placeholder="https://example.com" />
           </FormField>
-          <FormField class="md:col-span-2">
+          <FormField>
             <FormLabel>Địa chỉ hiển thị ngắn</FormLabel>
             <Input v-model="form.address" placeholder="Địa chỉ ngắn dùng chung" />
           </FormField>
-          <FormField class="md:col-span-2">
+          <FormField>
             <FormLabel>Địa chỉ trụ sở</FormLabel>
             <Input v-model="form.officeAddress" placeholder="Địa chỉ trụ sở chính" />
           </FormField>
@@ -125,10 +121,6 @@
           <FormField>
             <FormLabel>Chức vụ người đại diện</FormLabel>
             <Input v-model="form.representativeTitle" placeholder="Giám đốc Công ty" />
-          </FormField>
-          <FormField class="md:col-span-2">
-            <FormLabel>Nơi và năm thành lập</FormLabel>
-            <Textarea v-model="form.establishmentInfo" rows="6" placeholder="Thông tin nơi và năm thành lập công ty" />
           </FormField>
           <FormField class="md:col-span-2">
             <FormLabel>Google Map Embed URL</FormLabel>
@@ -256,7 +248,6 @@ const form = reactive<SiteSettings>({
   id: undefined,
   siteName: '',
   companyNameEn: '',
-  companyTradeName: '',
   shortName: '',
   slogan: '',
   logoPath: '',
@@ -276,7 +267,6 @@ const form = reactive<SiteSettings>({
   website: '',
   representativeName: '',
   representativeTitle: '',
-  establishmentInfo: '',
   address: '',
   mapEmbed: '',
   workingHours: '',
@@ -314,7 +304,6 @@ watch(() => store.settings, (val) => {
   Object.assign(form, {
     ...val,
     companyNameEn: val.companyNameEn || '',
-    companyTradeName: val.companyTradeName || '',
     shortName: val.shortName || '',
     slogan: val.slogan || '',
     logoPath: val.logoPath || '',
@@ -334,7 +323,6 @@ watch(() => store.settings, (val) => {
     website: val.website || '',
     representativeName: val.representativeName || '',
     representativeTitle: val.representativeTitle || '',
-    establishmentInfo: val.establishmentInfo || '',
     address: val.address || '',
     mapEmbed: val.mapEmbed || '',
     workingHours: val.workingHours || '',

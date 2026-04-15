@@ -2,7 +2,6 @@ export interface SiteSettings {
   id: number
   siteName: string
   companyNameEn: string | null
-  companyTradeName: string | null
   shortName: string | null
   slogan: string | null
   logoPath: string | null
@@ -22,7 +21,6 @@ export interface SiteSettings {
   website: string | null
   representativeName: string | null
   representativeTitle: string | null
-  establishmentInfo: string | null
   mapEmbed: string | null
   workingHours: string | null
   facebookUrl: string | null

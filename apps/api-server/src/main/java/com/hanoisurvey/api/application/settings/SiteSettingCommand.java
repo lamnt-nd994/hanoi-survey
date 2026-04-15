@@ -5,7 +5,6 @@ import java.time.LocalDate;
 public record SiteSettingCommand(
         String siteName,
         String companyNameEn,
-        String companyTradeName,
         String shortName,
         String slogan,
         String logoPath,
@@ -25,7 +24,6 @@ public record SiteSettingCommand(
         String website,
         String representativeName,
         String representativeTitle,
-        String establishmentInfo,
         String address,
         String mapEmbed,
         String workingHours,
