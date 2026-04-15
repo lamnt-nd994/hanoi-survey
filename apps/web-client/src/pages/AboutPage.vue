@@ -19,7 +19,7 @@
                   </h1>
                 </div>
               </div>
-              <div class="about-intro-copy prose prose-slate mt-4 max-w-none text-left text-[1.15rem] leading-[1.95] text-neutral-600" v-html="aboutData.intro.content"></div>
+              <div class="about-intro-copy prose prose-slate mt-4 max-w-none text-left text-[1.15rem] leading-[1.95] text-neutral-600" v-html="cleanedIntroContent"></div>
             </div>
 
             <div class="lg:pt-[4.6rem]">
@@ -41,6 +41,39 @@
                     <div class="mt-4 font-heading text-3xl font-bold leading-tight">Hình ảnh công trình và hoạt động khảo sát</div>
                   </div>
                 </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="mt-16 border-t border-neutral-200 pt-14">
+          <div class="max-w-5xl">
+            <h2 class="section-title text-primary-navy">Thông tin doanh nghiệp</h2>
+            <div class="mt-4 h-1 w-20 rounded-full bg-accent-green"></div>
+            <div class="mt-10 space-y-10 text-[1.05rem] leading-8 text-neutral-600 md:text-[1.08rem]">
+              <div>
+                <h3 class="text-sm font-semibold uppercase tracking-[0.18em] text-primary-navy">Tên nhà thầu</h3>
+                <div class="mt-4 space-y-3">
+                  <p><span class="font-semibold text-neutral-900">Tên công ty:</span> {{ companySettings.siteName }}</p>
+                  <p v-if="companySettings.companyTradeName || companySettings.companyNameEn"><span class="font-semibold text-neutral-900">Tên giao dịch:</span> {{ companySettings.companyTradeName || companySettings.companyNameEn }}</p>
+                </div>
+              </div>
+
+              <div>
+                <h3 class="text-sm font-semibold uppercase tracking-[0.18em] text-primary-navy">Trụ sở chính</h3>
+                <div class="mt-4 space-y-3">
+                  <p v-if="companySettings.officeAddress"><span class="font-semibold text-neutral-900">Địa chỉ:</span> {{ companySettings.officeAddress }}</p>
+                  <p v-if="companySettings.phone"><span class="font-semibold text-neutral-900">Điện thoại:</span> {{ companySettings.phone }}</p>
+                  <p v-if="companySettings.email"><span class="font-semibold text-neutral-900">Email:</span> {{ companySettings.email }}</p>
+                  <p v-if="companySettings.taxCode"><span class="font-semibold text-neutral-900">Mã số thuế:</span> {{ companySettings.taxCode }}</p>
+                  <p v-if="companySettings.website"><span class="font-semibold text-neutral-900">Website:</span> {{ companySettings.website }}</p>
+                  <p v-if="representativeLine"><span class="font-semibold text-neutral-900">Người đại diện:</span> <span class="font-semibold text-neutral-900">{{ representativeLine }}</span> <span> - {{representativeTitle}}</span></p>
+                </div>
+              </div>
+
+              <div v-if="companySettings.establishmentInfo">
+                <h3 class="text-sm font-semibold uppercase tracking-[0.18em] text-primary-navy">Nơi và năm thành lập</h3>
+                <p class="mt-4 whitespace-pre-line">{{ companySettings.establishmentInfo }}</p>
               </div>
             </div>
           </div>
@@ -191,19 +224,44 @@
 import { computed, onMounted } from 'vue'
 import { storeToRefs } from 'pinia'
 import { usePublicContentStore } from '../stores/publicContent'
+import { useSiteSettingsStore } from '../stores/siteSettings'
 import { resolveMediaUrl } from '../lib/media'
 import { Card } from '../components/ui/card'
 import { Skeleton } from '../components/ui/skeleton'
 import type { AboutCapabilityItem, AboutPageContent, AboutPageTimelineItem, AboutPageValueItem } from '../types/content'
 
 const publicContentStore = usePublicContentStore()
+const siteSettingsStore = useSiteSettingsStore()
 const { introPage: page, loading, errors } = storeToRefs(publicContentStore)
+const companySettings = computed(() => siteSettingsStore.settings || {
+  siteName: '',
+  companyNameEn: '',
+  companyTradeName: '',
+  officeAddress: '',
+  phone: '',
+  email: '',
+  taxCode: '',
+  website: '',
+  representativeName: '',
+  representativeTitle: '',
+  establishmentInfo: '',
+})
 
 const loadingState = computed(() => loading.value.introPage)
 const errorMessage = computed(() => errors.value.introPage)
 
 const aboutData = computed<AboutPageContent>(() => parseAboutContent(page.value?.contentJson))
 const introTitle = computed(() => aboutData.value.hero.title || page.value?.title || 'Về Chúng Tôi')
+const cleanedIntroContent = computed(() => stripRepresentativeParagraph(aboutData.value.intro.content))
+const representativeLine = computed(() => {
+  return [companySettings.value.representativeName]
+    .filter(Boolean)
+    .join(' - ')
+    .trim()
+})
+
+const representativeTitle = computed(() => { return companySettings.value.representativeTitle })
+
 const introImagePath = computed(() => {
   return aboutData.value.intro.imagePath || ''
 })
@@ -216,7 +274,10 @@ const capabilityItems = computed<AboutCapabilityItem[]>(() => aboutData.value.ca
 const isMobile = computed(() => typeof window !== 'undefined' && window.innerWidth < 768)
 
 onMounted(async () => {
-  await publicContentStore.loadIntroPage()
+  await Promise.all([
+    publicContentStore.loadIntroPage(),
+    siteSettingsStore.ensureLoaded(),
+  ])
 })
 
 function parseAboutContent(raw: string | null | undefined): AboutPageContent {
@@ -230,13 +291,21 @@ function parseAboutContent(raw: string | null | undefined): AboutPageContent {
   }
 }
 
+function stripRepresentativeParagraph(html: string) {
+  if (!html) return ''
+  return html
+    .replace(/<p\b[^>]*>(?:(?!<\/p>).)*Người\s*đại\s*diện:(?:(?!<\/p>).)*<\/p>/giu, '')
+    .replace(/<p\b[^>]*>(?:\s|&nbsp;|<br\s*\/?>)*<\/p>/giu, '')
+    .trim()
+}
+
 function createEmptyAboutContent(): AboutPageContent {
   return {
     hero: { title: 'Về chúng tôi', backgroundImagePath: '' },
     intro: {
       heading: 'Doi tac tin cay trong nganh khao sat xay dung',
       imagePath: '',
-      content: '<p class="ql-align-justify"><strong>CÔNG TY CỔ PHẦN TƯ VẤN KHẢO SÁT XÂY DỰNG HÀ NỘI</strong>&nbsp;(HANOI CONTRUCTION SERVEY CONSULTANT JOIN STOCK COMPANY) là một doanh nghiệp độc lập, tự hào với bề dày kinh nghiệm trong lĩnh vực tư vấn xây dựng.</p><p class="ql-align-justify"><br></p><p class="ql-align-justify">Được thành lập từ năm 2006, chúng tôi cam kết mang lại những giải pháp tư vấn chất lượng cao, đáp ứng các tiêu chuẩn khắt khe nhất của ngành xây dựng Việt Nam.</p><p class="ql-align-justify"><br></p><p class="ql-align-justify">Với sở hữu Trung tâm thí nghiệm và kiểm định xây dựng đạt chuẩn, VietDelta tự tin là đối tác tin cậy cho mọi công trình.</p><p class="ql-align-justify"><br></p><p><strong style="color: rgb(0, 64, 128);">Người đại diện:</strong>&nbsp;Đỗ Xuân Dân – Giám đốc Công ty</p>',
+      content: '<p class="ql-align-justify"><strong>CÔNG TY CỔ PHẦN TƯ VẤN KHẢO SÁT XÂY DỰNG HÀ NỘI</strong>&nbsp;(HANOI CONTRUCTION SERVEY CONSULTANT JOIN STOCK COMPANY) là một doanh nghiệp độc lập, tự hào với bề dày kinh nghiệm trong lĩnh vực tư vấn xây dựng.</p><p class="ql-align-justify"><br></p><p class="ql-align-justify">Được thành lập từ năm 2006, chúng tôi cam kết mang lại những giải pháp tư vấn chất lượng cao, đáp ứng các tiêu chuẩn khắt khe nhất của ngành xây dựng Việt Nam.</p><p class="ql-align-justify"><br></p><p class="ql-align-justify">Với sở hữu Trung tâm thí nghiệm và kiểm định xây dựng đạt chuẩn, VietDelta tự tin là đối tác tin cậy cho mọi công trình.</p>',
     },
     coreValues: {
       sectionTitle: 'Sứ mệnh và tầm nhìn',

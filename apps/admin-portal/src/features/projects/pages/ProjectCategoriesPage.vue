@@ -143,7 +143,7 @@ function startEditCategory(category: Category) {
 function buildCategoryPayload(): CategoryPayload {
   return {
     name: categoryForm.name.trim(),
-    slug: (categoryForm.slug || toSlug(categoryForm.name)).trim(),
+    slug: toSlug(categoryForm.slug || categoryForm.name),
     parentId: null,
     sortOrder: Number.isFinite(categoryForm.sortOrder) ? categoryForm.sortOrder : 0,
     active: categoryForm.active,

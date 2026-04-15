@@ -1,25 +1,45 @@
 <template>
   <section class="section">
     <div class="container-shell">
-      <SectionHeader :eyebrow="eyebrow" :title="title || 'Dự Án Tiêu Biểu'" :description="description" centered show-divider />
+      <SectionHeader :eyebrow="eyebrow" :title="title || 'Dự án tiêu biểu'" :description="description" centered show-divider />
 
       <div class="carousel-wrapper mt-20">
         <div class="carousel-track" :style="trackStyle">
           <div v-for="(project, index) in projectItems" :key="project.slug || index" class="carousel-slide">
-            <Card class="group relative h-[320px] overflow-hidden rounded-xl p-0" @mouseenter="hoveredIndex = index" @mouseleave="hoveredIndex = null">
-              <img v-if="project.coverImagePath" :src="resolveMediaUrl(project.coverImagePath)" :alt="project.title" width="420" height="320" loading="lazy" decoding="async" class="h-full w-full object-cover" @error="handleImageError" />
-              <div v-else class="h-full w-full bg-gradient-to-br from-primary-navy to-primary-light" />
-              <div class="absolute inset-0 bg-gradient-to-t from-primary-navy/70 via-primary-navy/20 to-transparent" />
-              <div class="project-overlay absolute inset-0 z-20 flex flex-col items-center justify-center gap-4 bg-[linear-gradient(to_top,rgba(0,51,102,0.96)_0%,rgba(0,51,102,0.72)_42%,transparent_100%)] p-6 text-white transition-opacity duration-300" :class="hoveredIndex === index ? 'opacity-100' : 'opacity-0'">
-                <span class="mb-2 text-sm font-semibold uppercase tracking-wider text-green-400">{{ project.categoryName }}</span>
-                <h3 class="text-center text-2xl font-bold text-white md:text-3xl">{{ project.title }}</h3>
-                <p class="text-center text-sm text-white/80">{{ project.location || 'Dự án khảo sát và thí nghiệm công trình' }}</p>
-                <router-link :to="project.slug ? { name: 'project-detail', params: { slug: project.slug } } : { name: 'projects' }" class="inline-flex min-h-[44px] items-center rounded-full bg-green-500 px-6 py-3 text-sm font-bold text-white transition-all hover:scale-105 hover:bg-green-600">
-                  Xem chi tiết
-                  <AppIcon icon="chevronRight" class="ml-2 h-4 w-4" />
-                </router-link>
+            <router-link
+              :to="project.slug ? { name: 'project-detail', params: { slug: project.slug } } : { name: 'projects' }"
+              class="group relative block h-[360px] overflow-hidden rounded-lg bg-primary-navy shadow-lg transition-transform duration-300 hover:-translate-y-1 focus:outline-none focus:ring-2 focus:ring-accent-green focus:ring-offset-2"
+            >
+              <div class="absolute inset-0 bg-gradient-to-br from-primary-navy to-primary-light">
+                <img
+                  v-if="project.coverImagePath"
+                  :src="resolveMediaUrl(project.coverImagePath)"
+                  :alt="project.title"
+                  width="420"
+                  height="220"
+                  loading="lazy"
+                  decoding="async"
+                  class="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
+                  @error="handleImageError"
+                />
+                <div v-else class="h-full w-full bg-gradient-to-br from-primary-navy to-primary-light" />
               </div>
-            </Card>
+
+              <div class="absolute inset-0 bg-gradient-to-t from-primary-navy via-primary-navy/45 to-transparent" />
+              <div class="absolute left-5 right-5 top-5 flex items-center justify-between gap-3">
+                <span v-if="project.categoryName" class="rounded-full border border-white/25 bg-white/15 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-700 backdrop-blur-sm">{{ project.categoryName }}</span>
+                <span class="ml-auto rounded-full bg-accent-green px-3 py-1 text-xs font-bold text-white">0{{ index + 1 }}</span>
+              </div>
+
+              <div class="absolute inset-x-0 bottom-0 p-5 text-white">
+                <h3 class="font-heading text-2xl font-bold leading-tight drop-shadow-md transition-colors">{{ project.title }}</h3>
+                <p class="mt-3 line-clamp-2 text-sm leading-6 text-white/85">{{ project.location || 'Dự án khảo sát và thí nghiệm công trình' }}</p>
+                <span class="mt-5 inline-flex items-center gap-2 text-sm font-semibold text-white transition-colors">
+                  Xem dự án
+                  <AppIcon icon="arrowRight" class="h-4 w-4 transition-transform group-hover:translate-x-1" />
+                </span>
+              </div>
+            </router-link>
           </div>
         </div>
 
@@ -60,7 +80,7 @@ const props = withDefaults(defineProps<{
   selectedItems?: HomeSelectedProjectItem[]
 }>(), {
   eyebrow: '',
-  title: 'Dự Án Tiêu Biểu',
+  title: 'Dự án tiêu biểu',
   description: '',
   mode: 'latest',
   limit: 6,
@@ -69,7 +89,6 @@ const props = withDefaults(defineProps<{
 
 const currentIndex = ref(0)
 const windowWidth = ref(window.innerWidth)
-const hoveredIndex = ref<number | null>(null)
 const documentVisible = ref(typeof document === 'undefined' ? true : !document.hidden)
 
 const projectItems = computed(() => {

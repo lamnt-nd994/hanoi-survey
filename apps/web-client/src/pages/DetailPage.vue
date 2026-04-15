@@ -9,63 +9,82 @@
       <Card v-else-if="error" class="p-8 text-rose-600">{{ error }}</Card>
 
       <div v-else-if="detail">
-        <article v-if="type === 'project'" class="space-y-10">
-          <div v-if="detail.coverImagePath" class="overflow-hidden rounded-[2rem] border border-neutral-200 bg-white shadow-sm">
+        <div v-if="detailHeading && type !== 'project'" class="mx-auto mb-20 max-w-4xl text-center">
+          <h1 class="font-heading text-3xl font-extrabold leading-tight text-primary-navy md:text-5xl">
+            {{ detailHeading }}
+          </h1>
+          <p v-if="detailSubheading" class="mx-auto mt-4 max-w-2xl text-base leading-7 text-neutral-600">
+            {{ detailSubheading }}
+          </p>
+        </div>
+
+        <article v-if="type === 'project'" class="space-y-8">
+          <section class="rounded-lg border border-l-4 border-neutral-200 border-l-primary-navy bg-white p-6 shadow-sm md:p-8">
+            <div v-if="detail.categoryName" class="text-[11px] font-semibold uppercase tracking-[0.16em] text-accent-green">{{ detail.categoryName }}</div>
+            <h1 class="mt-3 max-w-5xl font-heading text-3xl font-extrabold leading-tight text-primary-navy md:text-5xl">
+              {{ detail.title || detailHeading }}
+            </h1>
+            <p v-if="projectSummary" class="mt-5 max-w-4xl text-base leading-8 text-neutral-600">
+              {{ projectSummary }}
+            </p>
+          </section>
+          <div v-if="detail.coverImagePath" class="overflow-hidden rounded-lg border border-neutral-200 bg-white shadow-sm">
             <img
               :src="resolveMediaUrl(detail.coverImagePath)"
               :alt="detail.title"
               width="1200"
-              height="720"
+              height="640"
               loading="eager"
               fetchpriority="high"
               decoding="async"
-              class="h-[22rem] w-full object-cover md:h-[30rem]"
+              class="h-[18rem] w-full object-cover md:h-[26rem]"
             />
           </div>
-          <div v-else class="relative overflow-hidden rounded-[2rem] border border-neutral-200 bg-gradient-to-br from-primary-navy via-primary-light to-primary-navy px-8 py-12 text-white shadow-sm md:px-12 md:py-16">
+          <div v-else class="relative overflow-hidden rounded-lg border border-neutral-200 bg-gradient-to-br from-primary-navy via-primary-light to-primary-navy px-8 py-12 text-white shadow-sm md:px-12 md:py-16">
             <div class="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.14),transparent_26%),linear-gradient(135deg,rgba(255,255,255,0.06),transparent_40%)]" />
             <div class="relative max-w-3xl">
-              <div class="eyebrow text-white/70">Du an</div>
-              <h2 class="mt-4 font-heading text-3xl font-bold leading-tight md:text-5xl">{{ detail.title }}</h2>
+              <div class="eyebrow text-white/70">Dự án</div>
+              <h2 class="mt-4 font-heading text-2xl font-bold leading-tight md:text-3xl">Hình ảnh công trình đang được cập nhật</h2>
               <p class="mt-4 max-w-2xl text-sm leading-7 text-white/80 md:text-base">
-                Ho so cong trinh va pham vi cong viec duoc trinh bay chi tiet ben duoi. Hinh anh cover dang duoc cap nhat.
+                Hồ sơ công trình và phạm vi công việc được trình bày chi tiết bên dưới.
               </p>
             </div>
           </div>
 
           <div class="grid gap-8 lg:grid-cols-[0.72fr_1.28fr]">
-            <Card as="aside" class="p-6">
-              <div class="eyebrow">Thông tin dự án</div>
-              <div class="mt-5 space-y-4">
-                <div v-for="item in projectMetadata" :key="item.label" class="rounded-2xl border border-neutral-200 bg-neutral-50 px-4 py-4">
+            <Card as="aside" class="rounded-lg border-neutral-200 p-6 shadow-sm">
+              <div class="text-[11px] font-semibold uppercase tracking-[0.16em] text-accent-green">Thông tin dự án</div>
+              <div class="mt-5 divide-y divide-neutral-100 border-y border-neutral-100">
+                <div v-for="item in projectMetadata" :key="item.label" class="grid grid-cols-[7rem_minmax(0,1fr)] gap-4 py-4">
                   <div class="text-xs font-semibold uppercase tracking-[0.12em] text-neutral-400">{{ item.label }}</div>
-                  <div class="mt-2 text-base font-semibold text-primary-navy">{{ item.value }}</div>
+                  <div class="text-sm font-semibold leading-6 text-primary-navy">{{ item.value }}</div>
                 </div>
               </div>
             </Card>
 
-            <Card class="p-6 md:p-8">
-              <div class="prose prose-slate max-w-none">
+            <Card class="rounded-lg border-neutral-200 p-6 shadow-sm md:p-8">
+              <div class="text-[11px] font-semibold uppercase tracking-[0.16em] text-accent-green">Nội dung công việc</div>
+              <div class="prose prose-slate mt-5 max-w-none">
                 <div class="text-base leading-8 text-neutral-700" v-html="bodyText"></div>
               </div>
             </Card>
           </div>
 
           <section v-if="projectGalleryImages.length" class="space-y-5">
-            <div>
-              <div class="eyebrow">Hình ảnh dự án</div>
-              <h2 class="mt-2 font-heading text-3xl font-bold text-primary-navy">Thư viện công trình</h2>
+            <div class="border-l-4 border-primary-navy pl-4">
+              <div class="text-[11px] font-semibold uppercase tracking-[0.16em] text-accent-green">Hình ảnh dự án</div>
+              <h2 class="mt-2 font-heading text-2xl font-bold text-primary-navy md:text-3xl">Tư liệu công trình</h2>
             </div>
 
-            <div class="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+            <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
               <button
                 v-for="(image, index) in projectGalleryImages"
                 :key="`${image}-${index}`"
                 type="button"
-                class="overflow-hidden rounded-[1.75rem] border border-neutral-200 bg-white shadow-sm transition-transform duration-300 hover:-translate-y-1"
+                class="overflow-hidden rounded-lg border border-neutral-200 bg-white text-left shadow-sm transition-colors hover:border-accent-green/50"
                 @click="openProjectLightbox(index)"
               >
-                <img :src="resolveMediaUrl(image)" :alt="`${detail.title} ${index + 1}`" width="480" height="256" loading="lazy" decoding="async" class="h-64 w-full object-cover transition-transform duration-500 hover:scale-105" />
+                <img :src="resolveMediaUrl(image)" :alt="`${detail.title} ${index + 1}`" width="480" height="256" loading="lazy" decoding="async" class="h-56 w-full object-cover" />
               </button>
             </div>
           </section>
@@ -318,7 +337,34 @@ function hasRenderableContent(value: unknown) {
     .trim().length > 0
 }
 
+function stripHtml(value: string) {
+  return value
+    .replace(/<br\s*\/?>/gi, ' ')
+    .replace(/<[^>]*>/g, ' ')
+    .replace(/&nbsp;/gi, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
+}
+
 const bodyText = computed(() => detail.value?.content || detail.value?.description || detail.value?.overview || detail.value?.excerpt || 'Chưa có nội dung chi tiết.')
+const projectSummary = computed(() => {
+  if (type.value !== 'project') return ''
+  return stripHtml(detail.value?.excerpt || detail.value?.overview || detail.value?.description || '')
+})
+const detailHeading = computed(() => {
+  if (!detail.value) return ''
+  if (type.value === 'service') return detail.value.title || detail.value.name || ''
+  if (type.value === 'project') return detail.value.categoryName || detail.value.title || ''
+  if (type.value === 'equipment' && isEquipmentCategory.value) return detail.value.name || ''
+  if (type.value === 'equipment') return detail.value.categoryName || detail.value.name || ''
+  return ''
+})
+const detailSubheading = computed(() => {
+  if (!detail.value) return ''
+  if (type.value === 'project' && detail.value.title && detail.value.categoryName) return detail.value.title
+  if (type.value === 'equipment' && !isEquipmentCategory.value && detail.value.name && detail.value.categoryName) return detail.value.name
+  return ''
+})
 const serviceContent = computed(() => {
   if (type.value !== 'service') return ''
   const content = detail.value?.content

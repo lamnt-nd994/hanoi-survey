@@ -169,7 +169,8 @@ onMounted(async () => {
 async function handleSubmit() {
   if (form.categoryId <= 0) { error.value = 'Vui lòng chọn danh mục bài viết'; toasts.show(error.value, 'error'); return }
   if (!form.title.trim()) { error.value = 'Tiêu đề không được để trống'; toasts.show(error.value, 'error'); return }
-  if (!form.slug.trim()) { error.value = 'Slug không được để trống'; toasts.show(error.value, 'error'); return }
+  form.slug = toSlug(form.slug || form.title)
+  if (!form.slug) { error.value = 'Slug không hợp lệ'; toasts.show(error.value, 'error'); return }
 
   saving.value = true
   error.value = ''

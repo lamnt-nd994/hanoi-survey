@@ -6,8 +6,8 @@
           <div v-if="hasDropdown(item)" class="group relative cursor-pointer text-white">
             <router-link
               :to="getNavTo(item)"
-              class="flex cursor-pointer items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold text-white transition-all"
-              :class="isActiveNavRoute(item) ? 'bg-white/14 text-white' : 'text-white/90 hover:bg-white/10 hover:text-white'"
+              class="relative flex cursor-pointer items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold text-white transition-all after:absolute after:bottom-0 after:left-4 after:right-4 after:h-0.5 after:rounded-full after:bg-white after:transition-opacity"
+              :class="isActiveNavRoute(item) ? 'bg-white/14 text-white after:opacity-100' : 'text-white/90 after:opacity-0 hover:bg-white/10 hover:text-white hover:after:opacity-70'"
             >
               {{ item.title }}
               <AppIcon icon="chevronDown" class="h-4 w-4 transition-transform group-hover:rotate-180" />
@@ -52,7 +52,10 @@
             :target="isExternalUrl(item.resolvedUrl) ? '_blank' : undefined"
             :rel="isExternalUrl(item.resolvedUrl) ? 'noopener noreferrer' : undefined"
             class="cursor-pointer rounded-full px-4 py-2 text-sm font-semibold text-white transition-all"
-            :class="isActiveNavRoute(item) ? 'bg-white/14 text-white' : 'text-white/90 hover:bg-white/10 hover:text-white'"
+            :class="[
+              'relative after:absolute after:bottom-0 after:left-4 after:right-4 after:h-0.5 after:rounded-full after:bg-white after:transition-opacity',
+              isActiveNavRoute(item) ? 'bg-white/14 text-white after:opacity-100' : 'text-white/90 after:opacity-0 hover:bg-white/10 hover:text-white hover:after:opacity-70',
+            ]"
           >
             {{ item.title }}
           </component>

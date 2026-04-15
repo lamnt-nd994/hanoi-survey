@@ -26,6 +26,7 @@ public class SiteSettingRepositoryAdapter implements SiteSettingRepositoryPort {
         entity.setId(siteSetting.id());
         entity.setSiteName(siteSetting.siteName());
         entity.setCompanyNameEn(siteSetting.companyNameEn());
+        entity.setCompanyTradeName(siteSetting.companyTradeName());
         entity.setShortName(siteSetting.shortName());
         entity.setSlogan(siteSetting.slogan());
         entity.setLogoPath(siteSetting.logoPath());
@@ -43,6 +44,9 @@ public class SiteSettingRepositoryAdapter implements SiteSettingRepositoryPort {
         entity.setPhone(siteSetting.phone());
         entity.setEmail(siteSetting.email());
         entity.setWebsite(siteSetting.website());
+        entity.setRepresentativeName(siteSetting.representativeName());
+        entity.setRepresentativeTitle(siteSetting.representativeTitle());
+        entity.setEstablishmentInfo(siteSetting.establishmentInfo());
         entity.setAddress(siteSetting.address());
         entity.setMapEmbed(siteSetting.mapEmbed());
         entity.setWorkingHours(siteSetting.workingHours());
@@ -59,6 +63,7 @@ public class SiteSettingRepositoryAdapter implements SiteSettingRepositoryPort {
                 entity.getId(),
                 entity.getSiteName(),
                 entity.getCompanyNameEn(),
+                entity.getCompanyTradeName(),
                 entity.getShortName(),
                 entity.getSlogan(),
                 entity.getLogoPath(),
@@ -76,6 +81,9 @@ public class SiteSettingRepositoryAdapter implements SiteSettingRepositoryPort {
                 entity.getPhone(),
                 entity.getEmail(),
                 entity.getWebsite(),
+                entity.getRepresentativeName(),
+                entity.getRepresentativeTitle(),
+                entity.getEstablishmentInfo(),
                 entity.getAddress(),
                 entity.getMapEmbed(),
                 entity.getWorkingHours(),

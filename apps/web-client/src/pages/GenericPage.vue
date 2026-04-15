@@ -1,6 +1,12 @@
 <template>
   <div>
     <section class="container-shell py-16 md:py-20">
+      <div v-if="pageHeading" class="mx-auto mb-20 max-w-4xl text-center">
+        <h1 class="font-heading text-3xl font-extrabold leading-tight text-primary-navy md:text-5xl">
+          {{ pageHeading }}
+        </h1>
+      </div>
+
       <div v-if="loading" class="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
         <Skeleton v-for="index in 6" :key="index" class="h-40 rounded-2xl" />
       </div>
@@ -8,20 +14,27 @@
       <Card v-else-if="errorMessage" class="p-8 text-rose-600">{{ errorMessage }}</Card>
 
       <div v-else-if="currentRouteName === 'services'" class="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
-        <Card v-for="(item, index) in serviceItems" :key="item.slug" class="group p-6 hover:border-accent-green/30 hover:shadow-glow">
-          <div class="mb-4 flex items-start justify-between">
-            <span class="flex h-12 w-12 items-center justify-center rounded-xl bg-accent-green text-xl font-bold text-white shadow-glow">
-              {{ String(index + 1).padStart(2, '0') }}
+        <router-link
+          v-for="(item, index) in serviceItems"
+          :key="item.slug"
+          :to="item.slug ? { name: 'service-detail', params: { slug: item.slug } } : { name: 'services' }"
+          class="group flex h-full flex-col rounded-lg border border-neutral-200 bg-white p-5 shadow-sm transition-colors duration-200 hover:border-accent-green/50"
+        >
+          <div class="flex items-start justify-between gap-4">
+            <span class="text-[11px] font-semibold uppercase tracking-[0.14em] text-accent-green">Lĩnh vực khảo sát</span>
+            <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-accent-green/10 text-primary-navy">
+              <IconRenderer :icon="item.icon || 'settings-2'" class="h-5 w-5" />
             </span>
-            <svg class="h-6 w-6 text-neutral-400 transition-all group-hover:text-accent-green group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          </div>
+          <h3 class="mt-4 font-heading text-xl font-bold leading-tight text-primary-navy">{{ item.title || item }}</h3>
+          <p class="mt-3 text-sm leading-7 text-neutral-600">{{ item.overview || 'Dịch vụ triển khai theo tiêu chuẩn hiện hành, phù hợp hồ sơ thiết kế, thi công và kiểm định.' }}</p>
+          <span class="mt-auto inline-flex items-center gap-2 pt-5 text-sm font-semibold text-primary-navy">
+            Xem chi tiết
+            <svg class="h-4 w-4 text-accent-green" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
             </svg>
-          </div>
-          <router-link :to="item.slug ? { name: 'service-detail', params: { slug: item.slug } } : { name: 'services' }" class="font-heading text-xl font-bold text-primary-navy hover:text-accent-green">
-            {{ item.title || item }}
-          </router-link>
-          <p class="mt-3 text-sm leading-7 text-neutral-600">{{ item.overview || 'Dịch vụ triển khai theo tiêu chuẩn hiện hành, phù hợp hồ sơ thiết kế, thi công và kiểm định.' }}</p>
-        </Card>
+          </span>
+        </router-link>
       </div>
 
       <div v-else-if="isProjectRoute" class="space-y-8">
@@ -30,9 +43,9 @@
           v-for="item in paginatedProjectItems"
           :key="item.slug"
           :to="item.slug ? { name: 'project-detail', params: { slug: item.slug } } : { name: 'projects' }"
-          class="group flex h-full flex-col overflow-hidden rounded-2xl border border-neutral-200 bg-white shadow-[0_18px_45px_rgba(15,39,68,0.08)] transition-all duration-300 hover:-translate-y-1 hover:border-accent-green/30 hover:shadow-2xl hover:shadow-primary-navy/10"
+          class="group flex h-full flex-col overflow-hidden rounded-lg border border-l-4 border-neutral-200 border-l-primary-navy bg-white shadow-sm transition-colors duration-200 hover:border-accent-green/50 hover:border-l-accent-green"
         >
-          <div class="relative h-56 overflow-hidden bg-gradient-to-br from-primary-navy to-primary-light">
+          <div class="relative h-44 overflow-hidden border-b border-neutral-200 bg-gradient-to-br from-primary-navy to-primary-light">
             <img
               v-if="item.coverImagePath"
               :src="resolveMediaUrl(item.coverImagePath)"
@@ -41,49 +54,34 @@
               height="224"
               loading="lazy"
               decoding="async"
-              class="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+              class="absolute inset-0 h-full w-full object-cover"
               @error="handleImageError"
             />
-            <div class="absolute inset-0 bg-gradient-to-t from-primary-navy/80 via-primary-navy/35 to-transparent" />
-            <div class="absolute inset-x-0 bottom-0 flex items-end justify-between gap-4 p-6">
-              <div>
-                <span class="eyebrow inline-block text-white/80">{{ item.categoryName }}</span>
-                <h3 class="mt-2 font-heading text-2xl font-bold leading-tight text-white">{{ item.title }}</h3>
-              </div>
-              <span class="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-white/20 bg-white/10 text-white transition-all group-hover:bg-accent-green group-hover:border-accent-green">
-                <svg class="h-5 w-5 transition-transform group-hover:translate-x-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-                </svg>
-              </span>
-            </div>
           </div>
 
-          <div class="flex flex-1 flex-col gap-4 p-6">
-            <div class="space-y-3 text-sm text-neutral-600">
-              <div class="flex items-start gap-3">
-                <svg class="mt-0.5 h-4 w-4 shrink-0 text-accent-green" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                </svg>
-                <span>{{ item.location || 'Địa điểm đang được cập nhật' }}</span>
-              </div>
-              <div class="flex items-start gap-3">
-                <svg class="mt-0.5 h-4 w-4 shrink-0 text-accent-green" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
-                </svg>
-                <span>{{ item.scaleText || 'Quy mô đang được cập nhật' }}</span>
-              </div>
-              <div v-if="item.clientName" class="flex items-start gap-3">
-                <svg class="mt-0.5 h-4 w-4 shrink-0 text-accent-green" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5V4H2v16h5m10 0v-2a4 4 0 00-4-4H9a4 4 0 00-4 4v2m12 0H7m6-11a3 3 0 11-6 0 3 3 0 016 0z" />
-                </svg>
-                <span>{{ item.clientName }}</span>
+          <div class="flex flex-1 flex-col p-5">
+            <div class="min-h-[8.5rem]">
+              <div v-if="item.categoryName" class="text-[11px] font-semibold uppercase tracking-[0.14em] text-accent-green">{{ item.categoryName }}</div>
+              <h3 class="mt-2 font-heading text-xl font-bold leading-tight text-primary-navy transition-colors">{{ item.title }}</h3>
+
+              <div class="mt-5 divide-y divide-neutral-100 border-y border-neutral-100 text-sm">
+                <div class="grid grid-cols-[5.5rem_minmax(0,1fr)] gap-3 py-3">
+                  <span class="text-xs leading-6 font-semibold uppercase tracking-[0.12em] text-neutral-400">Địa điểm</span>
+                  <span class="font-medium leading-6 text-neutral-700">{{ item.location || 'Đang cập nhật' }}</span>
+                </div>
+                <div class="grid grid-cols-[5.5rem_minmax(0,1fr)] gap-3 py-3">
+                  <span class="text-xs leading-6 font-semibold uppercase tracking-[0.12em] text-neutral-400">Quy mô</span>
+                  <span class="font-medium leading-6 text-neutral-700">{{ item.scaleText || 'Đang cập nhật' }}</span>
+                </div>
+                <div v-if="item.clientName" class="grid grid-cols-[5.5rem_minmax(0,1fr)] gap-3 py-3">
+                  <span class="text-xs leading-6 font-semibold uppercase tracking-[0.12em] text-neutral-400">Chủ đầu tư</span>
+                  <span class="font-medium leading-6 text-neutral-700">{{ item.clientName }}</span>
+                </div>
               </div>
             </div>
 
-            <div class="mt-auto flex items-center justify-between border-t border-neutral-100 pt-4 text-sm font-semibold text-primary-navy">
-              <span>Xem chi tiết dự án</span>
-              <span class="text-accent-green transition-transform group-hover:translate-x-1">Chi tiet</span>
+            <div class="mt-auto pt-5 text-sm font-semibold text-primary-navy transition-colors">
+              Xem hồ sơ dự án
             </div>
           </div>
         </router-link>
@@ -107,10 +105,10 @@
         <template v-else>
           <router-link
             :to="postItems[0].slug ? { name: 'news-detail', params: { slug: postItems[0].slug } } : { name: 'news' }"
-            class="group block overflow-hidden rounded-[2rem] border border-neutral-200 bg-white transition-all duration-300 hover:-translate-y-1 hover:border-accent-green/30 hover:shadow-2xl hover:shadow-primary-navy/10"
+            class="group block overflow-hidden rounded-lg border border-l-4 border-neutral-200 border-l-primary-navy bg-white shadow-sm transition-colors duration-200 hover:border-accent-green/50 hover:border-l-accent-green"
           >
-            <div class="grid md:grid-cols-[320px_minmax(0,1fr)]">
-              <div class="relative h-56 overflow-hidden bg-gradient-to-br from-primary-navy to-primary-light md:h-full md:min-h-[15rem]">
+            <div class="grid md:grid-cols-[280px_minmax(0,1fr)]">
+              <div class="relative h-48 overflow-hidden border-b border-neutral-200 bg-gradient-to-br from-primary-navy to-primary-light md:h-full md:min-h-[13rem] md:border-b-0 md:border-r">
                 <img
                   v-if="postItems[0].coverImagePath"
                   :src="resolveMediaUrl(postItems[0].coverImagePath)"
@@ -120,28 +118,31 @@
                   loading="eager"
                   fetchpriority="high"
                   decoding="async"
-                  class="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                  class="absolute inset-0 h-full w-full object-cover"
                   @error="handleImageError"
                 />
-                <div class="absolute inset-0 bg-gradient-to-t from-primary-navy/80 via-primary-navy/35 to-transparent" />
               </div>
-              <div class="flex flex-1 flex-col justify-center p-6 md:p-7">
-                <span v-if="postItems[0].categoryName" class="text-xs font-semibold uppercase tracking-[0.1em] text-accent-green">{{ postItems[0].categoryName }}</span>
+              <div class="flex flex-1 flex-col justify-center p-5 md:p-7">
+                <div class="flex flex-wrap items-center gap-3 text-xs font-semibold uppercase tracking-[0.12em] text-neutral-400">
+                  <span v-if="postItems[0].categoryName" class="text-accent-green">{{ postItems[0].categoryName }}</span>
+                  <span v-if="postItems[0].categoryName && postItems[0].publishedAt" class="h-1 w-1 rounded-full bg-neutral-300" />
+                  <span v-if="postItems[0].publishedAt">{{ formatDate(postItems[0].publishedAt) }}</span>
+                </div>
                 <h2 class="mt-2 font-heading text-xl font-bold leading-snug text-primary-navy transition-colors md:text-2xl">{{ postItems[0].title }}</h2>
-                <p v-if="postItems[0].excerpt" class="mt-3 text-sm leading-7 text-neutral-500 line-clamp-2">{{ postItems[0].excerpt }}</p>
-                <span v-if="postItems[0].publishedAt" class="mt-4 text-xs text-neutral-400">{{ formatDate(postItems[0].publishedAt) }}</span>
+                <p v-if="postItems[0].excerpt" class="mt-3 text-sm leading-7 text-neutral-600 line-clamp-2">{{ postItems[0].excerpt }}</p>
+                <span class="mt-5 text-sm font-semibold text-primary-navy transition-colors">Đọc bản tin</span>
               </div>
             </div>
           </router-link>
 
-          <div class="divide-y divide-neutral-200 border-y border-neutral-200">
+          <div class="divide-y divide-neutral-200 border-y border-neutral-200 bg-white">
             <router-link
               v-for="item in postItems.slice(1)"
               :key="item.slug"
               :to="item.slug ? { name: 'news-detail', params: { slug: item.slug } } : { name: 'news' }"
-              class="group flex gap-4 py-5 transition-colors first:pt-5 last:pb-5"
+              class="group flex gap-4 px-2 py-5 transition-colors hover:bg-neutral-50 md:px-4"
             >
-              <div class="relative h-14 w-20 shrink-0 overflow-hidden rounded bg-neutral-100 md:h-16 md:w-24">
+              <div class="relative h-14 w-20 shrink-0 overflow-hidden rounded-sm border border-neutral-200 bg-neutral-100 md:h-16 md:w-24">
                 <img
                   v-if="item.coverImagePath"
                   :src="resolveMediaUrl(item.coverImagePath)"
@@ -158,14 +159,14 @@
                 </div>
               </div>
               <div class="flex min-w-0 flex-1 flex-col justify-center">
-                <h3 class="font-heading text-base font-semibold leading-snug text-primary-navy transition-colors group-hover:text-accent-green">{{ item.title }}</h3>
-                <div class="mt-1 flex items-center gap-3 text-xs text-neutral-400">
-                  <span v-if="item.categoryName">{{ item.categoryName }}</span>
+                <h3 class="font-heading text-base font-semibold leading-snug text-primary-navy transition-colors">{{ item.title }}</h3>
+                <div class="mt-2 flex flex-wrap items-center gap-3 text-[11px] font-semibold uppercase tracking-[0.1em] text-neutral-400">
+                  <span v-if="item.categoryName" class="text-accent-green">{{ item.categoryName }}</span>
                   <span v-if="item.categoryName && item.publishedAt">&middot;</span>
                   <span v-if="item.publishedAt">{{ formatDate(item.publishedAt) }}</span>
                 </div>
               </div>
-              <svg class="hidden h-4 w-4 shrink-0 self-center text-neutral-300 transition-colors group-hover:text-accent-green sm:block" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+              <svg class="hidden h-4 w-4 shrink-0 self-center text-neutral-300 transition-colors sm:block" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
             </router-link>
           </div>
 
@@ -183,16 +184,27 @@
       <div v-else-if="currentRouteName === 'equipment'" class="space-y-12">
         <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           <router-link
-            v-for="category in sortedEquipmentCategories"
+            v-for="(category, index) in sortedEquipmentCategories"
             :key="category.id"
             :to="category.slug ? { name: 'equipment-detail', params: { slug: category.slug } } : { name: 'equipment' }"
-            class="group rounded-xl border border-neutral-200 bg-white p-6 shadow-[0_18px_45px_rgba(15,39,68,0.08)] transition-all hover:border-accent-green/30"
+            class="group flex h-full flex-col rounded-lg border border-neutral-200 bg-white p-5 shadow-sm transition-colors duration-200 hover:border-accent-green/50"
           >
-            <div class="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-accent-green/10 text-accent-green transition-all group-hover:scale-110">
-              <IconRenderer :icon="category.icon || 'settings-2'" class="h-8 w-8" />
+            <div class="flex items-start justify-between gap-4">
+              <div class="text-[11px] font-semibold uppercase tracking-[0.14em] text-accent-green">Danh mục thiết bị</div>
+              <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-accent-green/10 text-primary-navy">
+                <IconRenderer :icon="category.icon || 'settings-2'" class="h-5 w-5" />
+              </span>
             </div>
-            <h3 class="font-heading text-xl font-bold text-primary-navy transition-colors group-hover:text-accent-green">{{ category.name }}</h3>
-            <div class="mt-2 text-sm text-neutral-500">{{ publicContentStore.equipments.filter((e) => e.categoryId === category.id).length }} thiết bị</div>
+            <h3 class="mt-4 font-heading text-xl font-bold leading-tight text-primary-navy">{{ category.name }}</h3>
+            <div class="mt-4 inline-flex w-fit items-center rounded-md border border-neutral-200 bg-neutral-50 px-3 py-2 text-sm font-medium text-neutral-700">
+              {{ publicContentStore.equipments.filter((e) => e.categoryId === category.id).length }} thiết bị
+            </div>
+            <span class="mt-auto inline-flex items-center gap-2 pt-5 text-sm font-semibold text-primary-navy">
+              Xem danh mục
+              <svg class="h-4 w-4 text-accent-green" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+              </svg>
+            </span>
           </router-link>
         </div>
       </div>
@@ -359,6 +371,12 @@ const selectedCategorySlug = computed(() => {
 const selectedProjectCategory = computed(() => publicContentStore.projectCategories.find((item) => item.slug === selectedCategorySlug.value) || null)
 const selectedPostCategory = computed(() => publicContentStore.postCategories.find((item) => item.slug === selectedCategorySlug.value) || null)
 const selectedEquipmentCategory = computed(() => publicContentStore.equipmentCategories.find((item) => item.slug === selectedCategorySlug.value) || null)
+const pageHeading = computed(() => {
+  if (isProjectRoute.value && selectedProjectCategory.value) return selectedProjectCategory.value.name
+  if (isNewsRoute.value && selectedPostCategory.value) return selectedPostCategory.value.name
+  if (currentRouteName.value === ROUTE_NAMES.equipment && selectedEquipmentCategory.value) return selectedEquipmentCategory.value.name
+  return ''
+})
 const items = computed(() => currentData.value.items)
 const introItems = computed<IntroCard[]>(() => [])
 const serviceItems = computed(() => {

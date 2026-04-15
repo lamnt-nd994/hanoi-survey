@@ -30,9 +30,9 @@
                 {{ email }}
               </a>
             </div>
-            <div class="mt-1 flex items-center justify-end gap-3 text-amber-500">
-              <AppIcon icon="phone" class="h-6 w-6" :stroke-width="2.25" />
-              <a v-if="phone" :href="`tel:${phone}`" class="cursor-pointer text-lg font-extrabold transition-colors hover:text-amber-600 lg:text-xl">
+            <div class="mt-1 flex items-center justify-end gap-3 text-primary-navy">
+              <AppIcon icon="phone" class="h-6 w-6 animate-[phone-call_1.2s_ease-in-out_infinite]" :stroke-width="2.25" />
+              <a v-if="phone" :href="`tel:${phone}`" class="cursor-pointer rounded-full px-2 py-1 text-lg font-extrabold transition-colors animate-[phone-highlight_1.4s_ease-in-out_infinite] hover:text-red-600 lg:text-xl">
                 <span>{{ phone }}</span>
               </a>
             </div>

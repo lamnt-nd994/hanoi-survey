@@ -15,6 +15,9 @@ public class SiteSettingEntity extends BaseEntity {
     @Column(name = "company_name_en")
     private String companyNameEn;
 
+    @Column(name = "company_trade_name")
+    private String companyTradeName;
+
     @Column(name = "short_name")
     private String shortName;
 
@@ -61,6 +64,15 @@ public class SiteSettingEntity extends BaseEntity {
 
     private String website;
 
+    @Column(name = "representative_name")
+    private String representativeName;
+
+    @Column(name = "representative_title")
+    private String representativeTitle;
+
+    @Column(name = "establishment_info", columnDefinition = "TEXT")
+    private String establishmentInfo;
+
     private String address;
 
     @Column(name = "map_embed", columnDefinition = "TEXT")
@@ -98,6 +110,14 @@ public class SiteSettingEntity extends BaseEntity {
 
     public void setCompanyNameEn(String companyNameEn) {
         this.companyNameEn = companyNameEn;
+    }
+
+    public String getCompanyTradeName() {
+        return companyTradeName;
+    }
+
+    public void setCompanyTradeName(String companyTradeName) {
+        this.companyTradeName = companyTradeName;
     }
 
     public String getShortName() {
@@ -234,6 +254,30 @@ public class SiteSettingEntity extends BaseEntity {
 
     public void setWebsite(String website) {
         this.website = website;
+    }
+
+    public String getRepresentativeName() {
+        return representativeName;
+    }
+
+    public void setRepresentativeName(String representativeName) {
+        this.representativeName = representativeName;
+    }
+
+    public String getRepresentativeTitle() {
+        return representativeTitle;
+    }
+
+    public void setRepresentativeTitle(String representativeTitle) {
+        this.representativeTitle = representativeTitle;
+    }
+
+    public String getEstablishmentInfo() {
+        return establishmentInfo;
+    }
+
+    public void setEstablishmentInfo(String establishmentInfo) {
+        this.establishmentInfo = establishmentInfo;
     }
 
     public String getAddress() {

@@ -149,7 +149,8 @@ async function handleSubmit() {
     toasts.show(error.value, 'error')
     return
   }
-  if (!(form.slug || toSlug(form.name)).trim()) {
+  const slug = toSlug(form.slug || form.name)
+  if (!slug) {
     error.value = 'Slug không hợp lệ'
     toasts.show(error.value, 'error')
     return
@@ -159,7 +160,7 @@ async function handleSubmit() {
     const payload: EquipmentPayload = {
       categoryId: form.categoryId,
       name: form.name.trim(),
-      slug: (form.slug || toSlug(form.name)).trim(),
+      slug,
       model: form.model,
       manufacturer: form.manufacturer,
       origin: form.origin,

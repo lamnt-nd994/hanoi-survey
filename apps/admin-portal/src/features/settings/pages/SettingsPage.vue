@@ -21,6 +21,10 @@
             <Input v-model="form.companyNameEn" placeholder="Company name in English" />
           </FormField>
           <FormField>
+            <FormLabel>Tên giao dịch</FormLabel>
+            <Input v-model="form.companyTradeName" placeholder="VIETDELTA CONSULTANCY JOINT STOCK COMPANY" />
+          </FormField>
+          <FormField>
             <FormLabel>Tên ngắn</FormLabel>
             <Input v-model="form.shortName" placeholder="VD: Hanoi Survey" />
           </FormField>
@@ -98,6 +102,10 @@
             <FormLabel>Email</FormLabel>
             <Input v-model="form.email" placeholder="info@example.com" />
           </FormField>
+          <FormField>
+            <FormLabel>Website</FormLabel>
+            <Input v-model="form.website" placeholder="https://example.com" />
+          </FormField>
           <FormField class="md:col-span-2">
             <FormLabel>Địa chỉ hiển thị ngắn</FormLabel>
             <Input v-model="form.address" placeholder="Địa chỉ ngắn dùng chung" />
@@ -109,6 +117,18 @@
           <FormField>
             <FormLabel>Giờ làm việc</FormLabel>
             <Input v-model="form.workingHours" placeholder="Thứ 2 - Thứ 6: 8:00 - 17:30" />
+          </FormField>
+          <FormField>
+            <FormLabel>Người đại diện</FormLabel>
+            <Input v-model="form.representativeName" placeholder="Ông Đỗ Xuân Dân" />
+          </FormField>
+          <FormField>
+            <FormLabel>Chức vụ người đại diện</FormLabel>
+            <Input v-model="form.representativeTitle" placeholder="Giám đốc Công ty" />
+          </FormField>
+          <FormField class="md:col-span-2">
+            <FormLabel>Nơi và năm thành lập</FormLabel>
+            <Textarea v-model="form.establishmentInfo" rows="6" placeholder="Thông tin nơi và năm thành lập công ty" />
           </FormField>
           <FormField class="md:col-span-2">
             <FormLabel>Google Map Embed URL</FormLabel>
@@ -211,6 +231,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { useAuthStore } from '@/stores/auth'
 import { useSettingsStore } from '@/stores/settings'
 import { useMediaStore } from '@/stores/media'
+import { useToastsStore } from '@/stores/toasts'
 import { useImageUpload } from '@/composables/useImageUpload'
 import { extractApiError } from '@/utils/files'
 import type { SiteSettings } from '@/types'
@@ -218,6 +239,7 @@ import type { SiteSettings } from '@/types'
 const store = useSettingsStore()
 const mediaStore = useMediaStore()
 const authStore = useAuthStore()
+const toasts = useToastsStore()
 const route = useRoute()
 const alert = ref('')
 const alertType = ref<'success' | 'error'>('success')
@@ -234,6 +256,7 @@ const form = reactive<SiteSettings>({
   id: undefined,
   siteName: '',
   companyNameEn: '',
+  companyTradeName: '',
   shortName: '',
   slogan: '',
   logoPath: '',
@@ -251,6 +274,9 @@ const form = reactive<SiteSettings>({
   phone: '',
   email: '',
   website: '',
+  representativeName: '',
+  representativeTitle: '',
+  establishmentInfo: '',
   address: '',
   mapEmbed: '',
   workingHours: '',
@@ -288,6 +314,7 @@ watch(() => store.settings, (val) => {
   Object.assign(form, {
     ...val,
     companyNameEn: val.companyNameEn || '',
+    companyTradeName: val.companyTradeName || '',
     shortName: val.shortName || '',
     slogan: val.slogan || '',
     logoPath: val.logoPath || '',
@@ -305,6 +332,9 @@ watch(() => store.settings, (val) => {
     phone: val.phone || '',
     email: val.email || '',
     website: val.website || '',
+    representativeName: val.representativeName || '',
+    representativeTitle: val.representativeTitle || '',
+    establishmentInfo: val.establishmentInfo || '',
     address: val.address || '',
     mapEmbed: val.mapEmbed || '',
     workingHours: val.workingHours || '',
@@ -350,12 +380,14 @@ async function handleSave() {
   try {
     form.hotline = ''
     form.branchAddress = ''
-    form.website = ''
     form.footerLogoPath = form.logoPath
     await store.update({ ...form })
     flash('Đã lưu thông tin công ty thành công')
-  } catch {
-    flash('Có lỗi xảy ra', 'error')
+    toasts.show('Đã lưu thông tin công ty thành công', 'success')
+  } catch (error: unknown) {
+    const message = extractApiError(error, 'Không thể lưu thông tin công ty')
+    flash(message, 'error')
+    toasts.show(message, 'error')
   } finally {
     saving.value = false
   }

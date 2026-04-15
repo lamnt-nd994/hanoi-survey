@@ -197,7 +197,7 @@ async function handleSubmit() {
     return
   }
 
-  form.slug = (form.slug || toSlug(form.title)).trim()
+  form.slug = toSlug(form.slug || form.title)
   if (!form.slug) {
     error.value = 'Slug không hợp lệ'
     toasts.show(error.value, 'error')

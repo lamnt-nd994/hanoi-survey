@@ -23,6 +23,7 @@ export const useSiteSettingsStore = defineStore('site-settings', () => {
 
   const siteName = computed(() => settings.value?.siteName || 'Hanoi Survey')
   const companyNameEn = computed(() => settings.value?.companyNameEn || '')
+  const companyTradeName = computed(() => settings.value?.companyTradeName || '')
   const shortName = computed(() => settings.value?.shortName || settings.value?.siteName || 'Hanoi Survey')
   const slogan = computed(() => settings.value?.slogan || '')
   const logoPath = computed(() => settings.value?.logoPath || '')
@@ -31,6 +32,10 @@ export const useSiteSettingsStore = defineStore('site-settings', () => {
   const companyIntro = computed(() => settings.value?.companyIntro || '')
   const businessLicensePath = computed(() => settings.value?.businessLicensePath || '')
   const footerText = computed(() => settings.value?.footerText || '')
+  const website = computed(() => settings.value?.website || '')
+  const representativeName = computed(() => settings.value?.representativeName || '')
+  const representativeTitle = computed(() => settings.value?.representativeTitle || '')
+  const establishmentInfo = computed(() => settings.value?.establishmentInfo || '')
 
   async function ensureLoaded(force = false) {
     if (loading.value) return
@@ -55,6 +60,7 @@ export const useSiteSettingsStore = defineStore('site-settings', () => {
     mergedContactInfo,
     siteName,
     companyNameEn,
+    companyTradeName,
     shortName,
     slogan,
     logoPath,
@@ -63,6 +69,10 @@ export const useSiteSettingsStore = defineStore('site-settings', () => {
     companyIntro,
     businessLicensePath,
     footerText,
+    website,
+    representativeName,
+    representativeTitle,
+    establishmentInfo,
     ensureLoaded,
   }
 })

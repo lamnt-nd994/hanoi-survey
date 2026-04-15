@@ -12,7 +12,7 @@
     >
       <div class="flex items-start justify-between gap-3">
         <p class="text-sm font-medium leading-6">{{ item.message }}</p>
-        <button type="button" class="text-xs opacity-60 transition hover:opacity-100" @click="store.dismiss(item.id)">Dong</button>
+<!--        <button type="button" class="text-xs opacity-60 transition hover:opacity-100" @click="store.dismiss(item.id)">Dong</button>-->
       </div>
     </div>
   </div>

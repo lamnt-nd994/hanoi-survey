@@ -1,5 +1,8 @@
-export function toSlug(value: string) {
-  return value
+export function toSlug(value: string | null | undefined) {
+  const input = value || ''
+
+  return input
+    .replace(/[đĐ]/g, 'd')
     .normalize('NFD')
     .replace(/[\u0300-\u036f]/g, '')
     .toLowerCase()

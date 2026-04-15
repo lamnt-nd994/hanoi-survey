@@ -483,7 +483,7 @@ function onTitleChange() {
 function buildPayload(): ServicePayload {
   return {
     title: form.title.trim(),
-    slug: (form.slug || toSlug(form.title)).trim(),
+    slug: toSlug(form.slug || form.title),
     overview: form.overview?.trim() || '',
     content: form.content || '',
     icon: form.icon?.trim() || '',

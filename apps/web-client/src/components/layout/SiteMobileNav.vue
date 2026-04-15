@@ -9,8 +9,8 @@
           <router-link
             :to="getNavTo(item)"
             @click="emit('close')"
-            class="flex min-h-[44px] cursor-pointer items-center rounded-xl px-4 py-3 text-base font-medium transition-all"
-            :class="isActiveNavRoute(item) ? 'bg-accent-green/10 text-accent-green' : 'text-neutral-700 hover:bg-neutral-100'"
+            class="relative flex min-h-[44px] cursor-pointer items-center rounded-xl px-4 py-3 text-base font-medium transition-all after:absolute after:bottom-1.5 after:left-4 after:h-0.5 after:w-10 after:rounded-full after:bg-accent-green after:transition-opacity"
+            :class="isActiveNavRoute(item) ? 'bg-accent-green/10 text-accent-green after:opacity-100' : 'text-neutral-700 after:opacity-0 hover:bg-neutral-100 hover:after:opacity-70'"
           >
             {{ item.title }}
           </router-link>
@@ -20,8 +20,8 @@
               :key="`${item.resolvedUrl}-${service.slug}`"
               :to="{ name: 'service-detail', params: { slug: service.slug } }"
               @click="emit('close')"
-              class="flex min-h-[40px] cursor-pointer items-center rounded-xl px-3 py-2 text-sm transition-colors"
-              :class="isActiveServiceRoute(service.slug) ? 'bg-accent-green/10 text-accent-green' : 'text-neutral-600 hover:bg-neutral-100 hover:text-primary-navy'"
+              class="relative flex min-h-[40px] cursor-pointer items-center rounded-xl px-3 py-2 text-sm transition-colors after:absolute after:bottom-1 after:left-3 after:h-0.5 after:w-8 after:rounded-full after:bg-accent-green after:transition-opacity"
+              :class="isActiveServiceRoute(service.slug) ? 'bg-accent-green/10 text-accent-green after:opacity-100' : 'text-neutral-600 after:opacity-0 hover:bg-neutral-100 hover:text-primary-navy hover:after:opacity-70'"
             >
               {{ service.title }}
             </router-link>
@@ -33,8 +33,8 @@
               :key="`${item.resolvedUrl}-${category.slug}`"
               :to="getNavTo(item, category.slug)"
               @click="emit('close')"
-              class="flex min-h-[40px] cursor-pointer items-center rounded-xl px-3 py-2 text-sm transition-colors"
-              :class="isActiveCategoryRoute(getRouteName(item), category.slug) ? 'bg-accent-green/10 text-accent-green' : 'text-neutral-600 hover:bg-neutral-100 hover:text-primary-navy'"
+              class="relative flex min-h-[40px] cursor-pointer items-center rounded-xl px-3 py-2 text-sm transition-colors after:absolute after:bottom-1 after:left-3 after:h-0.5 after:w-8 after:rounded-full after:bg-accent-green after:transition-opacity"
+              :class="isActiveCategoryRoute(getRouteName(item), category.slug) ? 'bg-accent-green/10 text-accent-green after:opacity-100' : 'text-neutral-600 after:opacity-0 hover:bg-neutral-100 hover:text-primary-navy hover:after:opacity-70'"
             >
               {{ category.name }}
             </router-link>
@@ -49,8 +49,8 @@
           :target="isExternalUrl(item.resolvedUrl) ? '_blank' : undefined"
           :rel="isExternalUrl(item.resolvedUrl) ? 'noopener noreferrer' : undefined"
           @click="emit('close')"
-          class="flex min-h-[44px] cursor-pointer items-center rounded-xl px-4 py-3 text-base font-medium transition-all"
-          :class="isActiveNavRoute(item) ? 'bg-accent-green/10 text-accent-green' : 'text-neutral-700 hover:bg-neutral-100'"
+          class="relative flex min-h-[44px] cursor-pointer items-center rounded-xl px-4 py-3 text-base font-medium transition-all after:absolute after:bottom-1.5 after:left-4 after:h-0.5 after:w-10 after:rounded-full after:bg-accent-green after:transition-opacity"
+          :class="isActiveNavRoute(item) ? 'bg-accent-green/10 text-accent-green after:opacity-100' : 'text-neutral-700 after:opacity-0 hover:bg-neutral-100 hover:after:opacity-70'"
         >
           {{ item.title }}
         </component>

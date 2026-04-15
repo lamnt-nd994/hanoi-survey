@@ -119,4 +119,56 @@ a {
   .text-balance {
     text-wrap: balance;
   }
+
+  @keyframes phone-highlight {
+    0%, 100% {
+      color: #0F2744;
+      text-shadow: 0 0 0 rgba(220, 38, 38, 0);
+    }
+
+    50% {
+      color: #dc2626;
+      text-shadow: 0 0 18px rgba(220, 38, 38, 0.35);
+    }
+  }
+
+  @keyframes phone-ring {
+    0%, 100% {
+      transform: rotate(0deg) scale(1);
+    }
+
+    10%, 30%, 50% {
+      transform: rotate(-12deg) scale(1.08);
+    }
+
+    20%, 40%, 60% {
+      transform: rotate(12deg) scale(1.08);
+    }
+
+    70% {
+      transform: rotate(0deg) scale(1);
+    }
+  }
+
+  @keyframes phone-call {
+    0%, 100% {
+      color: #0F2744;
+      transform: rotate(0deg) scale(1);
+    }
+
+    10%, 30%, 50% {
+      color: #dc2626;
+      transform: rotate(-12deg) scale(1.08);
+    }
+
+    20%, 40%, 60% {
+      color: #dc2626;
+      transform: rotate(12deg) scale(1.08);
+    }
+
+    70% {
+      color: #0F2744;
+      transform: rotate(0deg) scale(1);
+    }
+  }
 }

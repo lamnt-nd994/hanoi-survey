@@ -36,6 +36,7 @@ public class SiteSettingController {
         return ApiResponse.ok(SiteSettingResponse.from(service.update(new SiteSettingCommand(
                 request.siteName(),
                 request.companyNameEn(),
+                request.companyTradeName(),
                 request.shortName(),
                 request.slogan(),
                 request.logoPath(),
@@ -53,6 +54,9 @@ public class SiteSettingController {
                 request.phone(),
                 request.email(),
                 request.website(),
+                request.representativeName(),
+                request.representativeTitle(),
+                request.establishmentInfo(),
                 request.address(),
                 request.mapEmbed(),
                 request.workingHours(),
