@@ -3,7 +3,7 @@
     <div class="container-shell">
       <div class="grid gap-8 lg:grid-cols-[1.05fr_0.95fr] lg:items-center">
         <div class="overflow-hidden rounded-[2rem] border border-neutral-200 bg-neutral-100 shadow-sm">
-          <img v-if="imagePath" :src="resolveMediaUrl(imagePath)" :alt="siteName" class="h-[380px] w-full object-cover" />
+          <MediaImage v-if="imagePath" :src="imagePath" :alt="siteName" :width="760" :height="380" class="h-[380px] w-full object-cover" />
           <div v-else class="flex h-[320px] items-center justify-center bg-[linear-gradient(135deg,#16365f_0%,#264d7e_48%,#d6dde6_48%,#eef2f6_100%)] px-10 text-center text-white">
             <div>
               <div class="text-xs font-semibold uppercase tracking-[0.22em] text-white/70">Hanoi Survey</div>
@@ -18,7 +18,7 @@
 
           <div class="mt-7 space-y-3">
             <div v-for="item in highlights" :key="item" class="flex items-start gap-3 text-[1.05rem] font-medium text-primary-navy">
-              <span class="flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[20px] text-amber-400 font-bold fas fa-check-circle"></span>
+              <AppIcon icon="check-circle" class="mt-0.5 h-5 w-5 shrink-0 text-amber-400" />
               <span>{{ item }}</span>
             </div>
           </div>
@@ -35,7 +35,7 @@
 
 <script setup lang="ts">
 import AppIcon from '../ui/AppIcon.vue'
-import { resolveMediaUrl } from '../../lib/media'
+import MediaImage from '../ui/MediaImage.vue'
 
 defineProps<{
   siteName: string

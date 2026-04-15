@@ -24,6 +24,8 @@ public record SiteSettingRequest(
         String phone,
         String email,
         String website,
+        String representativeName,
+        String representativeTitle,
         String address,
         String mapEmbed,
         String workingHours,

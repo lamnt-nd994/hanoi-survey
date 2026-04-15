@@ -397,6 +397,8 @@ export interface SiteSettings {
   phone: string
   email: string
   website: string
+  representativeName: string
+  representativeTitle: string
   address: string
   mapEmbed: string
   workingHours: string

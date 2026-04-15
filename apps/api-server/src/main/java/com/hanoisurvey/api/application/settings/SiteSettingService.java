@@ -39,6 +39,8 @@ public class SiteSettingService {
                 command.phone(),
                 command.email(),
                 command.website(),
+                command.representativeName(),
+                command.representativeTitle(),
                 command.address(),
                 command.mapEmbed(),
                 command.workingHours(),
@@ -51,6 +53,37 @@ public class SiteSettingService {
     }
 
     private SiteSetting defaultSetting() {
-        return new SiteSetting(null, "Hanoi Survey", null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null);
+        return new SiteSetting(
+                null, // id
+                "Hanoi Survey", // siteName
+                null, // companyNameEn
+                null, // shortName
+                null, // slogan
+                null, // logoPath
+                null, // footerLogoPath
+                null, // heroBannerPath
+                null, // companyIntro
+                null, // taxCode
+                null, // licenseNumber
+                null, // businessLicensePath
+                null, // licenseIssuedBy
+                null, // licenseIssuedDate
+                null, // officeAddress
+                null, // branchAddress
+                null, // hotline
+                null, // phone
+                null, // email
+                null, // website
+                null, // representativeName
+                null, // representativeTitle
+                null, // address
+                null, // mapEmbed
+                null, // workingHours
+                null, // facebookUrl
+                null, // zaloUrl
+                null, // youtubeUrl
+                null, // linkedinUrl
+                null // footerText
+        );
     }
 }

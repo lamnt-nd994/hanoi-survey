@@ -7,14 +7,14 @@
       </div>
 
       <div class="grid grid-cols-2 gap-6 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
-        <div
+        <Card
           v-for="partner in partners"
           :key="partner.name"
-          class="group flex flex-col items-center justify-center rounded-2xl border border-neutral-200 p-6 transition-all hover:border-accent-green/30 hover:shadow-panel hover:bg-accent-green/5"
+          class="group flex flex-col items-center justify-center p-6 hover:border-accent-green/30 hover:bg-accent-green/5 hover:shadow-[0_18px_45px_rgba(15,39,68,0.08)]"
         >
           <span class="text-4xl transition-transform group-hover:scale-110">{{ partner.logo }}</span>
           <span class="mt-3 text-sm font-medium text-neutral-700 transition-colors group-hover:text-primary-navy">{{ partner.name }}</span>
-        </div>
+        </Card>
       </div>
 
       <div class="mt-20">
@@ -23,10 +23,10 @@
         </div>
 
         <div class="grid gap-6 md:grid-cols-3">
-          <div
+          <Card
             v-for="cert in certificates"
             :key="cert.name"
-            class="group flex items-start gap-4 rounded-2xl border border-neutral-200 bg-neutral-50 p-6 transition-all hover:border-accent-green/30 hover:shadow-panel"
+            class="group flex items-start gap-4 bg-neutral-50 p-6 hover:border-accent-green/30 hover:shadow-[0_18px_45px_rgba(15,39,68,0.08)]"
           >
             <div class="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl bg-accent-green/10 text-accent-green transition-all group-hover:bg-accent-green group-hover:text-white">
               <svg class="h-7 w-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -38,24 +38,26 @@
               <p class="mt-1 text-sm text-neutral-600">{{ cert.issuer }}</p>
               <span class="mt-2 inline-block rounded-full bg-accent-green/10 px-3 py-1 text-xs font-semibold text-accent-green">{{ cert.year }}</span>
             </div>
-          </div>
+          </Card>
         </div>
       </div>
 
       <div class="mt-12 rounded-2xl border-2 border-dashed border-accent-green/30 bg-accent-green/5 p-8 text-center">
         <h4 class="font-heading text-xl font-bold text-primary-navy">Tải hồ sơ năng lực đầy đủ</h4>
         <p class="mt-2 text-neutral-600">Nhận thông tin chi tiết về năng lực, danh mục thiết bị và các dự án đã thực hiện</p>
-        <router-link :to="{ name: 'contact' }" class="btn-primary mt-4">
+        <Button as="router-link" :to="{ name: 'contact' }" class="mt-4">
           <svg class="mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
           </svg>
           Liên hệ để nhận hồ sơ
-        </router-link>
+        </Button>
       </div>
     </div>
   </section>
 </template>
 
-<script setup>
+<script setup lang="ts">
+import { Button } from './ui/button'
+import { Card } from './ui/card'
 import { certificates, partners } from '../content'
 </script>

@@ -1,9 +1,10 @@
 <template>
-  <span class="cms-badge" :class="badgeClass">{{ label }}</span>
+  <Badge :variant="badgeVariant">{{ label }}</Badge>
 </template>
 
 <script setup lang="ts">
 import { computed } from 'vue'
+import { Badge } from '@/components/ui/badge'
 
 const props = defineProps<{
   status: string
@@ -21,11 +22,11 @@ const statusLabels: Record<string, string> = {
 
 const label = computed(() => statusLabels[props.status] || props.status)
 
-const badgeClass = computed(() => {
+const badgeVariant = computed(() => {
   const s = props.status
-  if (['PUBLISHED', 'RESOLVED', 'CLOSED'].includes(s)) return 'cms-badge-green'
-  if (['DRAFT', 'NEW'].includes(s)) return 'cms-badge-amber'
-  if (['IN_PROGRESS'].includes(s)) return 'cms-badge-blue'
-  return 'cms-badge-gray'
+  if (['PUBLISHED', 'RESOLVED', 'CLOSED'].includes(s)) return 'success'
+  if (['DRAFT', 'NEW'].includes(s)) return 'warning'
+  if (['IN_PROGRESS'].includes(s)) return 'outline'
+  return 'secondary'
 })
 </script>

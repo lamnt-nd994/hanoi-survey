@@ -1,6 +1,5 @@
 <template>
-  <i v-if="isFontAwesome" :class="[iconName, iconClass]" aria-hidden="true" />
-  <component v-else :is="resolvedIcon" :class="iconClass" :stroke-width="strokeWidth" aria-hidden="true" />
+  <component :is="resolvedIcon" :class="iconClass" :stroke-width="strokeWidth" aria-hidden="true" />
 </template>
 
 <script setup lang="ts">
@@ -9,14 +8,18 @@ import {
   Activity,
   ArrowRight,
   Building2,
+  ChartLine,
   ChevronDown,
   ChevronLeft,
   ChevronRight,
   Circle,
   Clock3,
+  Droplets,
   Facebook,
   FlaskConical,
+  Globe,
   Hammer,
+  HardHat,
   Linkedin,
   Mail,
   Map,
@@ -26,10 +29,13 @@ import {
   Mountain,
   Newspaper,
   Phone,
+  Pickaxe,
   ScanSearch,
   Settings2,
   ShieldCheck,
   UserRound,
+  Waves,
+  Wrench,
   X,
   Youtube,
   type LucideIcon,
@@ -49,14 +55,18 @@ const iconRegistry: Record<string, LucideIcon> = {
   Activity,
   ArrowRight,
   Building2,
+  ChartLine,
   ChevronDown,
   ChevronLeft,
   ChevronRight,
   Circle,
   Clock3,
+  Droplets,
   Facebook,
   FlaskConical,
+  Globe,
   Hammer,
+  HardHat,
   Linkedin,
   Mail,
   Map,
@@ -66,10 +76,13 @@ const iconRegistry: Record<string, LucideIcon> = {
   Mountain,
   Newspaper,
   Phone,
+  Pickaxe,
   ScanSearch,
   Settings2,
   ShieldCheck,
   UserRound,
+  Waves,
+  Wrench,
   X,
   Youtube,
 }
@@ -81,6 +94,22 @@ const legacyIconMap: Record<string, string> = {
   monitoring: 'Activity',
   supervision: 'ShieldCheck',
   construction: 'Hammer',
+  tools: 'Wrench',
+  water: 'Waves',
+  'chart-line': 'ChartLine',
+  'globe-asia': 'Globe',
+  'hard-hat': 'HardHat',
+  'map-marked-alt': 'Map',
+  flask: 'FlaskConical',
+  'fa-tools': 'Wrench',
+  'fa-water': 'Waves',
+  'fa-chart-line': 'ChartLine',
+  'fa-globe-asia': 'Globe',
+  'fa-hard-hat': 'HardHat',
+  'fa-map-marked-alt': 'Map',
+  'fa-flask': 'FlaskConical',
+  'fa-check-circle': 'ShieldCheck',
+  'check-circle': 'ShieldCheck',
   circle: 'Circle',
   'settings-2': 'Settings2',
   settings: 'Settings2',
@@ -107,7 +136,6 @@ const legacyIconMap: Record<string, string> = {
 
 const iconClass = computed(() => props.class)
 const iconName = computed(() => props.icon.trim())
-const isFontAwesome = computed(() => /(^|\s)fa([srbld]|-solid|-regular|-brands)?(\s|$)/.test(iconName.value))
 
 const resolvedIcon = computed<LucideIcon>(() => {
   const resolvedName = resolveIconName(iconName.value)
@@ -117,7 +145,8 @@ const resolvedIcon = computed<LucideIcon>(() => {
 function resolveIconName(value: string) {
   if (!value) return 'Circle'
 
-  const mappedValue = legacyIconMap[value] || value
+  const normalizedValue = normalizeIconName(value)
+  const mappedValue = legacyIconMap[normalizedValue] || normalizedValue
   if (iconRegistry[mappedValue]) return mappedValue
 
   const pascalCase = mappedValue
@@ -127,5 +156,15 @@ function resolveIconName(value: string) {
     .join('')
 
   return iconRegistry[pascalCase] ? pascalCase : 'Circle'
+}
+
+function normalizeIconName(value: string) {
+  const segments = value
+    .trim()
+    .split(/\s+/)
+    .filter(Boolean)
+    .filter((segment) => !/^fa(s|r|b|l|d)?$/.test(segment) && !/^fa-(solid|regular|brands)$/.test(segment))
+
+  return segments[segments.length - 1] || value
 }
 </script>

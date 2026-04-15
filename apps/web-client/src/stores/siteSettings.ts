@@ -31,6 +31,9 @@ export const useSiteSettingsStore = defineStore('site-settings', () => {
   const companyIntro = computed(() => settings.value?.companyIntro || '')
   const businessLicensePath = computed(() => settings.value?.businessLicensePath || '')
   const footerText = computed(() => settings.value?.footerText || '')
+  const website = computed(() => settings.value?.website || '')
+  const representativeName = computed(() => settings.value?.representativeName || '')
+  const representativeTitle = computed(() => settings.value?.representativeTitle || '')
 
   async function ensureLoaded(force = false) {
     if (loading.value) return
@@ -63,6 +66,9 @@ export const useSiteSettingsStore = defineStore('site-settings', () => {
     companyIntro,
     businessLicensePath,
     footerText,
+    website,
+    representativeName,
+    representativeTitle,
     ensureLoaded,
   }
 })

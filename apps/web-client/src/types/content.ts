@@ -18,6 +18,9 @@ export interface SiteSettings {
   phone: string | null
   email: string
   address: string
+  website: string | null
+  representativeName: string | null
+  representativeTitle: string | null
   mapEmbed: string | null
   workingHours: string | null
   facebookUrl: string | null

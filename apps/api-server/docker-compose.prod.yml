@@ -16,8 +16,7 @@ services:
       APP_UPLOAD_PUBLIC_PREFIX: ${APP_UPLOAD_PUBLIC_PREFIX:-uploads}
       APP_CORS_ALLOWED_ORIGINS: ${APP_CORS_ALLOWED_ORIGINS:-https://example.com,https://admin.example.com}
       APP_LOG_LEVEL: ${APP_LOG_LEVEL:-INFO}
-      MULTIPART_MAX_FILE_SIZE: ${MULTIPART_MAX_FILE_SIZE:-10MB}
-      MULTIPART_MAX_REQUEST_SIZE: ${MULTIPART_MAX_REQUEST_SIZE:-10MB}
+      APP_MEDIA_MAX_SIZE: ${APP_MEDIA_MAX_SIZE:-10MB}
       TZ: Asia/Ho_Chi_Minh
     depends_on:
       mysql:

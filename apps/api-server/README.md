@@ -77,6 +77,43 @@ Files added for production:
 - `.env.prod.example`: sample environment variables for Dokploy/server
 - `deploy/dokploy/*`: split Dokploy deployment files for `mysql`, `api-server`, `web-client`, `admin-portal`
 
+## UAT deploy with Docker Compose
+
+Files added for UAT:
+
+- `src/main/resources/application-uat.yml`: Spring Boot `uat` profile
+- `docker-compose.uat.yml`: UAT stack for API + MySQL (+ Adminer optional)
+- `.env.uat.example`: sample UAT environment variables
+
+Prepare host folders first, then copy `.env.uat.example` to your UAT environment and replace at least:
+
+- `JWT_SECRET`
+- `APP_CORS_ALLOWED_ORIGINS`
+- `HOST_UPLOADS_DIR`
+- `HOST_MYSQL_DATA_DIR`
+- `MYSQL_PASSWORD`
+- `MYSQL_ROOT_PASSWORD`
+
+Run UAT from `apps/api-server`:
+
+```bash
+docker compose --env-file .env.uat -f docker-compose.uat.yml up -d --build
+```
+
+Default UAT ports:
+
+- API: `http://localhost:8082`
+- MySQL: `localhost:3311`
+- Adminer with tools profile: `http://localhost:8083`
+
+To include Adminer:
+
+```bash
+docker compose --env-file .env.uat -f docker-compose.uat.yml --profile tools up -d --build
+```
+
+`application-uat.yml` keeps Swagger enabled by default for testing. Set `SPRINGDOC_ENABLED=false` in `.env.uat` if UAT should behave like production.
+
 ### 1) Prepare host folders on server
 
 Create 2 absolute directories on your server before deploy:

@@ -2,127 +2,164 @@
   <div>
     <section class="container-shell py-16 md:py-14">
       <div v-if="loading" class="grid gap-6">
-        <div class="panel h-40 animate-pulse bg-neutral-100"></div>
-        <div class="panel h-64 animate-pulse bg-neutral-100"></div>
+        <Skeleton class="h-40 rounded-2xl" />
+        <Skeleton class="h-64 rounded-2xl" />
       </div>
 
-      <div v-else-if="error" class="panel p-8 text-rose-600">{{ error }}</div>
+      <Card v-else-if="error" class="p-8 text-rose-600">{{ error }}</Card>
 
       <div v-else-if="detail">
-        <article v-if="type === 'project'" class="space-y-10">
-          <div v-if="detail.coverImagePath" class="overflow-hidden rounded-[2rem] border border-neutral-200 bg-white shadow-sm">
+        <div v-if="detailHeading && type !== 'project'" class="mx-auto mb-20 max-w-4xl text-center">
+          <h1 class="font-heading text-3xl font-extrabold leading-tight text-primary-navy md:text-5xl">
+            {{ detailHeading }}
+          </h1>
+          <p v-if="detailSubheading" class="mx-auto mt-4 max-w-2xl text-base leading-7 text-neutral-600">
+            {{ detailSubheading }}
+          </p>
+        </div>
+
+        <article v-if="type === 'project'" class="space-y-8">
+          <section class="rounded-lg border border-l-4 border-neutral-200 border-l-primary-navy bg-white p-6 shadow-sm md:p-8">
+            <div v-if="detail.categoryName" class="text-[11px] font-semibold uppercase tracking-[0.16em] text-accent-green">{{ detail.categoryName }}</div>
+            <h1 class="mt-3 max-w-5xl font-heading text-3xl font-extrabold leading-tight text-primary-navy md:text-5xl">
+              {{ detail.title || detailHeading }}
+            </h1>
+            <p v-if="projectSummary" class="mt-5 max-w-4xl text-base leading-8 text-neutral-600">
+              {{ projectSummary }}
+            </p>
+          </section>
+          <div v-if="detail.coverImagePath" class="overflow-hidden rounded-lg border border-neutral-200 bg-white shadow-sm">
             <img
               :src="resolveMediaUrl(detail.coverImagePath)"
               :alt="detail.title"
-              class="h-[22rem] w-full object-cover md:h-[30rem]"
+              width="1200"
+              height="640"
+              loading="eager"
+              fetchpriority="high"
+              decoding="async"
+              class="h-[18rem] w-full object-cover md:h-[26rem]"
             />
           </div>
-          <div v-else class="relative overflow-hidden rounded-[2rem] border border-neutral-200 bg-gradient-to-br from-primary-navy via-primary-light to-primary-navy px-8 py-12 text-white shadow-sm md:px-12 md:py-16">
+          <div v-else class="relative overflow-hidden rounded-lg border border-neutral-200 bg-gradient-to-br from-primary-navy via-primary-light to-primary-navy px-8 py-12 text-white shadow-sm md:px-12 md:py-16">
             <div class="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.14),transparent_26%),linear-gradient(135deg,rgba(255,255,255,0.06),transparent_40%)]" />
             <div class="relative max-w-3xl">
-              <div class="eyebrow text-white/70">Du an</div>
-              <h2 class="mt-4 font-heading text-3xl font-bold leading-tight md:text-5xl">{{ detail.title }}</h2>
+              <div class="eyebrow text-white/70">Dự án</div>
+              <h2 class="mt-4 font-heading text-2xl font-bold leading-tight md:text-3xl">Hình ảnh công trình đang được cập nhật</h2>
               <p class="mt-4 max-w-2xl text-sm leading-7 text-white/80 md:text-base">
-                Ho so cong trinh va pham vi cong viec duoc trinh bay chi tiet ben duoi. Hinh anh cover dang duoc cap nhat.
+                Hồ sơ công trình và phạm vi công việc được trình bày chi tiết bên dưới.
               </p>
             </div>
           </div>
 
           <div class="grid gap-8 lg:grid-cols-[0.72fr_1.28fr]">
-            <aside class="panel p-6">
-              <div class="eyebrow">Thông tin dự án</div>
-              <div class="mt-5 space-y-4">
-                <div v-for="item in projectMetadata" :key="item.label" class="rounded-2xl border border-neutral-200 bg-neutral-50 px-4 py-4">
+            <Card as="aside" class="rounded-lg border-neutral-200 p-6 shadow-sm">
+              <div class="text-[11px] font-semibold uppercase tracking-[0.16em] text-accent-green">Thông tin dự án</div>
+              <div class="mt-5 divide-y divide-neutral-100 border-y border-neutral-100">
+                <div v-for="item in projectMetadata" :key="item.label" class="grid grid-cols-[7rem_minmax(0,1fr)] gap-4 py-4">
                   <div class="text-xs font-semibold uppercase tracking-[0.12em] text-neutral-400">{{ item.label }}</div>
-                  <div class="mt-2 text-base font-semibold text-primary-navy">{{ item.value }}</div>
+                  <div class="text-sm font-semibold leading-6 text-primary-navy">{{ item.value }}</div>
                 </div>
               </div>
-            </aside>
+            </Card>
 
-            <div class="panel p-6 md:p-8">
-              <div class="prose prose-slate max-w-none">
+            <Card class="rounded-lg border-neutral-200 p-6 shadow-sm md:p-8">
+              <div class="text-[11px] font-semibold uppercase tracking-[0.16em] text-accent-green">Nội dung công việc</div>
+              <div class="prose prose-slate mt-5 max-w-none">
                 <div class="text-base leading-8 text-neutral-700" v-html="bodyText"></div>
               </div>
-            </div>
+            </Card>
           </div>
 
           <section v-if="projectGalleryImages.length" class="space-y-5">
-            <div>
-              <div class="eyebrow">Hình ảnh dự án</div>
-              <h2 class="mt-2 font-heading text-3xl font-bold text-primary-navy">Thư viện công trình</h2>
+            <div class="border-l-4 border-primary-navy pl-4">
+              <div class="text-[11px] font-semibold uppercase tracking-[0.16em] text-accent-green">Hình ảnh dự án</div>
+              <h2 class="mt-2 font-heading text-2xl font-bold text-primary-navy md:text-3xl">Tư liệu công trình</h2>
             </div>
 
-            <div class="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+            <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
               <button
                 v-for="(image, index) in projectGalleryImages"
                 :key="`${image}-${index}`"
                 type="button"
-                class="overflow-hidden rounded-[1.75rem] border border-neutral-200 bg-white shadow-sm transition-transform duration-300 hover:-translate-y-1"
+                class="overflow-hidden rounded-lg border border-neutral-200 bg-white text-left shadow-sm transition-colors hover:border-accent-green/50"
                 @click="openProjectLightbox(index)"
               >
-                <img :src="resolveMediaUrl(image)" :alt="`${detail.title} ${index + 1}`" class="h-64 w-full object-cover transition-transform duration-500 hover:scale-105" />
+                <img :src="resolveMediaUrl(image)" :alt="`${detail.title} ${index + 1}`" width="480" height="256" loading="lazy" decoding="async" class="h-56 w-full object-cover" />
               </button>
             </div>
           </section>
         </article>
 
-        <div v-if="isProjectLightboxOpen" class="fixed inset-0 z-[70] flex items-center justify-center bg-slate-950/90 px-4 py-6" @click.self="closeProjectLightbox">
-          <button type="button" class="absolute right-4 top-4 flex h-11 w-11 items-center justify-center rounded-full border border-white/20 bg-white/10 text-white transition hover:bg-white/20 md:right-8 md:top-8" @click="closeProjectLightbox">
+        <Dialog v-if="isProjectLightboxOpen" :open="isProjectLightboxOpen" @update:open="handleLightboxOpenChange">
+          <DialogContent class="max-w-6xl px-0 py-0" aria-describedby="project-lightbox-description">
+          <DialogTitle class="sr-only">{{ detail.title }} gallery</DialogTitle>
+          <p id="project-lightbox-description" class="sr-only">Project image gallery lightbox.</p>
+          <Button type="button" variant="ghost" size="icon" class="absolute right-0 top-[-3.25rem] border border-white/20 bg-white/10 text-white hover:bg-white/20" @click="closeProjectLightbox">
             <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
             </svg>
-          </button>
+          </Button>
 
-          <button
+          <Button
             v-if="projectGalleryImages.length > 1"
             type="button"
-            class="absolute left-3 top-1/2 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full border border-white/20 bg-white/10 text-white transition hover:bg-white/20 md:left-6"
+            variant="ghost"
+            size="icon"
+            class="absolute left-3 top-1/2 -translate-y-1/2 border border-white/20 bg-white/10 text-white hover:bg-white/20 md:left-6"
             @click.stop="showPrevProjectImage"
           >
             <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
             </svg>
-          </button>
+          </Button>
 
           <div class="w-full max-w-6xl">
             <img
               :src="currentProjectLightboxImage"
               :alt="`${detail.title} ${activeProjectImageIndex + 1}`"
+              width="1200"
+              height="800"
+              loading="lazy"
+              decoding="async"
               class="max-h-[82vh] w-full rounded-[1.75rem] object-contain"
             />
             <div class="mt-4 text-center text-sm text-white/75">
               Anh {{ activeProjectImageIndex + 1 }} / {{ projectGalleryImages.length }}
             </div>
             <div v-if="projectGalleryImages.length > 1" class="mt-4 flex flex-wrap justify-center gap-3">
-              <button
+              <Button
                 v-for="(image, index) in projectGalleryImages"
                 :key="`thumb-${image}-${index}`"
                 type="button"
-                class="overflow-hidden rounded-2xl border-2 transition-all"
+                variant="ghost"
+                class="h-auto min-h-0 min-w-0 overflow-hidden rounded-2xl border-2 p-0 transition-all"
                 :class="index === activeProjectImageIndex ? 'border-white shadow-lg shadow-white/10' : 'border-white/10 opacity-70 hover:opacity-100'"
                 @click.stop="activeProjectImageIndex = index"
               >
-                <img :src="resolveMediaUrl(image)" :alt="`${detail.title} thumbnail ${index + 1}`" class="h-16 w-24 object-cover md:h-20 md:w-32" />
-              </button>
+                <img :src="resolveMediaUrl(image)" :alt="`${detail.title} thumbnail ${index + 1}`" width="128" height="80" loading="lazy" decoding="async" class="h-16 w-24 object-cover md:h-20 md:w-32" />
+              </Button>
             </div>
           </div>
 
-          <button
+          <Button
             v-if="projectGalleryImages.length > 1"
             type="button"
-            class="absolute right-3 top-1/2 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full border border-white/20 bg-white/10 text-white transition hover:bg-white/20 md:right-6"
+            variant="ghost"
+            size="icon"
+            class="absolute right-3 top-1/2 -translate-y-1/2 border border-white/20 bg-white/10 text-white hover:bg-white/20 md:right-6"
             @click.stop="showNextProjectImage"
           >
             <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
             </svg>
-          </button>
-        </div>
+          </Button>
+          </DialogContent>
+        </Dialog>
 
-        <article v-else-if="type === 'equipment' && isEquipmentCategory" class="space-y-10">
-          <div v-if="categoryEquipments.length === 0" class="panel p-8 text-center text-neutral-500">
+        <article v-if="type === 'equipment' && isEquipmentCategory" class="space-y-10">
+          <Card v-if="categoryEquipments.length === 0" class="p-8 text-center text-neutral-500">
             Chưa có thiết bị trong danh mục này.
-          </div>
+          </Card>
           <div v-else class="overflow-x-auto rounded-xl border border-neutral-200 bg-white shadow-sm">
             <table class="w-full text-left text-sm">
               <thead>
@@ -147,6 +184,10 @@
                       v-if="item.coverImagePath"
                       :src="resolveMediaUrl(item.coverImagePath)"
                       :alt="item.name"
+                      width="80"
+                      height="56"
+                      loading="lazy"
+                      decoding="async"
                       class="mx-auto h-14 w-20 rounded-lg border border-neutral-200 object-cover"
                       @error="($event) => ($event.target as HTMLImageElement).style.display = 'none'"
                     />
@@ -158,7 +199,7 @@
           </div>
         </article>
 
-        <article v-else>
+        <article v-else-if="type !== 'project'">
           <section v-if="type === 'service' && serviceDocuments.length" class="mb-12 space-y-5">
             <h2 class="font-heading text-2xl font-bold uppercase text-primary-navy">* TÀI LIỆU-QUYẾT ĐỊNH</h2>
 
@@ -185,7 +226,7 @@
                 :key="`${image}-${index}`"
                 class="overflow-hidden rounded-lg border border-neutral-100 bg-white"
               >
-                <img :src="resolveMediaUrl(image)" :alt="`${detail?.title || 'service'} ${index + 1}`" class="h-64 w-full object-cover" />
+                <img :src="resolveMediaUrl(image)" :alt="`${detail?.title || 'service'} ${index + 1}`" width="480" height="256" loading="lazy" decoding="async" class="h-64 w-full object-cover" />
               </div>
             </div>
           </section>
@@ -207,14 +248,52 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
-import { fetchEquipmentDetail, fetchEquipmentCategories, fetchPageBySlug, fetchPostDetail, fetchProjectDetail, fetchServiceDetail } from '../lib/api'
+import { Button } from '../components/ui/button'
+import { Card } from '../components/ui/card'
+import { Dialog, DialogContent, DialogTitle } from '../components/ui/dialog'
+import { Skeleton } from '../components/ui/skeleton'
+import { fetchEquipmentDetail, fetchEquipmentCategories, fetchEquipments, fetchPageBySlug, fetchPostDetail, fetchProjectDetail, fetchServiceDetail } from '../lib/api'
 import { resolveMediaUrl } from '../lib/media'
-import type { Equipment, ServiceDocument, ServiceImage } from '../types/content'
+import type { Equipment, EquipmentCategory, ServiceDocument, ServiceImage } from '../types/content'
+
+type EquipmentCategoryDetail = Pick<EquipmentCategory, 'id' | 'name' | 'slug'>
+interface PublicDetail extends Partial<EquipmentCategoryDetail> {
+  id?: number
+  categoryId?: number | null
+  categoryName?: string | null
+  title?: string
+  name?: string
+  slug?: string
+  overview?: string
+  description?: string
+  excerpt?: string
+  content?: string
+  coverImagePath?: string | null
+  galleryJson?: string | null
+  documents?: ServiceDocument[]
+  images?: ServiceImage[]
+  clientName?: string | null
+  location?: string | null
+  startedAt?: string | null
+  completedAt?: string | null
+  model?: string | null
+  manufacturer?: string | null
+  origin?: string | null
+  unit?: string | null
+  quantity?: number | null
+  productionYear?: number | null
+  contentJson?: string | null
+}
+type GalleryItem = string | {
+  path?: string
+  url?: string
+  filePath?: string
+}
 
 const route = useRoute()
 const loading = ref(true)
 const error = ref('')
-const detail = ref<any>(null)
+const detail = ref<PublicDetail | null>(null)
 const isProjectLightboxOpen = ref(false)
 const activeProjectImageIndex = ref(0)
 
@@ -230,16 +309,20 @@ function parseGalleryPaths(gallery: unknown) {
   try {
     const parsed = JSON.parse(gallery)
     if (!Array.isArray(parsed)) return []
-    return parsed
+    return (parsed as GalleryItem[])
       .map((item) => {
         if (typeof item === 'string') return item
-        if (item && typeof item === 'object') return (item as any).path || (item as any).url || (item as any).filePath || ''
+        if (isGalleryObject(item)) return item.path || item.url || item.filePath || ''
         return ''
       })
       .filter(Boolean)
   } catch {
     return gallery.split('\n').map(item => item.trim()).filter(Boolean)
   }
+}
+
+function isGalleryObject(item: GalleryItem): item is Exclude<GalleryItem, string> {
+  return typeof item === 'object' && item !== null
 }
 
 function hasRenderableContent(value: unknown) {
@@ -254,7 +337,34 @@ function hasRenderableContent(value: unknown) {
     .trim().length > 0
 }
 
+function stripHtml(value: string) {
+  return value
+    .replace(/<br\s*\/?>/gi, ' ')
+    .replace(/<[^>]*>/g, ' ')
+    .replace(/&nbsp;/gi, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
+}
+
 const bodyText = computed(() => detail.value?.content || detail.value?.description || detail.value?.overview || detail.value?.excerpt || 'Chưa có nội dung chi tiết.')
+const projectSummary = computed(() => {
+  if (type.value !== 'project') return ''
+  return stripHtml(detail.value?.excerpt || detail.value?.overview || detail.value?.description || '')
+})
+const detailHeading = computed(() => {
+  if (!detail.value) return ''
+  if (type.value === 'service') return detail.value.title || detail.value.name || ''
+  if (type.value === 'project') return detail.value.categoryName || detail.value.title || ''
+  if (type.value === 'equipment' && isEquipmentCategory.value) return detail.value.name || ''
+  if (type.value === 'equipment') return detail.value.categoryName || detail.value.name || ''
+  return ''
+})
+const detailSubheading = computed(() => {
+  if (!detail.value) return ''
+  if (type.value === 'project' && detail.value.title && detail.value.categoryName) return detail.value.title
+  if (type.value === 'equipment' && !isEquipmentCategory.value && detail.value.name && detail.value.categoryName) return detail.value.name
+  return ''
+})
 const serviceContent = computed(() => {
   if (type.value !== 'service') return ''
   const content = detail.value?.content
@@ -336,12 +446,11 @@ async function loadDetail() {
     else if (type.value === 'post') detail.value = await fetchPostDetail(slug.value)
      else if (type.value === 'equipment') {
        const categories = await fetchEquipmentCategories()
-       const category = categories.find((c: any) => c.slug === slug.value)
+       const category = categories.find((item) => item.slug === slug.value)
 
        if (category) {
          isEquipmentCategory.value = true
          detail.value = { name: category.name }
-         const { fetchEquipments } = await import('../lib/api')
          const all = await fetchEquipments({ categorySlug: slug.value, size: 100 })
          categoryEquipments.value = all.filter((item) => item.categoryId === category.id)
        } else {
@@ -365,6 +474,14 @@ function openProjectLightbox(index: number) {
 function closeProjectLightbox() {
   isProjectLightboxOpen.value = false
   activeProjectImageIndex.value = 0
+}
+
+function handleLightboxOpenChange(open: boolean) {
+  if (!open) {
+    closeProjectLightbox()
+    return
+  }
+  isProjectLightboxOpen.value = true
 }
 
 function showPrevProjectImage() {

@@ -43,6 +43,8 @@ public class SiteSettingRepositoryAdapter implements SiteSettingRepositoryPort {
         entity.setPhone(siteSetting.phone());
         entity.setEmail(siteSetting.email());
         entity.setWebsite(siteSetting.website());
+        entity.setRepresentativeName(siteSetting.representativeName());
+        entity.setRepresentativeTitle(siteSetting.representativeTitle());
         entity.setAddress(siteSetting.address());
         entity.setMapEmbed(siteSetting.mapEmbed());
         entity.setWorkingHours(siteSetting.workingHours());
@@ -76,6 +78,8 @@ public class SiteSettingRepositoryAdapter implements SiteSettingRepositoryPort {
                 entity.getPhone(),
                 entity.getEmail(),
                 entity.getWebsite(),
+                entity.getRepresentativeName(),
+                entity.getRepresentativeTitle(),
                 entity.getAddress(),
                 entity.getMapEmbed(),
                 entity.getWorkingHours(),

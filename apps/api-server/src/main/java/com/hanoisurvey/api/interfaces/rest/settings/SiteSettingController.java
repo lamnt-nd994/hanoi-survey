@@ -53,6 +53,8 @@ public class SiteSettingController {
                 request.phone(),
                 request.email(),
                 request.website(),
+                request.representativeName(),
+                request.representativeTitle(),
                 request.address(),
                 request.mapEmbed(),
                 request.workingHours(),

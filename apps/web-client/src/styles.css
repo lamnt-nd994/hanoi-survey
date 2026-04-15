@@ -42,34 +42,6 @@ a {
     @apply text-xs font-semibold uppercase tracking-[0.08em] text-accent-green md:text-sm;
   }
 
-  .panel {
-    @apply rounded-2xl border border-neutral-200 bg-white shadow-panel transition-all hover:shadow-panel-lg;
-  }
-
-  .btn-primary {
-    @apply inline-flex items-center justify-center rounded-full bg-accent-green px-6 py-3 text-sm font-semibold text-white transition-all hover:bg-accent-dark focus:outline-none focus:ring-2 focus:ring-accent-green focus:ring-offset-2 min-h-[44px] min-w-[44px];
-  }
-
-  .btn-secondary {
-    @apply inline-flex items-center justify-center rounded-full border-2 border-white bg-transparent px-6 py-3 text-sm font-semibold text-white transition-all hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-primary-navy min-h-[44px] min-w-[44px];
-  }
-
-  .btn-outline {
-    @apply inline-flex items-center justify-center rounded-full border-2 border-primary-navy bg-transparent px-6 py-3 text-sm font-semibold text-primary-navy transition-all hover:bg-primary-navy/5 focus:outline-none focus:ring-2 focus:ring-primary-navy focus:ring-offset-2 min-h-[44px] min-w-[44px];
-  }
-
-  .stat-card {
-    @apply rounded-xl border border-neutral-200 bg-white p-6 shadow-panel;
-  }
-
-  .service-card {
-    @apply rounded-2xl border border-neutral-200 bg-white p-6 shadow-panel transition-all hover:border-accent-green/30 hover:shadow-glow;
-  }
-
-  .project-card {
-    @apply overflow-hidden rounded-2xl border border-neutral-200 bg-white shadow-panel transition-all hover:shadow-panel-lg;
-  }
-
   .hero-section {
     @apply relative overflow-hidden;
     background: linear-gradient(rgba(0, 51, 102, 0.5), rgba(0, 51, 102, 0.7)), url('https://images.unsplash.com/photo-1504307651254-35680f356dfd?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80');
@@ -113,69 +85,6 @@ a {
     @apply font-heading text-2xl font-extrabold text-primary-navy md:text-3xl;
   }
 
-  .line {
-    @apply mx-auto mt-4 h-1 w-16 bg-accent-green;
-  }
-
-  .services-grid {
-    @apply grid gap-6 md:grid-cols-2 lg:grid-cols-3 mt-20;
-  }
-
-  .service-icon {
-    @apply mx-auto mb-5 flex h-16 w-16 items-center justify-center text-primary-navy;
-  }
-
-  .service-card h3 {
-    @apply mb-4 text-lg font-bold text-primary-navy;
-  }
-
-  .service-card p {
-    @apply mb-4 text-sm leading-relaxed text-gray-600;
-  }
-
-  .btn-link {
-    @apply inline-flex items-center text-sm font-bold text-accent-green transition-all hover:underline;
-  }
-
-  .projects-grid {
-    @apply grid gap-6 md:grid-cols-3;
-  }
-
-  .project-card-wrapper {
-    @apply relative overflow-hidden rounded-lg;
-    height: 250px;
-  }
-
-  .project-img {
-    @apply h-full w-full;
-    object-fit: cover;
-    transition: transform 0.5s;
-    background: linear-gradient(135deg, #0F2744 0%, #1A3A5C 100%);
-  }
-
-  .project-overlay {
-    @apply absolute bottom-0 left-0 right-0 p-5 text-white;
-    background: rgba(0, 51, 102, 0.9);
-    transform: translateY(100%);
-    transition: transform 0.3s;
-  }
-
-  .project-card-wrapper:hover .project-img {
-    transform: scale(1.1);
-  }
-
-  .project-card-wrapper:hover .project-overlay {
-    transform: translateY(0);
-  }
-
-  .project-overlay h3 {
-    @apply text-lg font-bold text-white;
-  }
-
-  .project-overlay p {
-    @apply mt-1 text-sm text-gray-300;
-  }
-
   .carousel-wrapper {
     @apply relative;
     overflow: hidden;
@@ -204,138 +113,62 @@ a {
       flex: 0 0 50%;
     }
   }
-
-  .carousel-slide .project-card {
-    @apply relative overflow-hidden rounded-xl;
-    height: 320px;
-    position: relative;
-  }
-
-  .carousel-slide .project-card img {
-    @apply h-full w-full;
-    object-fit: cover;
-  }
-
-  .carousel-slide .project-overlay {
-    @apply absolute inset-0 z-10 flex flex-col items-center justify-center gap-4 p-6 text-white;
-    background: linear-gradient(to top, rgba(0, 51, 102, 0.95) 0%, rgba(0, 51, 102, 0.7) 40%, transparent 100%);
-    opacity: 0;
-    transform: translateY(0);
-    transition: opacity 0.4s ease;
-  }
-
-  .carousel-slide .project-card:hover .project-overlay {
-    opacity: 1 !important;
-  }
-
-  .carousel-slide .project-category {
-    @apply mb-2 text-sm font-semibold uppercase tracking-wider text-accent-green;
-  }
-
-  .carousel-slide .project-title {
-    @apply text-center text-2xl font-bold text-white md:text-3xl;
-  }
-
-  .carousel-slide .project-btn {
-    @apply inline-flex items-center rounded-full bg-accent-green px-6 py-3 text-sm font-bold text-white transition-all hover:bg-accent-dark hover:scale-105;
-    min-h: 44px;
-  }
-
-  .carousel-btn {
-    @apply absolute top-1/2 z-10 flex h-12 w-12 -translate-y-1/2 items-center justify-center rounded-full border border-gray-300 bg-white text-primary-navy shadow-lg transition-all hover:bg-accent-green hover:border-accent-green hover:text-white;
-    transform: translateY(-50%);
-  }
-
-  .carousel-prev {
-    @apply left-4;
-  }
-
-  .carousel-next {
-    @apply right-4;
-  }
-
-  .carousel-dots {
-    @apply mt-6 flex justify-center gap-3;
-  }
-
-  .carousel-dot {
-    @apply h-3 w-3 rounded-full bg-gray-300 transition-all;
-  }
-
-  .carousel-dot.active {
-    @apply bg-accent-green w-8;
-  }
-
-  .carousel-dot:hover {
-    @apply bg-accent-green/70;
-  }
-
-  .quote-section {
-    @apply bg-primary-navy py-16 text-white md:py-20;
-  }
-
-  .quote-container {
-    @apply flex flex-wrap items-center gap-8;
-  }
-
-  .quote-text {
-    @apply flex-1 pr-8 md:pr-16;
-  }
-
-  .quote-text h2 {
-    @apply mb-4 text-2xl font-bold uppercase text-white md:text-3xl;
-  }
-
-  .quote-text p {
-    @apply text-gray-300;
-  }
-
-  .quote-checklist {
-    @apply mt-6 space-y-3;
-  }
-
-  .quote-checklist li {
-    @apply flex items-center text-white;
-  }
-
-  .check-icon {
-    @apply mr-3 h-5 w-5 flex-shrink-0 text-accent-green;
-  }
-
-  .quote-form {
-    @apply flex-1 rounded-lg bg-white p-8 text-gray-700;
-  }
-
-  .form-group {
-    @apply mb-4;
-  }
-
-  .form-group label {
-    @apply mb-2 block text-sm font-bold text-gray-700;
-  }
-
-  .form-group input,
-  .form-group select,
-  .form-group textarea {
-    @apply w-full rounded border border-gray-300 p-3 text-gray-700;
-  }
-
-  .form-group input:focus,
-  .form-group select:focus {
-    @apply border-accent-green outline-none;
-  }
-
-  .btn-submit {
-    @apply w-full rounded bg-accent-green p-3 font-bold text-white;
-  }
-
-  .btn-submit:hover {
-    @apply bg-accent-dark;
-  }
 }
 
 @layer utilities {
   .text-balance {
     text-wrap: balance;
+  }
+
+  @keyframes phone-highlight {
+    0%, 100% {
+      color: #0F2744;
+      text-shadow: 0 0 0 rgba(220, 38, 38, 0);
+    }
+
+    50% {
+      color: #dc2626;
+      text-shadow: 0 0 18px rgba(220, 38, 38, 0.35);
+    }
+  }
+
+  @keyframes phone-ring {
+    0%, 100% {
+      transform: rotate(0deg) scale(1);
+    }
+
+    10%, 30%, 50% {
+      transform: rotate(-12deg) scale(1.08);
+    }
+
+    20%, 40%, 60% {
+      transform: rotate(12deg) scale(1.08);
+    }
+
+    70% {
+      transform: rotate(0deg) scale(1);
+    }
+  }
+
+  @keyframes phone-call {
+    0%, 100% {
+      color: #0F2744;
+      transform: rotate(0deg) scale(1);
+    }
+
+    10%, 30%, 50% {
+      color: #dc2626;
+      transform: rotate(-12deg) scale(1.08);
+    }
+
+    20%, 40%, 60% {
+      color: #dc2626;
+      transform: rotate(12deg) scale(1.08);
+    }
+
+    70% {
+      color: #0F2744;
+      transform: rotate(0deg) scale(1);
+    }
   }
 }

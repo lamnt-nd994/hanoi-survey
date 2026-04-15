@@ -2,10 +2,10 @@
   <div>
     <section class="container-shell py-16 md:py-20">
       <div v-if="loadingState" class="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
-        <div v-for="index in 6" :key="index" class="panel h-40 animate-pulse bg-neutral-100"></div>
+        <Skeleton v-for="index in 6" :key="index" class="h-40 rounded-2xl" />
       </div>
 
-      <div v-else-if="errorMessage" class="panel p-8 text-rose-600">{{ errorMessage }}</div>
+      <Card v-else-if="errorMessage" class="p-8 text-rose-600">{{ errorMessage }}</Card>
 
       <template v-else>
         <section class="py-2 md:py-4">
@@ -19,7 +19,7 @@
                   </h1>
                 </div>
               </div>
-              <div class="about-intro-copy prose prose-slate mt-4 max-w-none text-left text-[1.15rem] leading-[1.95] text-neutral-600" v-html="aboutData.intro.content"></div>
+              <div class="about-intro-copy prose prose-slate mt-4 max-w-none text-left text-[1.15rem] leading-[1.95] text-neutral-600" v-html="cleanedIntroContent"></div>
             </div>
 
             <div class="lg:pt-[4.6rem]">
@@ -28,6 +28,11 @@
                   v-if="introImagePath"
                   :src="resolveMediaUrl(introImagePath)"
                   :alt="introTitle"
+                  width="720"
+                  height="470"
+                  loading="eager"
+                  fetchpriority="high"
+                  decoding="async"
                   class="h-[320px] w-full object-cover md:h-[430px] lg:h-[470px]"
                 />
                 <div v-else class="flex h-[320px] items-center justify-center bg-[linear-gradient(135deg,#214c79_0%,#3f6a94_55%,#d8e0e8_55%,#eef3f7_100%)] px-10 text-center text-white md:h-[430px] lg:h-[470px]">
@@ -41,19 +46,48 @@
           </div>
         </section>
 
+        <section class="mt-16 border-t border-neutral-200 pt-14">
+          <div class="max-w-5xl">
+            <h2 class="section-title text-primary-navy">Thông tin doanh nghiệp</h2>
+            <div class="mt-4 h-1 w-20 rounded-full bg-accent-green"></div>
+            <div class="mt-10 space-y-10 text-[1.05rem] leading-8 text-neutral-600 md:text-[1.08rem]">
+              <div>
+                <h3 class="text-sm font-semibold uppercase tracking-[0.18em] text-primary-navy">Tên nhà thầu</h3>
+                <div class="mt-4 space-y-3">
+                  <p><span class="font-semibold text-neutral-900">Tên công ty:</span> {{ companySettings.siteName }}</p>
+                  <p v-if="companySettings.companyNameEn"><span class="font-semibold text-neutral-900">Tên công ty tiếng Anh:</span> {{ companySettings.companyNameEn }}</p>
+                </div>
+              </div>
+
+              <div>
+                <h3 class="text-sm font-semibold uppercase tracking-[0.18em] text-primary-navy">Trụ sở chính</h3>
+                <div class="mt-4 space-y-3">
+                  <p v-if="companySettings.officeAddress"><span class="font-semibold text-neutral-900">Địa chỉ:</span> {{ companySettings.officeAddress }}</p>
+                  <p v-if="companySettings.phone"><span class="font-semibold text-neutral-900">Điện thoại:</span> {{ companySettings.phone }}</p>
+                  <p v-if="companySettings.email"><span class="font-semibold text-neutral-900">Email:</span> {{ companySettings.email }}</p>
+                  <p v-if="companySettings.taxCode"><span class="font-semibold text-neutral-900">Mã số thuế:</span> {{ companySettings.taxCode }}</p>
+                  <p v-if="companySettings.website"><span class="font-semibold text-neutral-900">Website:</span> {{ companySettings.website }}</p>
+                  <p v-if="representativeLine"><span class="font-semibold text-neutral-900">Người đại diện:</span> <span class="font-semibold text-neutral-900">{{ representativeLine }}</span> <span> - {{representativeTitle}}</span></p>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </section>
+
         <section class="mt-16 rounded-[2rem] bg-neutral-50 px-6 py-10 md:px-10 md:py-14">
           <div class="text-center">
             <h2 class="section-title text-primary-navy">{{ aboutData.coreValues.sectionTitle }}</h2>
             <div class="mx-auto mt-4 h-1 w-20 rounded-full bg-accent-green"></div>
           </div>
           <div class="mt-10 grid gap-6 md:grid-cols-3">
-            <article v-for="(item, index) in valueItems" :key="`${item.title}-${index}`" class="panel border-t-4 border-primary-navy p-8 text-center shadow-sm">
+            <Card v-for="(item, index) in valueItems" :key="`${item.title}-${index}`" as="article" class="border-t-4 border-primary-navy p-8 text-center shadow-sm">
               <div class="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-accent-green/10 text-accent-green">
                 <span class="block h-8 w-8" v-html="resolveValueIcon(item.icon)"></span>
               </div>
               <h3 class="mt-6 font-heading text-2xl font-bold text-primary-navy">{{ item.title }}</h3>
               <p class="mt-4 text-sm leading-7 text-neutral-600">{{ item.description }}</p>
-            </article>
+            </Card>
           </div>
         </section>
 
@@ -71,26 +105,26 @@
                 class="relative md:grid md:grid-cols-2 md:gap-10"
               >
                 <div v-if="index % 2 === 0" class="md:pr-10">
-                  <article class="panel p-6 md:text-right">
+                  <Card as="article" class="p-6 md:text-right">
                     <div class="text-sm font-semibold uppercase tracking-[0.2em] text-accent-green">{{ item.year }}</div>
                     <h3 class="mt-3 font-heading text-2xl font-bold text-primary-navy">{{ item.title }}</h3>
                     <p class="mt-3 text-sm leading-7 text-neutral-600">{{ item.description }}</p>
-                  </article>
+                  </Card>
                 </div>
                 <div class="hidden md:block"></div>
                 <div class="absolute left-1/2 top-8 hidden h-5 w-5 -translate-x-1/2 rounded-full border-4 border-accent-green bg-white md:block"></div>
                 <div v-if="index % 2 === 1" class="md:col-start-2 md:pl-10">
-                  <article class="panel p-6">
+                  <Card as="article" class="p-6">
                     <div class="text-sm font-semibold uppercase tracking-[0.2em] text-accent-green">{{ item.year }}</div>
                     <h3 class="mt-3 font-heading text-2xl font-bold text-primary-navy">{{ item.title }}</h3>
                     <p class="mt-3 text-sm leading-7 text-neutral-600">{{ item.description }}</p>
-                  </article>
+                  </Card>
                 </div>
-                <article v-if="isMobile" class="panel mt-4 p-6 md:hidden">
+                <Card v-if="isMobile" as="article" class="mt-4 p-6 md:hidden">
                   <div class="text-sm font-semibold uppercase tracking-[0.2em] text-accent-green">{{ item.year }}</div>
                   <h3 class="mt-3 font-heading text-2xl font-bold text-primary-navy">{{ item.title }}</h3>
                   <p class="mt-3 text-sm leading-7 text-neutral-600">{{ item.description }}</p>
-                </article>
+                </Card>
               </div>
             </div>
           </div>
@@ -102,18 +136,22 @@
             <div class="mx-auto mt-4 h-1 w-20 rounded-full bg-accent-green"></div>
           </div>
           <div class="mt-10 grid gap-8 lg:grid-cols-[1.1fr_0.9fr] lg:items-center">
-            <div class="panel p-4">
+            <Card class="p-4">
               <img
                 v-if="aboutData.organization.chartImagePath"
                 :src="resolveMediaUrl(aboutData.organization.chartImagePath)"
                 :alt="aboutData.organization.chartCaption || aboutData.organization.heading"
+                width="720"
+                height="480"
+                loading="lazy"
+                decoding="async"
                 class="h-full w-full rounded-2xl border border-neutral-200 object-cover"
               />
               <div v-else class="flex min-h-72 items-center justify-center rounded-2xl border border-dashed border-neutral-300 bg-white text-center text-sm text-neutral-400">
                 Chưa có ảnh sơ đồ tổ chức
               </div>
               <p class="mt-4 text-center text-sm italic text-neutral-500">{{ aboutData.organization.chartCaption }}</p>
-            </div>
+            </Card>
             <div>
               <h3 class="font-heading text-3xl font-bold text-primary-navy">{{ aboutData.organization.heading }}</h3>
               <p class="mt-4 text-base leading-8 text-neutral-600">{{ aboutData.organization.description }}</p>
@@ -156,11 +194,15 @@
                 </li>
               </ul>
             </div>
-            <div class="panel p-4">
+            <div>
               <img
                 v-if="aboutData.capability.imagePath"
                 :src="resolveMediaUrl(aboutData.capability.imagePath)"
                 :alt="aboutData.capability.heading || aboutData.capability.sectionTitle"
+                width="720"
+                height="480"
+                loading="lazy"
+                decoding="async"
                 class="h-full w-full rounded-2xl border border-neutral-200 object-cover"
               />
               <div v-else class="flex min-h-72 items-center justify-center rounded-2xl border border-dashed border-neutral-300 bg-white text-center text-sm text-neutral-400">
@@ -178,22 +220,44 @@
 import { computed, onMounted } from 'vue'
 import { storeToRefs } from 'pinia'
 import { usePublicContentStore } from '../stores/publicContent'
+import { useSiteSettingsStore } from '../stores/siteSettings'
 import { resolveMediaUrl } from '../lib/media'
+import { Card } from '../components/ui/card'
+import { Skeleton } from '../components/ui/skeleton'
 import type { AboutCapabilityItem, AboutPageContent, AboutPageTimelineItem, AboutPageValueItem } from '../types/content'
 
 const publicContentStore = usePublicContentStore()
+const siteSettingsStore = useSiteSettingsStore()
 const { introPage: page, loading, errors } = storeToRefs(publicContentStore)
+const companySettings = computed(() => siteSettingsStore.settings || {
+  siteName: '',
+  companyNameEn: '',
+  officeAddress: '',
+  phone: '',
+  email: '',
+  taxCode: '',
+  website: '',
+  representativeName: '',
+  representativeTitle: '',
+})
 
 const loadingState = computed(() => loading.value.introPage)
 const errorMessage = computed(() => errors.value.introPage)
 
 const aboutData = computed<AboutPageContent>(() => parseAboutContent(page.value?.contentJson))
 const introTitle = computed(() => aboutData.value.hero.title || page.value?.title || 'Về Chúng Tôi')
+const cleanedIntroContent = computed(() => stripRepresentativeParagraph(aboutData.value.intro.content))
+const representativeLine = computed(() => {
+  return [companySettings.value.representativeName]
+    .filter(Boolean)
+    .join(' - ')
+    .trim()
+})
+
+const representativeTitle = computed(() => { return companySettings.value.representativeTitle })
+
 const introImagePath = computed(() => {
-  return aboutData.value.intro.imagePath
-    || aboutData.value.organization.chartImagePath
-    || aboutData.value.capability.imagePath
-    || ''
+  return aboutData.value.intro.imagePath || ''
 })
 const valueItems = computed<AboutPageValueItem[]>(() => aboutData.value.coreValues.items.filter((item) => item.title.trim() || item.description.trim()))
 const timelineItems = computed<AboutPageTimelineItem[]>(() => [...aboutData.value.timeline.items]
@@ -204,7 +268,10 @@ const capabilityItems = computed<AboutCapabilityItem[]>(() => aboutData.value.ca
 const isMobile = computed(() => typeof window !== 'undefined' && window.innerWidth < 768)
 
 onMounted(async () => {
-  await publicContentStore.loadIntroPage()
+  await Promise.all([
+    publicContentStore.loadIntroPage(),
+    siteSettingsStore.ensureLoaded(),
+  ])
 })
 
 function parseAboutContent(raw: string | null | undefined): AboutPageContent {
@@ -218,13 +285,21 @@ function parseAboutContent(raw: string | null | undefined): AboutPageContent {
   }
 }
 
+function stripRepresentativeParagraph(html: string) {
+  if (!html) return ''
+  return html
+    .replace(/<p\b[^>]*>(?:(?!<\/p>).)*Người\s*đại\s*diện:(?:(?!<\/p>).)*<\/p>/giu, '')
+    .replace(/<p\b[^>]*>(?:\s|&nbsp;|<br\s*\/?>)*<\/p>/giu, '')
+    .trim()
+}
+
 function createEmptyAboutContent(): AboutPageContent {
   return {
     hero: { title: 'Về chúng tôi', backgroundImagePath: '' },
     intro: {
       heading: 'Doi tac tin cay trong nganh khao sat xay dung',
       imagePath: '',
-      content: '<p class="ql-align-justify"><strong>CÔNG TY CỔ PHẦN TƯ VẤN KHẢO SÁT XÂY DỰNG HÀ NỘI</strong>&nbsp;(HANOI CONTRUCTION SERVEY CONSULTANT JOIN STOCK COMPANY) là một doanh nghiệp độc lập, tự hào với bề dày kinh nghiệm trong lĩnh vực tư vấn xây dựng.</p><p class="ql-align-justify"><br></p><p class="ql-align-justify">Được thành lập từ năm 2006, chúng tôi cam kết mang lại những giải pháp tư vấn chất lượng cao, đáp ứng các tiêu chuẩn khắt khe nhất của ngành xây dựng Việt Nam.</p><p class="ql-align-justify"><br></p><p class="ql-align-justify">Với sở hữu Trung tâm thí nghiệm và kiểm định xây dựng đạt chuẩn, VietDelta tự tin là đối tác tin cậy cho mọi công trình.</p><p class="ql-align-justify"><br></p><p><strong style="color: rgb(0, 64, 128);">Người đại diện:</strong>&nbsp;Đỗ Xuân Dân – Giám đốc Công ty</p>',
+      content: '<p class="ql-align-justify"><strong>CÔNG TY CỔ PHẦN TƯ VẤN KHẢO SÁT XÂY DỰNG HÀ NỘI</strong>&nbsp;(HANOI CONTRUCTION SERVEY CONSULTANT JOIN STOCK COMPANY) là một doanh nghiệp độc lập, tự hào với bề dày kinh nghiệm trong lĩnh vực tư vấn xây dựng.</p><p class="ql-align-justify"><br></p><p class="ql-align-justify">Được thành lập từ năm 2006, chúng tôi cam kết mang lại những giải pháp tư vấn chất lượng cao, đáp ứng các tiêu chuẩn khắt khe nhất của ngành xây dựng Việt Nam.</p><p class="ql-align-justify"><br></p><p class="ql-align-justify">Với sở hữu Trung tâm thí nghiệm và kiểm định xây dựng đạt chuẩn, VietDelta tự tin là đối tác tin cậy cho mọi công trình.</p>',
     },
     coreValues: {
       sectionTitle: 'Sứ mệnh và tầm nhìn',

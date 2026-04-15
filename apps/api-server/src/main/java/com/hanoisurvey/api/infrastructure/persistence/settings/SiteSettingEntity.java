@@ -61,6 +61,12 @@ public class SiteSettingEntity extends BaseEntity {
 
     private String website;
 
+    @Column(name = "representative_name")
+    private String representativeName;
+
+    @Column(name = "representative_title")
+    private String representativeTitle;
+
     private String address;
 
     @Column(name = "map_embed", columnDefinition = "TEXT")
@@ -234,6 +240,22 @@ public class SiteSettingEntity extends BaseEntity {
 
     public void setWebsite(String website) {
         this.website = website;
+    }
+
+    public String getRepresentativeName() {
+        return representativeName;
+    }
+
+    public void setRepresentativeName(String representativeName) {
+        this.representativeName = representativeName;
+    }
+
+    public String getRepresentativeTitle() {
+        return representativeTitle;
+    }
+
+    public void setRepresentativeTitle(String representativeTitle) {
+        this.representativeTitle = representativeTitle;
     }
 
     public String getAddress() {
