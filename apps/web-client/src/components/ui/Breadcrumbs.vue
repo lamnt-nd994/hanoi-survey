@@ -1,7 +1,7 @@
 <template>
   <nav aria-label="Breadcrumb" class="border-b border-neutral-200/80 bg-white/95">
-    <div class="container-shell py-4">
-      <ol class="flex flex-wrap items-center gap-2 text-sm text-neutral-500">
+    <div class="container-shell flex min-h-[3.75rem] items-center py-4">
+      <ol class="flex min-h-[1.5rem] flex-wrap items-center gap-2 text-sm text-neutral-500">
         <li v-for="(item, index) in items" :key="`${item.label}-${index}`" class="flex items-center gap-2">
           <router-link
             v-if="item.to && !item.current"
@@ -14,6 +14,7 @@
           <span v-if="index < items.length - 1" class="text-neutral-300">/</span>
         </li>
       </ol>
+      <div v-if="isLoading" class="sr-only">Loading breadcrumb</div>
     </div>
   </nav>
 </template>
@@ -27,5 +28,6 @@ defineProps<{
     to?: RouteLocationRaw
     current?: boolean
   }>
+  isLoading?: boolean
 }>()
 </script>

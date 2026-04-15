@@ -7,16 +7,16 @@
         </h1>
       </div>
 
-      <div v-if="loading" class="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+      <div v-if="loading && !rendersStableRouteContent" class="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
         <Skeleton v-for="index in 6" :key="index" class="h-40 rounded-2xl" />
       </div>
 
-      <Card v-else-if="errorMessage" class="p-8 text-rose-600">{{ errorMessage }}</Card>
+      <div v-if="errorMessage && !loading" class="mb-8 rounded-2xl border border-rose-200 bg-rose-50 px-5 py-4 text-sm text-rose-700">{{ errorMessage }}</div>
 
-      <div v-else-if="currentRouteName === 'services'" class="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+      <div v-if="currentRouteName === 'services'" class="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
         <router-link
-          v-for="(item, index) in serviceItems"
-          :key="item.slug"
+          v-for="(item, index) in serviceCards"
+          :key="item.slug || `service-card-${index}`"
           :to="item.slug ? { name: 'service-detail', params: { slug: item.slug } } : { name: 'services' }"
           class="group flex h-full flex-col rounded-lg border border-neutral-200 bg-white p-5 shadow-sm transition-colors duration-200 hover:border-accent-green/50"
         >
@@ -26,9 +26,9 @@
               <IconRenderer :icon="item.icon || 'settings-2'" class="h-5 w-5" />
             </span>
           </div>
-          <h3 class="mt-4 font-heading text-xl font-bold leading-tight text-primary-navy">{{ item.title || item }}</h3>
-          <p class="mt-3 text-sm leading-7 text-neutral-600">{{ item.overview || 'Dịch vụ triển khai theo tiêu chuẩn hiện hành, phù hợp hồ sơ thiết kế, thi công và kiểm định.' }}</p>
-          <span class="mt-auto inline-flex items-center gap-2 pt-5 text-sm font-semibold text-primary-navy">
+          <h3 class="mt-4 min-h-[3.5rem] font-heading text-xl font-bold leading-tight text-primary-navy">{{ item.title || item }}</h3>
+          <p class="mt-3 min-h-[7rem] text-sm leading-7 text-neutral-600">{{ item.overview || 'Dịch vụ triển khai theo tiêu chuẩn hiện hành, phù hợp hồ sơ thiết kế, thi công và kiểm định.' }}</p>
+          <span class="mt-auto inline-flex min-h-[2rem] items-center gap-2 pt-5 text-sm font-semibold text-primary-navy">
             Xem chi tiết
             <svg class="h-4 w-4 text-accent-green" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
@@ -40,7 +40,7 @@
       <div v-else-if="isProjectRoute" class="space-y-8">
         <div class="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
         <router-link
-          v-for="item in paginatedProjectItems"
+          v-for="(item, index) in projectCards"
           :key="item.slug"
           :to="item.slug ? { name: 'project-detail', params: { slug: item.slug } } : { name: 'projects' }"
           class="group flex h-full flex-col overflow-hidden rounded-lg border border-l-4 border-neutral-200 border-l-primary-navy bg-white shadow-sm transition-colors duration-200 hover:border-accent-green/50 hover:border-l-accent-green"
@@ -62,7 +62,7 @@
           <div class="flex flex-1 flex-col p-5">
             <div class="min-h-[8.5rem]">
               <div v-if="item.categoryName" class="text-[11px] font-semibold uppercase tracking-[0.14em] text-accent-green">{{ item.categoryName }}</div>
-              <h3 class="mt-2 font-heading text-xl font-bold leading-tight text-primary-navy transition-colors">{{ item.title }}</h3>
+              <h3 class="mt-2 min-h-[3.5rem] font-heading text-xl font-bold leading-tight text-primary-navy transition-colors">{{ item.title }}</h3>
 
               <div class="mt-5 divide-y divide-neutral-100 border-y border-neutral-100 text-sm">
                 <div class="grid grid-cols-[5.5rem_minmax(0,1fr)] gap-3 py-3">
@@ -73,9 +73,9 @@
                   <span class="text-xs leading-6 font-semibold uppercase tracking-[0.12em] text-neutral-400">Quy mô</span>
                   <span class="font-medium leading-6 text-neutral-700">{{ item.scaleText || 'Đang cập nhật' }}</span>
                 </div>
-                <div v-if="item.clientName" class="grid grid-cols-[5.5rem_minmax(0,1fr)] gap-3 py-3">
+                <div class="grid min-h-[4rem] grid-cols-[5.5rem_minmax(0,1fr)] gap-3 py-3">
                   <span class="text-xs leading-6 font-semibold uppercase tracking-[0.12em] text-neutral-400">Chủ đầu tư</span>
-                  <span class="font-medium leading-6 text-neutral-700">{{ item.clientName }}</span>
+                  <span class="font-medium leading-6 text-neutral-700">{{ item.clientName || 'Đang cập nhật' }}</span>
                 </div>
               </div>
             </div>
@@ -98,21 +98,21 @@
       </div>
 
       <div v-else-if="isNewsRoute" class="space-y-8">
-        <Card v-if="!postItems.length" class="p-8 text-center text-neutral-500">
+        <Card v-if="false && !postItems.length" class="p-8 text-center text-neutral-500">
           Chưa có bài viết nào.
         </Card>
 
         <template v-else>
           <router-link
-            :to="postItems[0].slug ? { name: 'news-detail', params: { slug: postItems[0].slug } } : { name: 'news' }"
+            :to="newsHeroCard.slug ? { name: 'news-detail', params: { slug: newsHeroCard.slug } } : { name: 'news' }"
             class="group block overflow-hidden rounded-lg border border-l-4 border-neutral-200 border-l-primary-navy bg-white shadow-sm transition-colors duration-200 hover:border-accent-green/50 hover:border-l-accent-green"
           >
             <div class="grid md:grid-cols-[280px_minmax(0,1fr)]">
               <div class="relative h-48 overflow-hidden border-b border-neutral-200 bg-gradient-to-br from-primary-navy to-primary-light md:h-full md:min-h-[13rem] md:border-b-0 md:border-r">
                 <img
-                  v-if="postItems[0].coverImagePath"
-                  :src="resolveMediaUrl(postItems[0].coverImagePath)"
-                  :alt="postItems[0].title"
+                  v-if="newsHeroCard.coverImagePath"
+                  :src="resolveMediaUrl(newsHeroCard.coverImagePath)"
+                  :alt="newsHeroCard.title"
                   width="320"
                   height="240"
                   loading="eager"
@@ -123,13 +123,13 @@
                 />
               </div>
               <div class="flex flex-1 flex-col justify-center p-5 md:p-7">
-                <div class="flex flex-wrap items-center gap-3 text-xs font-semibold uppercase tracking-[0.12em] text-neutral-400">
-                  <span v-if="postItems[0].categoryName" class="text-accent-green">{{ postItems[0].categoryName }}</span>
-                  <span v-if="postItems[0].categoryName && postItems[0].publishedAt" class="h-1 w-1 rounded-full bg-neutral-300" />
-                  <span v-if="postItems[0].publishedAt">{{ formatDate(postItems[0].publishedAt) }}</span>
+                <div class="flex min-h-[1rem] flex-wrap items-center gap-3 text-xs font-semibold uppercase tracking-[0.12em] text-neutral-400">
+                  <span class="text-accent-green">{{ newsHeroCard.categoryName || 'Tin tức' }}</span>
+                  <span class="h-1 w-1 rounded-full bg-neutral-300" />
+                  <span>{{ newsHeroCard.publishedAt ? formatDate(newsHeroCard.publishedAt) : 'Đang cập nhật' }}</span>
                 </div>
-                <h2 class="mt-2 font-heading text-xl font-bold leading-snug text-primary-navy transition-colors md:text-2xl">{{ postItems[0].title }}</h2>
-                <p v-if="postItems[0].excerpt" class="mt-3 text-sm leading-7 text-neutral-600 line-clamp-2">{{ postItems[0].excerpt }}</p>
+                <h2 class="mt-2 min-h-[4.5rem] font-heading text-xl font-bold leading-snug text-primary-navy transition-colors md:text-2xl">{{ newsHeroCard.title }}</h2>
+                <p class="mt-3 min-h-[3.5rem] text-sm leading-7 text-neutral-600 line-clamp-2">{{ newsHeroCard.excerpt || 'Nội dung bài viết đang được cập nhật theo hệ thống tin tức.' }}</p>
                 <span class="mt-5 text-sm font-semibold text-primary-navy transition-colors">Đọc bản tin</span>
               </div>
             </div>
@@ -137,8 +137,8 @@
 
           <div class="divide-y divide-neutral-200 border-y border-neutral-200 bg-white">
             <router-link
-              v-for="item in postItems.slice(1)"
-              :key="item.slug"
+              v-for="(item, index) in newsListCards"
+              :key="item.slug || `news-card-${index}`"
               :to="item.slug ? { name: 'news-detail', params: { slug: item.slug } } : { name: 'news' }"
               class="group flex gap-4 px-2 py-5 transition-colors hover:bg-neutral-50 md:px-4"
             >
@@ -159,11 +159,11 @@
                 </div>
               </div>
               <div class="flex min-w-0 flex-1 flex-col justify-center">
-                <h3 class="font-heading text-base font-semibold leading-snug text-primary-navy transition-colors">{{ item.title }}</h3>
-                <div class="mt-2 flex flex-wrap items-center gap-3 text-[11px] font-semibold uppercase tracking-[0.1em] text-neutral-400">
-                  <span v-if="item.categoryName" class="text-accent-green">{{ item.categoryName }}</span>
-                  <span v-if="item.categoryName && item.publishedAt">&middot;</span>
-                  <span v-if="item.publishedAt">{{ formatDate(item.publishedAt) }}</span>
+                <h3 class="min-h-[2.5rem] font-heading text-base font-semibold leading-snug text-primary-navy transition-colors">{{ item.title }}</h3>
+                <div class="mt-2 flex min-h-[1rem] flex-wrap items-center gap-3 text-[11px] font-semibold uppercase tracking-[0.1em] text-neutral-400">
+                  <span class="text-accent-green">{{ item.categoryName || 'Tin tức' }}</span>
+                  <span>&middot;</span>
+                  <span>{{ item.publishedAt ? formatDate(item.publishedAt) : 'Đang cập nhật' }}</span>
                 </div>
               </div>
               <svg class="hidden h-4 w-4 shrink-0 self-center text-neutral-300 transition-colors sm:block" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
@@ -184,8 +184,8 @@
       <div v-else-if="currentRouteName === 'equipment'" class="space-y-12">
         <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           <router-link
-            v-for="(category, index) in sortedEquipmentCategories"
-            :key="category.id"
+            v-for="(category, index) in equipmentCards"
+            :key="category.id ?? `equipment-card-${index}`"
             :to="category.slug ? { name: 'equipment-detail', params: { slug: category.slug } } : { name: 'equipment' }"
             class="group flex h-full flex-col rounded-lg border border-neutral-200 bg-white p-5 shadow-sm transition-colors duration-200 hover:border-accent-green/50"
           >
@@ -195,11 +195,11 @@
                 <IconRenderer :icon="category.icon || 'settings-2'" class="h-5 w-5" />
               </span>
             </div>
-            <h3 class="mt-4 font-heading text-xl font-bold leading-tight text-primary-navy">{{ category.name }}</h3>
+            <h3 class="mt-4 min-h-[3.5rem] font-heading text-xl font-bold leading-tight text-primary-navy">{{ category.name }}</h3>
             <div class="mt-4 inline-flex w-fit items-center rounded-md border border-neutral-200 bg-neutral-50 px-3 py-2 text-sm font-medium text-neutral-700">
-              {{ publicContentStore.equipments.filter((e) => e.categoryId === category.id).length }} thiết bị
+              {{ category.countText }}
             </div>
-            <span class="mt-auto inline-flex items-center gap-2 pt-5 text-sm font-semibold text-primary-navy">
+            <span class="mt-auto inline-flex min-h-[2rem] items-center gap-2 pt-5 text-sm font-semibold text-primary-navy">
               Xem danh mục
               <svg class="h-4 w-4 text-accent-green" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
@@ -220,27 +220,27 @@
               </p>
 
               <div class="mt-8 space-y-4 border-t border-white/10 pt-6">
-                <a v-if="mergedContactInfo.phone" :href="`tel:${mergedContactInfo.phone}`" class="group flex items-center justify-between gap-4 rounded-2xl border border-white/10 bg-white/5 px-5 py-4 transition-colors hover:bg-white/10">
+                <a :href="mergedContactInfo.phone ? `tel:${mergedContactInfo.phone}` : undefined" class="group flex min-h-[5.5rem] items-center justify-between gap-4 rounded-2xl border border-white/10 bg-white/5 px-5 py-4 transition-colors hover:bg-white/10">
                   <div class="flex items-center gap-4">
                     <span class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-accent-green text-white">
                       <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" /></svg>
                     </span>
                     <div>
                       <div class="text-[11px] font-semibold uppercase tracking-[0.16em] text-white/55">Hotline</div>
-                      <div class="mt-1 text-lg font-semibold">{{ mergedContactInfo.phone }}</div>
+                      <div class="mt-1 text-lg font-semibold">{{ mergedContactInfo.phone || 'Đang cập nhật' }}</div>
                     </div>
                   </div>
                   <span class="text-white/35 transition-transform group-hover:translate-x-1">→</span>
                 </a>
 
-                <a v-if="mergedContactInfo.email" :href="`mailto:${mergedContactInfo.email}`" class="group flex items-center justify-between gap-4 rounded-2xl border border-white/10 bg-white/5 px-5 py-4 transition-colors hover:bg-white/10">
+                <a :href="mergedContactInfo.email ? `mailto:${mergedContactInfo.email}` : undefined" class="group flex min-h-[5.5rem] items-center justify-between gap-4 rounded-2xl border border-white/10 bg-white/5 px-5 py-4 transition-colors hover:bg-white/10">
                   <div class="flex items-center gap-4">
                     <span class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-white/10 text-white">
                       <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
                     </span>
                     <div>
                       <div class="text-[11px] font-semibold uppercase tracking-[0.16em] text-white/55">Email</div>
-                      <div class="mt-1 text-base font-medium">{{ mergedContactInfo.email }}</div>
+                      <div class="mt-1 text-base font-medium">{{ mergedContactInfo.email || 'Đang cập nhật' }}</div>
                     </div>
                   </div>
                   <span class="text-white/35 transition-transform group-hover:translate-x-1">→</span>
@@ -248,15 +248,15 @@
               </div>
 
               <div class="mt-8 grid gap-3 sm:grid-cols-3 lg:grid-cols-1 xl:grid-cols-3">
-                <div class="rounded-2xl border border-white/10 px-4 py-4">
+                <div class="min-h-[7rem] rounded-2xl border border-white/10 px-4 py-4">
                   <div class="text-[11px] font-semibold uppercase tracking-[0.16em] text-white/50">Phạm vi</div>
                   <div class="mt-2 text-sm leading-6 text-white/88">Địa chất, địa hình, thủy văn, quan trắc</div>
                 </div>
-                <div class="rounded-2xl border border-white/10 px-4 py-4">
+                <div class="min-h-[7rem] rounded-2xl border border-white/10 px-4 py-4">
                   <div class="text-[11px] font-semibold uppercase tracking-[0.16em] text-white/50">Phản hồi</div>
                   <div class="mt-2 text-sm leading-6 text-white/88">Ưu tiên xử lý nhanh qua điện thoại và email</div>
                 </div>
-                <div class="rounded-2xl border border-white/10 px-4 py-4">
+                <div class="min-h-[7rem] rounded-2xl border border-white/10 px-4 py-4">
                   <div class="text-[11px] font-semibold uppercase tracking-[0.16em] text-white/50">Thời gian</div>
                   <div class="mt-2 text-sm leading-6 text-white/88">{{ mergedContactInfo.workingHours || 'Theo lịch làm việc của công ty' }}</div>
                 </div>
@@ -264,9 +264,9 @@
             </div>
 
             <div class="px-6 py-8 lg:px-8 lg:py-10">
-              <div class="rounded-[1.7rem] border border-neutral-200 bg-neutral-50 px-5 py-5">
+              <div class="min-h-[11rem] rounded-[1.7rem] border border-neutral-200 bg-neutral-50 px-5 py-5">
                 <div class="text-[11px] font-semibold uppercase tracking-[0.16em] text-neutral-400">Văn phòng giao dịch</div>
-                <div class="mt-3 text-xl font-semibold leading-8 text-primary-navy">{{ mergedContactInfo.officeAddress || mergedContactInfo.address }}</div>
+                <div class="mt-3 min-h-[4rem] text-xl font-semibold leading-8 text-primary-navy">{{ mergedContactInfo.officeAddress || mergedContactInfo.address || 'Đang cập nhật địa chỉ văn phòng giao dịch' }}</div>
                 <div class="mt-5 text-sm leading-7 text-neutral-600">
                   Vui lòng liên hệ trước để chúng tôi bố trí đúng bộ phận kỹ thuật hoặc kinh doanh phụ trách đầu việc khảo sát của bạn.
                 </div>
@@ -295,7 +295,7 @@
             </svg>
           </div>
           <h3 class="font-heading text-xl font-bold text-primary-navy">{{ item.title }}</h3>
-          <div class="mt-3 text-sm leading-7 text-neutral-600" v-html="item.body"></div>
+          <div class="mt-3 min-h-[7rem] text-sm leading-7 text-neutral-600" v-html="item.body"></div>
         </article>
       </div>
 
@@ -327,6 +327,85 @@ type IntroCard = {
   title: string
   body: string
 }
+
+type ServiceCard = {
+  slug: string
+  title: string
+  overview: string
+  icon?: string
+}
+
+type ProjectCard = {
+  slug: string
+  title: string
+  categoryName?: string | null
+  coverImagePath?: string | null
+  location?: string | null
+  scaleText?: string | null
+  clientName?: string | null
+}
+
+type NewsCard = {
+  slug: string
+  title: string
+  categoryName?: string | null
+  coverImagePath?: string | null
+  publishedAt?: string | null
+  excerpt?: string | null
+}
+
+type EquipmentCard = {
+  id?: number | null
+  slug: string
+  name: string
+  icon?: string | null
+  countText: string
+}
+
+const FALLBACK_SERVICE_CARDS: ServiceCard[] = [
+  { slug: '', title: 'Khảo sát địa hình', overview: 'Dịch vụ triển khai theo tiêu chuẩn hiện hành, phù hợp hồ sơ thiết kế, thi công và kiểm định.', icon: 'map' },
+  { slug: '', title: 'Khảo sát địa chất', overview: 'Thu thập và phân tích dữ liệu nền móng cho công trình dân dụng, công nghiệp và hạ tầng kỹ thuật.', icon: 'mountain' },
+  { slug: '', title: 'Khảo sát thủy văn', overview: 'Đánh giá hiện trạng dòng chảy, mực nước và các yếu tố ảnh hưởng đến giải pháp thiết kế.', icon: 'droplets' },
+  { slug: '', title: 'Quan trắc công trình', overview: 'Theo dõi biến động địa kỹ thuật và trạng thái công trình trong suốt quá trình thi công, vận hành.', icon: 'activity' },
+  { slug: '', title: 'Thí nghiệm xây dựng', overview: 'Thực hiện thí nghiệm vật liệu và kiểm định phục vụ thiết kế, nghiệm thu và kiểm soát chất lượng.', icon: 'flask-conical' },
+  { slug: '', title: 'Tư vấn hiện trường', overview: 'Phối hợp kỹ thuật nhanh với chủ đầu tư và đơn vị thi công để xử lý yêu cầu khảo sát thực tế.', icon: 'briefcase' },
+]
+
+const FALLBACK_PROJECT_CARDS: ProjectCard[] = Array.from({ length: 6 }, (_, index) => ({
+  slug: '',
+  title: `Dá»± Ã¡n kháº£o sÃ¡t ${index + 1}`,
+  categoryName: 'Dá»± Ã¡n tiÃªu biá»ƒu',
+  coverImagePath: '',
+  location: 'Äang cáº­p nháº­t',
+  scaleText: 'Äang cáº­p nháº­t',
+  clientName: 'Äang cáº­p nháº­t',
+}))
+
+const FALLBACK_NEWS_HERO_CARD: NewsCard = {
+  slug: '',
+  title: 'Tin tá»©c cáº­p nháº­t tá»« há»‡ thá»‘ng ná»™i dung',
+  categoryName: 'Tin tá»©c',
+  coverImagePath: '',
+  publishedAt: '',
+  excerpt: 'Ná»™i dung báº£n tin sáº½ Ä‘Æ°á»£c hiá»ƒn thá»‹ á»•n Ä‘á»‹nh ngay khi dá»¯ liá»‡u Ä‘Æ°á»£c táº£i xong.',
+}
+
+const FALLBACK_NEWS_LIST_CARDS: NewsCard[] = Array.from({ length: 5 }, (_, index) => ({
+  slug: '',
+  title: `Báº£n tin kháº£o sÃ¡t ${index + 1}`,
+  categoryName: 'Tin tá»©c',
+  coverImagePath: '',
+  publishedAt: '',
+  excerpt: '',
+}))
+
+const FALLBACK_EQUIPMENT_CARDS: EquipmentCard[] = Array.from({ length: 6 }, (_, index) => ({
+  id: null,
+  slug: '',
+  name: `Danh má»¥c thiáº¿t bá»‹ ${index + 1}`,
+  icon: 'settings-2',
+  countText: '0 thiáº¿t bá»‹',
+}))
 
 const $route = useRoute()
 const router = useRouter()
@@ -361,6 +440,15 @@ const pageData: Record<string, StaticPageConfig> = {
 const currentRouteName = computed(() => $route.name as string || ROUTE_NAMES.about)
 const isProjectRoute = computed(() => currentRouteName.value === ROUTE_NAMES.projects || currentRouteName.value === ROUTE_NAMES.projectCategory)
 const isNewsRoute = computed(() => currentRouteName.value === ROUTE_NAMES.news || currentRouteName.value === ROUTE_NAMES.newsCategory)
+const rendersStableRouteContent = computed(() => [
+  ROUTE_NAMES.services,
+  ROUTE_NAMES.projects,
+  ROUTE_NAMES.projectCategory,
+  ROUTE_NAMES.news,
+  ROUTE_NAMES.newsCategory,
+  ROUTE_NAMES.equipment,
+  ROUTE_NAMES.contact,
+].includes(currentRouteName.value as (typeof ROUTE_NAMES)[keyof Pick<typeof ROUTE_NAMES, 'services' | 'projects' | 'projectCategory' | 'news' | 'newsCategory' | 'equipment' | 'contact'>]))
 const currentData = computed(() => pageData[currentRouteName.value] || pageData[ROUTE_NAMES.about])
 const selectedCategorySlug = computed(() => {
   const categoryParam = $route.params.category
@@ -381,6 +469,65 @@ const items = computed(() => currentData.value.items)
 const introItems = computed<IntroCard[]>(() => [])
 const serviceItems = computed(() => {
   return publicContentStore.services
+})
+const serviceCards = computed<ServiceCard[]>(() => {
+  if (serviceItems.value.length) {
+    return serviceItems.value.map((item) => ({
+      slug: item.slug || '',
+      title: item.title || '',
+      overview: item.overview || '',
+      icon: item.icon || 'settings-2',
+    }))
+  }
+
+  if (currentRouteName.value === ROUTE_NAMES.services) {
+    return FALLBACK_SERVICE_CARDS
+  }
+
+  return []
+})
+const projectCards = computed<ProjectCard[]>(() => {
+  if (paginatedProjectItems.value.length) {
+    return paginatedProjectItems.value.map((item) => ({
+      slug: item.slug || '',
+      title: item.title || '',
+      categoryName: item.categoryName || '',
+      coverImagePath: item.coverImagePath || '',
+      location: item.location || '',
+      scaleText: item.scaleText || '',
+      clientName: item.clientName || '',
+    }))
+  }
+  if (isProjectRoute.value) return FALLBACK_PROJECT_CARDS
+  return []
+})
+const newsHeroCard = computed<NewsCard>(() => {
+  const first = postItems.value[0]
+  if (first) {
+    return {
+      slug: first.slug || '',
+      title: first.title || '',
+      categoryName: first.categoryName || '',
+      coverImagePath: first.coverImagePath || '',
+      publishedAt: first.publishedAt || '',
+      excerpt: first.excerpt || '',
+    }
+  }
+  return FALLBACK_NEWS_HERO_CARD
+})
+const newsListCards = computed<NewsCard[]>(() => {
+  if (postItems.value.length > 1) {
+    return postItems.value.slice(1).map((item) => ({
+      slug: item.slug || '',
+      title: item.title || '',
+      categoryName: item.categoryName || '',
+      coverImagePath: item.coverImagePath || '',
+      publishedAt: item.publishedAt || '',
+      excerpt: item.excerpt || '',
+    }))
+  }
+  if (isNewsRoute.value) return FALLBACK_NEWS_LIST_CARDS
+  return []
 })
 const projectItems = computed(() => {
   if (!isProjectRoute.value || !selectedProjectCategory.value) return publicContentStore.projects
@@ -439,6 +586,19 @@ const equipmentItems = computed(() => {
   return publicContentStore.equipments.filter((item) => item.categoryId === selectedEquipmentCategory.value?.id)
 })
 const sortedEquipmentCategories = computed(() => [...publicContentStore.equipmentCategories].sort((a, b) => a.sortOrder - b.sortOrder))
+const equipmentCards = computed<EquipmentCard[]>(() => {
+  if (sortedEquipmentCategories.value.length) {
+    return sortedEquipmentCategories.value.map((category) => ({
+      id: category.id,
+      slug: category.slug || '',
+      name: category.name || '',
+      icon: category.icon || 'settings-2',
+      countText: `${publicContentStore.equipments.filter((e) => e.categoryId === category.id).length} thiáº¿t bá»‹`,
+    }))
+  }
+  if (currentRouteName.value === ROUTE_NAMES.equipment) return FALLBACK_EQUIPMENT_CARDS
+  return []
+})
 const equipmentGroups = computed(() => sortedEquipmentCategories.value
   .map((category) => ({
     id: category.id,
@@ -580,3 +740,4 @@ async function loadRemoteItems() {
 
 watch(() => $route.fullPath, loadRemoteItems, { immediate: true })
 </script>
+
