@@ -74,7 +74,7 @@
 
     <div class="border-t border-white/10 px-4 py-6">
       <div class="container-shell text-center text-sm text-neutral-500">
-        <p>&copy; 2024 {{ siteName }}. All rights reserved.</p>
+        <p>&copy; 2026 HANOI CSC. All rights reserved.</p>
       </div>
     </div>
   </footer>
