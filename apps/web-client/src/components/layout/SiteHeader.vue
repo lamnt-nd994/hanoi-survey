@@ -1,8 +1,8 @@
 <template>
   <header class="sticky top-0 z-50 border-b border-neutral-200 bg-white/95 backdrop-blur-md">
     <div class="container-shell">
-      <div class="grid min-h-[5.5rem] grid-cols-[minmax(0,1fr)_auto] items-center gap-4 py-3 md:gap-6 lg:min-h-[6.5rem] lg:grid-cols-[22rem_15rem_auto] xl:grid-cols-[26rem_15rem_auto]">
-        <router-link :to="{ name: 'home' }" class="flex min-w-0 md:w-[22rem] lg:w-[22rem] xl:w-[26rem] cursor-pointer items-center gap-4">
+      <div class="grid min-h-[5.5rem] grid-cols-[minmax(0,1fr)_auto] items-center gap-4 py-3 md:gap-6 lg:min-h-[6.5rem]">
+        <router-link :to="{ name: 'home' }" class="flex min-w-0 cursor-pointer items-center">
           <div v-if="logoPath" class="flex h-16 w-[9.75rem] shrink-0 items-center justify-center md:h-20 md:w-[10.5rem]">
             <img :src="resolveMediaUrl(logoPath)" :alt="siteName" width="156" height="156" loading="eager" decoding="async" class="max-h-full w-full object-contain" />
           </div>
@@ -10,7 +10,7 @@
             HS
           </div>
           <div class="hidden min-w-0 flex-1 md:block md:min-h-[3.5rem] lg:min-h-[3.75rem]">
-            <div class="line-clamp-2 min-h-[2.5rem] font-heading text-sm font-extrabold leading-tight text-primary-navy lg:text-xl">
+            <div class="min-h-[2.5rem] font-heading text-sm font-extrabold leading-tight text-primary-navy lg:text-xl">
               {{ siteName }}
             </div>
             <div class="mt-1 min-h-[1rem] text-[11px] font-semibold tracking-[0.02em] text-neutral-500 lg:text-xs">
