@@ -4,7 +4,7 @@
       <div class="grid gap-8 lg:grid-cols-[1.05fr_0.95fr] lg:items-center">
         <div class="overflow-hidden rounded-[2rem] border border-neutral-200 bg-neutral-100 shadow-sm">
           <MediaImage v-if="imagePath" :src="imagePath" :alt="siteName" :width="760" :height="380" class="h-[380px] w-full object-cover" />
-          <div v-else class="flex h-[320px] items-center justify-center bg-[linear-gradient(135deg,#16365f_0%,#264d7e_48%,#d6dde6_48%,#eef2f6_100%)] px-10 text-center text-white">
+          <div v-else class="flex h-[380px] items-center justify-center bg-[linear-gradient(135deg,#16365f_0%,#264d7e_48%,#d6dde6_48%,#eef2f6_100%)] px-10 text-center text-white">
             <div>
               <div class="text-xs font-semibold uppercase tracking-[0.22em] text-white/70">Hanoi Survey</div>
               <div class="mt-4 font-heading text-3xl font-bold leading-tight">Khảo sát chính xác cho nền móng và hạ tầng</div>

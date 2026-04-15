@@ -24,11 +24,13 @@
       :is-projects-nav-item="isProjectsNavItem"
       :is-equipments-nav-item="isEquipmentsNavItem"
       :is-news-nav-item="isNewsNavItem"
+      :is-loading="!layoutReady"
+      :nav-ready="publicMenusStore.loaded"
       @toggle-mobile-menu="isMobileMenuOpen = !isMobileMenuOpen"
       @close-mobile-menu="isMobileMenuOpen = false"
     />
 
-    <Breadcrumbs v-if="shouldShowBreadcrumb" :items="breadcrumbItems" />
+    <Breadcrumbs v-if="shouldShowBreadcrumb" :items="breadcrumbItems" :is-loading="!layoutReady" />
 
     <main>
       <router-view />
@@ -50,6 +52,7 @@
       :facebook-url="mergedContactInfo.facebookUrl"
       :youtube-url="mergedContactInfo.youtubeUrl"
       :linkedin-url="mergedContactInfo.linkedinUrl"
+      :is-loading="!layoutReady"
     />
 
     <FloatingCTA />
@@ -57,7 +60,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, ref, watch } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useRoute, type RouteLocationRaw } from 'vue-router'
 import FloatingCTA from '../FloatingCTA.vue'
@@ -81,6 +84,7 @@ const { mainMenuItems: navItems } = storeToRefs(publicMenusStore)
 const { services, projectCategories, postCategories, equipmentCategories } = storeToRefs(publicContentStore)
 const breadcrumbDetailLabel = ref('')
 const breadcrumbLabelCache = new Map<string, string>()
+const layoutReady = ref(false)
 
 const companyName = computed(() => companyNameEn.value || shortName.value || 'Hanoi Construction Survey Consultant Joint Stock Company')
 const shouldShowBreadcrumb = computed(() => route.name !== ROUTE_NAMES.home)
@@ -217,15 +221,15 @@ function isNewsNavItem(item: PublicMenuItem) {
   return item.resolvedUrl === '/tin-tuc' || /tin tức|tin tuc|kiến thức|kien thuc/i.test(item.title)
 }
 
-onMounted(async () => {
-  await Promise.all([
-    siteSettingsStore.ensureLoaded(),
-    publicMenusStore.loadMainMenu(),
-    publicContentStore.loadServices(),
-    publicContentStore.loadProjectCategories(),
-    publicContentStore.loadPostCategories(),
-    publicContentStore.loadEquipmentCategories(),
-  ])
+void Promise.allSettled([
+  siteSettingsStore.ensureLoaded(),
+  publicMenusStore.loadMainMenu(),
+  publicContentStore.loadServices(),
+  publicContentStore.loadProjectCategories(),
+  publicContentStore.loadPostCategories(),
+  publicContentStore.loadEquipmentCategories(),
+]).finally(() => {
+  layoutReady.value = true
 })
 
 watch(() => route.fullPath, () => {

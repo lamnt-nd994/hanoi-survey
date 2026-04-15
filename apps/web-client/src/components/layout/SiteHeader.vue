@@ -1,40 +1,40 @@
 <template>
   <header class="sticky top-0 z-50 border-b border-neutral-200 bg-white/95 backdrop-blur-md">
     <div class="container-shell">
-      <div class="flex items-center justify-between gap-6">
-        <router-link :to="{ name: 'home' }" class="flex min-w-0 cursor-pointer items-center">
-          <div v-if="logoPath" class="flex shrink-0 items-center justify-center">
-            <img :src="resolveMediaUrl(logoPath)" :alt="siteName" width="156" height="156" loading="eager" decoding="async" class="max-h-24 object-contain" />
+      <div class="grid min-h-[5.5rem] grid-cols-[minmax(0,1fr)_auto] items-center gap-4 py-3 md:gap-6 lg:min-h-[6.5rem] lg:grid-cols-[22rem_15rem_auto] xl:grid-cols-[26rem_15rem_auto]">
+        <router-link :to="{ name: 'home' }" class="flex min-w-0 md:w-[22rem] lg:w-[22rem] xl:w-[26rem] cursor-pointer items-center gap-4">
+          <div v-if="logoPath" class="flex h-16 w-[9.75rem] shrink-0 items-center justify-center md:h-20 md:w-[10.5rem]">
+            <img :src="resolveMediaUrl(logoPath)" :alt="siteName" width="156" height="156" loading="eager" decoding="async" class="max-h-full w-full object-contain" />
           </div>
-          <div v-else class="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-primary-navy text-sm font-bold text-white shadow-lg">
+          <div v-else class="flex h-14 w-14 shrink-0 items-center justify-center rounded-lg bg-primary-navy text-sm font-bold text-white shadow-lg md:h-16 md:w-16">
             HS
           </div>
-          <div class="hidden min-w-0 md:block">
-            <div class="line-clamp-2 font-heading text-sm font-extrabold leading-tight text-primary-navy lg:text-xl">
+          <div class="hidden min-w-0 flex-1 md:block md:min-h-[3.5rem] lg:min-h-[3.75rem]">
+            <div class="line-clamp-2 min-h-[2.5rem] font-heading text-sm font-extrabold leading-tight text-primary-navy lg:text-xl">
               {{ siteName }}
             </div>
-            <div class="mt-1 text-[11px] font-semibold tracking-[0.02em] text-neutral-500 lg:text-xs">
-              {{ companyName }}
+            <div class="mt-1 min-h-[1rem] text-[11px] font-semibold tracking-[0.02em] text-neutral-500 lg:text-xs">
+              <span v-if="companyName">{{ companyName }}</span>
+              <span v-else-if="isLoading" class="block h-3 w-48 rounded bg-neutral-200/80"></span>
             </div>
-<!--            <div v-if="address" class="mt-1 max-w-[28rem] text-xs leading-5 text-neutral-500">-->
-<!--              {{ address }}-->
-<!--            </div>-->
           </div>
         </router-link>
 
-        <div class="hidden lg:flex lg:items-center">
-          <div class="text-right">
-            <div v-if="email" class="flex items-center justify-end gap-2 text-sm text-neutral-500">
+        <div class="hidden lg:flex lg:min-h-[3.75rem] lg:min-w-[15rem] lg:items-center lg:justify-end">
+          <div class="w-[15rem] text-right">
+            <div class="flex min-h-[1.25rem] items-center justify-end gap-2 text-sm text-neutral-500">
               <AppIcon icon="mail" class="h-4 w-4 text-neutral-400" />
-              <a :href="`mailto:${email}`" class="cursor-pointer transition-colors hover:text-primary-navy">
+              <a v-if="email" :href="`mailto:${email}`" class="cursor-pointer transition-colors hover:text-primary-navy">
                 {{ email }}
               </a>
+              <span v-else-if="isLoading" class="block h-3 w-40 rounded bg-neutral-200/80"></span>
             </div>
-            <div class="mt-1 flex items-center justify-end gap-3 text-primary-navy">
+            <div class="mt-1 flex min-h-[2rem] items-center justify-end gap-3 text-primary-navy">
               <AppIcon icon="phone" class="h-6 w-6 animate-[phone-call_1.2s_ease-in-out_infinite]" :stroke-width="2.25" />
               <a v-if="phone" :href="`tel:${phone}`" class="cursor-pointer rounded-full px-2 py-1 text-lg font-extrabold transition-colors animate-[phone-highlight_1.4s_ease-in-out_infinite] hover:text-red-600 lg:text-xl">
                 <span>{{ phone }}</span>
               </a>
+              <span v-else-if="isLoading" class="block h-7 w-36 rounded-full bg-neutral-200/80"></span>
             </div>
           </div>
         </div>
@@ -61,6 +61,8 @@
       :is-projects-nav-item="isProjectsNavItem"
       :is-equipments-nav-item="isEquipmentsNavItem"
       :is-news-nav-item="isNewsNavItem"
+      :is-loading="isLoading"
+      :nav-ready="navReady"
     />
 
     <SiteMobileNav
@@ -82,6 +84,7 @@
       :is-projects-nav-item="isProjectsNavItem"
       :is-equipments-nav-item="isEquipmentsNavItem"
       :is-news-nav-item="isNewsNavItem"
+      :is-loading="isLoading"
       @close="emit('closeMobileMenu')"
     />
   </header>
@@ -119,6 +122,8 @@ defineProps<{
   isProjectsNavItem: (item: PublicMenuItem) => boolean
   isEquipmentsNavItem: (item: PublicMenuItem) => boolean
   isNewsNavItem: (item: PublicMenuItem) => boolean
+  isLoading?: boolean
+  navReady?: boolean
 }>()
 
 const emit = defineEmits<{

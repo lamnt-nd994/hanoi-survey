@@ -1,13 +1,7 @@
 <template>
   <div>
     <section class="container-shell py-16 md:py-20">
-      <div v-if="loadingState" class="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
-        <Skeleton v-for="index in 6" :key="index" class="h-40 rounded-2xl" />
-      </div>
-
-      <Card v-else-if="errorMessage" class="p-8 text-rose-600">{{ errorMessage }}</Card>
-
-      <template v-else>
+      <div v-if="errorMessage && !loadingState" class="mb-8 rounded-2xl border border-rose-200 bg-rose-50 px-5 py-4 text-sm text-rose-700">{{ errorMessage }}</div>
         <section class="py-2 md:py-4">
           <div class="grid gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(420px,0.92fr)] lg:items-start lg:gap-16">
             <div class="max-w-4xl pt-2">
@@ -211,7 +205,6 @@
             </div>
           </div>
         </section>
-      </template>
     </section>
   </div>
 </template>
@@ -223,7 +216,6 @@ import { usePublicContentStore } from '../stores/publicContent'
 import { useSiteSettingsStore } from '../stores/siteSettings'
 import { resolveMediaUrl } from '../lib/media'
 import { Card } from '../components/ui/card'
-import { Skeleton } from '../components/ui/skeleton'
 import type { AboutCapabilityItem, AboutPageContent, AboutPageTimelineItem, AboutPageValueItem } from '../types/content'
 
 const publicContentStore = usePublicContentStore()
