@@ -641,39 +641,22 @@ function normalizeMapEmbedUrl(rawUrl: string | null | undefined, fallbackAddress
 
   const normalized = rawUrl.trim()
 
-  if (/google\.com\/maps\/embed/i.test(normalized) || /[?&]output=embed(?:&|$)/i.test(normalized)) {
+  if (isValidGoogleMapsEmbedUrl(normalized)) {
     return normalized
   }
 
-  if (/google\.[^/]+\/maps/i.test(normalized) || /maps\.app\.goo\.gl/i.test(normalized)) {
-    return buildGoogleEmbedUrl(normalized, fallback)
-  }
-
-  return normalized
+  return fallback
 }
 
-function buildGoogleEmbedUrl(rawUrl: string, fallback: string) {
+function isValidGoogleMapsEmbedUrl(rawUrl: string) {
   try {
     const url = new URL(rawUrl)
-    const query = url.searchParams.get('q') || url.searchParams.get('query')
-    if (query) {
-      return `https://www.google.com/maps?q=${encodeURIComponent(query)}&output=embed`
-    }
-
-    const coordinates = url.pathname.match(/@(-?\d+(?:\.\d+)?),(-?\d+(?:\.\d+)?)/)
-    if (coordinates) {
-      return `https://www.google.com/maps?q=${coordinates[1]},${coordinates[2]}&output=embed`
-    }
-
-    const placeMatch = url.pathname.match(/\/maps\/place\/([^/]+)/i)
-    if (placeMatch?.[1]) {
-      const place = decodeURIComponent(placeMatch[1]).replace(/\+/g, ' ')
-      return `https://www.google.com/maps?q=${encodeURIComponent(place)}&output=embed`
-    }
-
-    return `https://www.google.com/maps?q=${encodeURIComponent(rawUrl)}&output=embed`
+    const isGoogleHost = /(^|\.)google\.[^/]+$/i.test(url.hostname)
+    const isEmbedPath = /\/maps\/embed/i.test(url.pathname)
+    const hasEmbedOutput = url.searchParams.get('output') === 'embed'
+    return isGoogleHost && (isEmbedPath || hasEmbedOutput)
   } catch {
-    return fallback
+    return false
   }
 }
 

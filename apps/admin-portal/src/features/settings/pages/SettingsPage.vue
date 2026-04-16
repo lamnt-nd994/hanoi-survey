@@ -125,6 +125,7 @@
           <FormField class="md:col-span-2">
             <FormLabel>Google Map Embed URL</FormLabel>
             <Textarea v-model="form.mapEmbed" rows="3" placeholder="https://www.google.com/maps/embed?..." />
+            <p class="mt-2 text-xs text-slate-500">Dùng Google Maps &gt; Chia sẻ &gt; Nhúng bản đồ &gt; sao chép URL trong thẻ iframe hoặc phần src. Không dùng link share thông thường.</p>
           </FormField>
         </div>
       </DataCard>
@@ -363,7 +364,28 @@ function handleMediaSelected(storagePath: string) {
   closeMediaPicker()
 }
 
+function isValidGoogleMapsEmbedUrl(rawUrl: string | null | undefined) {
+  if (!rawUrl || !rawUrl.trim()) return true
+
+  try {
+    const url = new URL(rawUrl.trim())
+    const isGoogleHost = /(^|\.)google\.[^/]+$/i.test(url.hostname)
+    const isEmbedPath = /\/maps\/embed/i.test(url.pathname)
+    const hasEmbedOutput = url.searchParams.get('output') === 'embed'
+    return isGoogleHost && (isEmbedPath || hasEmbedOutput)
+  } catch {
+    return false
+  }
+}
+
 async function handleSave() {
+  if (!isValidGoogleMapsEmbedUrl(form.mapEmbed)) {
+    const message = 'Google Map Embed URL phải là link nhúng từ Google Maps. Dùng Chia sẻ > Nhúng bản đồ và sao chép URL phần src.'
+    flash(message, 'error')
+    toasts.show(message, 'error')
+    return
+  }
+
   saving.value = true
   try {
     form.hotline = ''

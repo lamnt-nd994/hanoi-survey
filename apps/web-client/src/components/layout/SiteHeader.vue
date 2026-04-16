@@ -9,11 +9,11 @@
           <div v-else class="flex h-14 w-14 shrink-0 items-center justify-center rounded-lg bg-primary-navy text-sm font-bold text-white shadow-lg md:h-16 md:w-16">
             HS
           </div>
-          <div class="hidden min-w-0 flex-1 md:block md:min-h-[3.5rem] lg:min-h-[3.75rem]">
-            <div class="min-h-[2.5rem] font-heading text-sm font-extrabold leading-tight text-primary-navy lg:text-xl">
+          <div class="hidden min-w-0 flex-1 md:block">
+            <div class="min-h-[2.5rem] font-heading text-sm font-extrabold leading-tight text-primary-navy lg:text-xl sm:pt-3 lg:pt-0">
               {{ siteName }}
             </div>
-            <div class="mt-1 min-h-[1rem] text-[11px] font-semibold tracking-[0.02em] text-neutral-500 lg:text-xs">
+            <div class="min-h-[1rem] text-[11px] font-semibold tracking-[0.02em] text-neutral-500 lg:text-xs">
               <span v-if="companyName">{{ companyName }}</span>
               <span v-else-if="isLoading" class="block h-3 w-48 rounded bg-neutral-200/80"></span>
             </div>

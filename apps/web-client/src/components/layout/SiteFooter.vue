@@ -23,7 +23,7 @@
         <div class="mt-3 min-h-[4.5rem] space-y-1 text-sm leading-6 text-neutral-400">
           <div v-if="licenseNumber || licenseIssuedDate || isLoading" class="flex min-h-[2rem] flex-wrap gap-x-5 gap-y-1">
             <span v-if="licenseNumber"><strong class="text-white/90">Giấy phép số:</strong> {{ licenseNumber }}</span>
-            <span v-if="licenseIssuedDate"><strong class="text-white/90">Ngày cấp:</strong> {{ licenseIssuedDate }}</span>
+            <span v-if="licenseIssuedDate"><strong class="text-white/90">Ngày cấp:</strong> {{ formattedLicenseIssuedDate }}</span>
             <span v-if="isLoading && !licenseNumber" class="inline-block h-4 w-32 rounded bg-white/10"></span>
             <span v-if="isLoading && !licenseIssuedDate" class="inline-block h-4 w-24 rounded bg-white/10"></span>
           </div>
@@ -95,11 +95,12 @@
 </template>
 
 <script setup lang="ts">
+import { computed } from 'vue'
 import { resolveMediaUrl } from '../../lib/media'
 import AppIcon from '../ui/AppIcon.vue'
 import SocialLinks from '../ui/SocialLinks.vue'
 
-defineProps<{
+const props = defineProps<{
   siteName: string
   shortName: string
   companyName: string
@@ -117,4 +118,29 @@ defineProps<{
   linkedinUrl: string
   isLoading?: boolean
 }>()
+
+const formattedLicenseIssuedDate = computed(() => formatDateDdMmYyyy(props.licenseIssuedDate))
+
+function formatDateDdMmYyyy(value: string) {
+  if (!value) return ''
+
+  const trimmed = value.trim()
+  const isoDateMatch = trimmed.match(/^(\d{4})-(\d{2})-(\d{2})/)
+  if (isoDateMatch) {
+    return `${isoDateMatch[3]}-${isoDateMatch[2]}-${isoDateMatch[1]}`
+  }
+
+  const slashDateMatch = trimmed.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/)
+  if (slashDateMatch) {
+    return `${slashDateMatch[1].padStart(2, '0')}-${slashDateMatch[2].padStart(2, '0')}-${slashDateMatch[3]}`
+  }
+
+  const parsedDate = new Date(trimmed)
+  if (Number.isNaN(parsedDate.getTime())) return trimmed
+
+  const day = String(parsedDate.getDate()).padStart(2, '0')
+  const month = String(parsedDate.getMonth() + 1).padStart(2, '0')
+  const year = parsedDate.getFullYear()
+  return `${day}-${month}-${year}`
+}
 </script>
