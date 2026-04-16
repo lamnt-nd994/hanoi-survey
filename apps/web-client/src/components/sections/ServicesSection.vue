@@ -1,7 +1,7 @@
-<template>
+﻿<template>
   <section class="section bg-light">
     <div class="container-shell">
-      <SectionHeader :title="title || 'LĨNH VỰC HOẠT ĐỘNG'" centered />
+      <SectionHeader :title="title || 'LĨNH VỰC HOẠT ĐỘNG'" centered show-divider />
 
       <div v-if="loading" class="mt-20 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
         <Card v-for="index in 6" :key="index" class="rounded-lg p-5 shadow-sm">
@@ -97,3 +97,4 @@ function resolveServiceDescription(service: SurveyService) {
   return service.overview || 'Dịch vụ được cập nhật trực tiếp từ hệ thống nội dung.'
 }
 </script>
+

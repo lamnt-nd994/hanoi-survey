@@ -1,7 +1,7 @@
 <template>
   <footer class="mt-20 bg-primary-navy text-[#888]">
     <div class="container-shell grid gap-10 py-14 md:grid-cols-[1.25fr_1fr_1fr] md:gap-12">
-      <div class="min-h-[26rem]">
+      <div>
         <div class="flex items-center gap-3">
           <div v-if="logoPath" class="flex h-16 w-[11rem] items-center justify-center">
             <img :src="resolveMediaUrl(logoPath)" :alt="siteName" width="176" height="48" loading="lazy" decoding="async" class="max-h-12 w-full object-contain" />
@@ -20,7 +20,7 @@
           <strong v-if="companyName" class="font-semibold text-white/90">{{ companyName }}</strong>
           <span v-else-if="isLoading" class="inline-block h-4 w-52 rounded bg-white/10"></span>
         </div>
-        <div class="mt-3 min-h-[4.5rem] space-y-1 text-sm leading-6 text-neutral-400">
+        <div class="mt-3 space-y-1 text-sm leading-6 text-neutral-400">
           <div v-if="licenseNumber || licenseIssuedDate || isLoading" class="flex min-h-[2rem] flex-wrap gap-x-5 gap-y-1">
             <span v-if="licenseNumber"><strong class="text-white/90">Giấy phép số:</strong> {{ licenseNumber }}</span>
             <span v-if="licenseIssuedDate"><strong class="text-white/90">Ngày cấp:</strong> {{ formattedLicenseIssuedDate }}</span>
@@ -32,7 +32,7 @@
             <span v-else class="inline-block h-4 w-40 rounded bg-white/10"></span>
           </div>
         </div>
-        <p class="mt-5 min-h-[6rem] text-sm leading-7 text-neutral-400">
+        <p class="mt-5 text-sm leading-7 text-neutral-400">
           {{ footerText || 'Khảo sát chính xác - Nền móng vững chắc.' }}
         </p>
 
