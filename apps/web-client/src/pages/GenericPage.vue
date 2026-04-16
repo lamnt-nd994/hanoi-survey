@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <div>
     <section class="container-shell py-16 md:py-20">
       <div v-if="pageHeading" class="mx-auto mb-20 max-w-4xl text-center">
@@ -373,27 +373,27 @@ const FALLBACK_SERVICE_CARDS: ServiceCard[] = [
 
 const FALLBACK_PROJECT_CARDS: ProjectCard[] = Array.from({ length: 6 }, (_, index) => ({
   slug: '',
-  title: `Dá»± Ã¡n kháº£o sÃ¡t ${index + 1}`,
-  categoryName: 'Dá»± Ã¡n tiÃªu biá»ƒu',
+  title: `Dự án khảo sát ${index + 1}`,
+  categoryName: 'Dự án tiêu biểu',
   coverImagePath: '',
-  location: 'Äang cáº­p nháº­t',
-  scaleText: 'Äang cáº­p nháº­t',
-  clientName: 'Äang cáº­p nháº­t',
+  location: 'Đang cập nhật',
+  scaleText: 'Đang cập nhật',
+  clientName: 'Đang cập nhật',
 }))
 
 const FALLBACK_NEWS_HERO_CARD: NewsCard = {
   slug: '',
-  title: 'Tin tá»©c cáº­p nháº­t tá»« há»‡ thá»‘ng ná»™i dung',
-  categoryName: 'Tin tá»©c',
+  title: 'Tin tức cập nhật từ hệ thống nội dung',
+  categoryName: 'Tin tức',
   coverImagePath: '',
   publishedAt: '',
-  excerpt: 'Ná»™i dung báº£n tin sáº½ Ä‘Æ°á»£c hiá»ƒn thá»‹ á»•n Ä‘á»‹nh ngay khi dá»¯ liá»‡u Ä‘Æ°á»£c táº£i xong.',
+  excerpt: 'Nội dung bản tin sẽ được hiển thị ổn định ngay khi dữ liệu được tải xong.',
 }
 
 const FALLBACK_NEWS_LIST_CARDS: NewsCard[] = Array.from({ length: 5 }, (_, index) => ({
   slug: '',
-  title: `Báº£n tin kháº£o sÃ¡t ${index + 1}`,
-  categoryName: 'Tin tá»©c',
+  title: `Bản tin khảo sát ${index + 1}`,
+  categoryName: 'Tin tức',
   coverImagePath: '',
   publishedAt: '',
   excerpt: '',
@@ -402,9 +402,9 @@ const FALLBACK_NEWS_LIST_CARDS: NewsCard[] = Array.from({ length: 5 }, (_, index
 const FALLBACK_EQUIPMENT_CARDS: EquipmentCard[] = Array.from({ length: 6 }, (_, index) => ({
   id: null,
   slug: '',
-  name: `Danh má»¥c thiáº¿t bá»‹ ${index + 1}`,
+  name: `Danh mục thiết bị ${index + 1}`,
   icon: 'settings-2',
-  countText: '0 thiáº¿t bá»‹',
+  countText: '0 thiết bị',
 }))
 
 const $route = useRoute()
@@ -593,7 +593,7 @@ const equipmentCards = computed<EquipmentCard[]>(() => {
       slug: category.slug || '',
       name: category.name || '',
       icon: category.icon || 'settings-2',
-      countText: `${publicContentStore.equipments.filter((e) => e.categoryId === category.id).length} thiáº¿t bá»‹`,
+      countText: `${publicContentStore.equipments.filter((e) => e.categoryId === category.id).length} thiết bị`,
     }))
   }
   if (currentRouteName.value === ROUTE_NAMES.equipment) return FALLBACK_EQUIPMENT_CARDS
